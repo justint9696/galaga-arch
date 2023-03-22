@@ -9,7 +9,6 @@
 #define WINDOW_FLAGS		0
 #define RENDERER_FLAGS		SDL_RENDERER_ACCELERATED
 
-
 typedef struct {
 	SDL_Renderer *renderer;
 	SDL_Window *window;
@@ -18,5 +17,7 @@ typedef struct {
 void initSDL();
 
 void drawRect(float x, float y, int width, int height, uint32_t color);
+
+SDL_Texture *LoadTexture(const char *filename);
 
 #endif
