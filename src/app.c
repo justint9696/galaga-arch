@@ -1,6 +1,8 @@
-#include <assert.h>
-
 #include "include/app.h"
+#include "include/util.h"
+
+#include <assert.h>
+#include <SDL2/SDL_image.h>
 
 static App app;
 
@@ -25,13 +27,32 @@ void initSDL() {
 }
 
 void drawRect(float x, float y, int width, int height, uint32_t color) {
+	// make origin at bottom of screen
+	y += WINDOW_HEIGHT;
+
+	const int x0 = clamp(0, x, WINDOW_WIDTH - width),
+		y0 = clamp(0, y, WINDOW_HEIGHT - height);
+
+	const int xf = clamp(0, x0 + width, WINDOW_WIDTH),
+		yf = clamp(0, y0 + height, WINDOW_HEIGHT);
+
 	SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 0);
 	SDL_RenderClear(app.renderer);
 	SDL_SetRenderDrawColor(app.renderer, 255, 255, 255, 255);
-	for (int i = x; i < x + width; i++) {
-		for (int j = y; j < y + height; j++) {
+	for (int i = x0; i < xf; i++) {
+		for (int j = y0; j < yf; j++) {
 			SDL_RenderDrawPoint(app.renderer, i, j);
 		}
 	}
 	SDL_RenderPresent(app.renderer);
+}
+
+SDL_Texture *LoadTexture(const char *filename) {
+	SDL_Texture *texture;
+
+	SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Loading %s", filename);
+
+	texture = IMG_LoadTexture(app.renderer, filename);
+
+	return texture;
 }
