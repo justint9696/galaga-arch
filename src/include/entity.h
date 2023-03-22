@@ -8,18 +8,19 @@ typedef struct {
 } vec2;
 
 typedef struct {
+    int index;
     int width, height;
     vec2 pos, vel;
     SDL_Texture *texture;
     uint32_t color;
 } Entity;
 
-void initEntity(Entity *ent, float x, float y, char *texture);
+Entity *Entity_Init(float x, float y, int width, int height, const char *texture);
 
-void SetPosition(Entity *ent, float x, float y);
+void Entity_Update(Entity *self);
 
-void SetVelocity(Entity *ent, float vx, float vy);
+void Entity_SetPosition(Entity *self, float x, float y);
 
-SDL_Texture *loadTexture(char *filename);
+void Entity_SetVelocity(Entity *self, float vx, float vy);
 
 #endif
