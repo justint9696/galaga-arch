@@ -4,7 +4,7 @@ BIN=bin/
 SRC=$(wildcard src/*.c)
 
 CFLAGS=-Wall
-LDFLAGS=-L ../ludo -lSDL2
+LDFLAGS=-L ../ludo -lSDL2 -lSDL2_image
 OBJ=$(SRC:.c=.o)
 
 TARGET=game
