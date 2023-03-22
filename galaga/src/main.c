@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "app.h"
+#include "inlcude/app.h"
 
 int main(int argc, char *argv[]) {
 	initSDL();

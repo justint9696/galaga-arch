@@ -1,4 +1,4 @@
-#include "entity.h"
+#include "include/entity.h"
 
 void initEntity(Entity *ent, float x, float y, char *texture) {
     ent->pos.x = x;

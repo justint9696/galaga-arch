@@ -1,6 +1,6 @@
 #include <assert.h>
 
-#include "app.h"
+#include "include/app.h"
 
 static App app;
 
