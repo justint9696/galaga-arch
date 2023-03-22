@@ -1,19 +1,52 @@
+#include "include/app.h"
 #include "include/entity.h"
+#include "include/linked_list.h"
 
-void initEntity(Entity *ent, float x, float y, char *texture) {
-    ent->pos.x = x;
-    ent->pos.y = y;
+static int numEnt = 0;
+static LinkedList entities;
 
-    ent->vel.x = 0.f;
-    ent->vel.y = 0.f;
+static Entity *Entity_Alloc() {
+    Entity *self = (Entity *)malloc(sizeof(Entity));
+    memset(self, 0, sizeof(Entity));
+
+    LinkedList_Add(&entities, &self);
+
+    return self;
 }
 
-void SetPosition(Entity *ent, float x, float y) {
-    ent->pos.x = x;
-    ent->pos.y = y;
+static void Entity_Free(Entity *self) {
+    LinkedList_Remove(&entities, &self);
+    free(self);
 }
 
-void SetVelocity(Entity *ent, float vx, float vy) {
-    ent->vel.x = vx;
-    ent->vel.y = vy;
+void Entity_Update(Entity *self) {
+    self->pos.x += self->vel.x;
+    self->pos.y += self->vel.x;
+}
+
+Entity *Entity_Init(float x, float y, int width, int height, const char *texture) {
+    Entity *self = Entity_Alloc();
+
+    self->pos.x = x;
+    self->pos.y = y;
+
+    self->vel.x = 0.f;
+    self->vel.y = 0.f;
+
+    self->width = width;
+    self->height = height;
+
+    self->texture = LoadTexture(texture);
+
+    return self;
+}
+
+void Entity_SetPosition(Entity *self, float x, float y) {
+    self->pos.x = x;
+    self->pos.y = y;
+}
+
+void Entity_SetVelocity(Entity *self, float vx, float vy) {
+    self->vel.x = vx;
+    self->vel.y = vy;
 }
