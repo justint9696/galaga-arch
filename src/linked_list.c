@@ -1,7 +1,5 @@
 #include "include/linked_list.h"
 
-#include <stddef.h>
-
 void LinkedList_Add(LinkedList *head, void *item) {
     if (!head->item)
         head->item = item;
