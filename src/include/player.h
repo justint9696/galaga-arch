@@ -11,7 +11,7 @@
 
 #define PLAYER_SPAWN_X      50.f
 #define PLAYER_SPAWN_Y      100.f
-#define PLAYER_VEL          15.f
+#define PLAYER_VEL          0.5f
 #define PLAYER_WIDTH        15.f
 #define PLAYER_HEIGHT       15.f
 #define PLAYER_TEXTURE      "images/player.png"

@@ -12,18 +12,25 @@ void Player_Init() {
 }
 
 void Player_Update(int buttons) {
+    if (buttons == _player.buttons) 
+        return;
+
     _player.buttons = buttons;
 
-    Entity_SetVelocity(_player.ent, 0, 0);
+    float vx = 0.f, vy = 0.f;
 
     if (buttons & BUTTON_UP)
-        Entity_SetVelocity(_player.ent, 0, PLAYER_VEL);
-    if (buttons & BUTTON_DOWN)
-        Entity_SetVelocity(_player.ent, 0, -PLAYER_VEL);
+        vy = PLAYER_VEL;
+    else if (buttons & BUTTON_DOWN)
+        vy = -PLAYER_VEL;
+
     if (buttons & BUTTON_LEFT)
-        Entity_SetVelocity(_player.ent, -PLAYER_VEL, 0);
-    if (buttons & BUTTON_RIGHT)
-        Entity_SetVelocity(_player.ent, PLAYER_VEL, 0);
+        vx = -PLAYER_VEL;
+    else if (buttons & BUTTON_RIGHT)
+        vx = PLAYER_VEL;
+        
+    Entity_SetVelocity(_player.ent, vx, vy);
+
     // if (buttons & BUTTON_SPACE)
     //     return;
 }
