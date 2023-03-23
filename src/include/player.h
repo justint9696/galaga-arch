@@ -9,9 +9,9 @@
 #define BUTTON_RIGHT        (1 << 3)
 #define BUTTON_SPACE        (1 << 4)
 
-#define PLAYER_SPAWN_X      0.f
-#define PLAYER_SPAWN_Y      0.f
-#define PLAYER_VEL          15
+#define PLAYER_SPAWN_X      50.f
+#define PLAYER_SPAWN_Y      100.f
+#define PLAYER_VEL          15.f
 #define PLAYER_WIDTH        15.f
 #define PLAYER_HEIGHT       15.f
 #define PLAYER_TEXTURE      "images/player.png"
