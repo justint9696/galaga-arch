@@ -3,13 +3,15 @@
 #include "include/linked_list.h"
 #include "include/render.h"
 #include "include/util.h"
+#include "include/window.h"
 
-#include <stdio.h>
+#include <assert.h>
+#include <math.h>
 
 static int _num_ent = 0;
 static LinkedList _entities;
 
-static Entity *Entity_Alloc() {
+static inline Entity *_Entity_Alloc() {
     Entity *self = (Entity *)malloc(sizeof(Entity));
     memset(self, 0, sizeof(Entity));
 
@@ -18,49 +20,51 @@ static Entity *Entity_Alloc() {
     return self;
 }
 
-static void Entity_Free(Entity *self) {
+static inline void _Entity_Free(Entity *self) {
+    assert(self);
+
     LinkedList_Remove(&_entities, &self);
     free(self);
 }
 
-static void Entity_Render(Entity *self) {
+static void _Entity_Render(Entity *self) {
     DrawTexture(self->texture, self->pos.x, self->pos.y, self->width, self->height);
 }
 
-void Entity_Update(Entity *self) {
+static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
     // update entity position
-    self->pos.x += self->vel.x;
-    self->pos.y += self->vel.x;
+    self->pos.x += round(1.f * deltaTime * self->vel.x),
+    self->pos.x = clamp(0, self->pos.x, WINDOW_WIDTH - self->width);
+
+    self->pos.y += round(1.f * deltaTime * self->vel.y);
+    self->pos.y = clamp(0, self->pos.y, WINDOW_HEIGHT - self->height);
 
     #ifdef DEBUG
         printf("\nentity debug information: \n\t- id: %i \n\t- origin (%.2f, %.2f) \n\t- velocity: (%.2f, %.2f)\n", self->id, self->pos.x, self->pos.y, self->vel.x, self->vel.y);
     #endif
 
-    Entity_Render(self);
+    _Entity_Render(self);
 }
 
-void Entity_UpdateAll() {
+void Entity_UpdateAll(uint64_t deltaTime) {
     Entity *entity;
     LinkedList *tmp = &_entities;
 
     while (tmp) {
         entity = (Entity *)tmp->item;
-        Entity_Update(entity);
+        _Entity_Update(entity, deltaTime);
 
         tmp = tmp->next;
     }
 }
 
 Entity *Entity_Init(float x, float y, int width, int height, const char *texture) {
-    Entity *self = Entity_Alloc();
+    Entity *self = _Entity_Alloc();
 
     self->id = _num_ent++;
 
     self->pos.x = x;
     self->pos.y = y;
-
-    self->vel.x = 0.f;
-    self->vel.y = 0.f;
 
     self->width = width;
     self->height = height;
