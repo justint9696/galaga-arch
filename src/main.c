@@ -3,11 +3,12 @@
 #include "include/player.h"
 
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_render.h>
 #include <SDL2/SDL_scancode.h>
-#include <stdio.h>
 
 int main(int argc, char *argv[]) {
 	int buttons;
+
 	initSDL();
 
 	Game_Init();
@@ -16,7 +17,6 @@ int main(int argc, char *argv[]) {
 	SDL_Event event;
 	while (1) {
 		buttons = 0;
-		drawRect(0, 0, 15, 15, 0x00000000);
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
