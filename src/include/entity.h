@@ -8,7 +8,7 @@ typedef struct {
 } vec2;
 
 typedef struct {
-    int index;
+    int id;
     int width, height;
     vec2 pos, vel;
     SDL_Texture *texture;
@@ -18,6 +18,8 @@ typedef struct {
 Entity *Entity_Init(float x, float y, int width, int height, const char *texture);
 
 void Entity_Update(Entity *self);
+
+void Entity_UpdateAll();
 
 void Entity_SetPosition(Entity *self, float x, float y);
 
