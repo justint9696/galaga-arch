@@ -13,12 +13,14 @@ void Renderer_Init(SDL_Renderer *renderer) {
 
 void Renderer_Prepare() {
     assert(_renderer);
+
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
 	SDL_RenderClear(_renderer);
 }
 
 void Renderer_Update() {
     assert(_renderer);
+
     SDL_RenderPresent(_renderer);
 }
 
@@ -26,10 +28,12 @@ void DrawRect(float x, float y, int width, int height, uint64_t color) {
     // make origin at bottom of screen
 	y = WINDOW_HEIGHT - y;
 
-	const int x0 = clamp(0, x, WINDOW_WIDTH - width),
+	const int 
+		x0 = clamp(0, x, WINDOW_WIDTH - width),
 		y0 = clamp(0, y, WINDOW_HEIGHT - height);
 
-	const int xf = clamp(0, x0 + width, WINDOW_WIDTH),
+	const int 
+		xf = clamp(0, x0 + width, WINDOW_WIDTH),
 		yf = clamp(0, y0 + height, WINDOW_HEIGHT);
 
 	SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0);
@@ -47,7 +51,8 @@ void DrawTexture(SDL_Texture *texture, float x, float y, int width, int height) 
     // make origin at bottom of screen
 	y = WINDOW_HEIGHT - y;
 
-    const int x0 = clamp(0, x, WINDOW_WIDTH - width),
+    const int 
+		x0 = clamp(0, x, WINDOW_WIDTH - width),
         y0 = clamp(0, y, WINDOW_HEIGHT - height);
 
     SDL_Rect rect;
