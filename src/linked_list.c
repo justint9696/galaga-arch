@@ -1,15 +1,18 @@
 #include "include/linked_list.h"
 
+#include <stdlib.h>
+
 void LinkedList_Add(LinkedList *head, void *item) {
     if (!head->item)
         head->item = item;
     else {
         LinkedList *tmp = head;
-        while (!tmp->next) {
+        while (tmp->next) {
             tmp = tmp->next;
         }
 
-        tmp->next = item;
+        tmp->next = (LinkedList *)malloc(sizeof(LinkedList));
+        tmp->next->item = item;
     }
 }
 
