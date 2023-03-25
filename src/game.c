@@ -6,8 +6,7 @@
 #include <SDL2/SDL_render.h>
 #include <sys/time.h>
 
-
-static uint64_t _time = 0, _delta_time = 0;
+static uint64_t _time, _delta_time;
 
 static inline uint64_t _Get_Tick() {
     struct timeval tv;
@@ -16,14 +15,15 @@ static inline uint64_t _Get_Tick() {
     return tick;
 }
 
-void _Game_Tick() {
+static void _Game_Tick() {
     uint64_t tick = _Get_Tick();
 
     _delta_time = tick - _time;
-    _time = tick;
+    _time += _delta_time;
 }
 
 void Game_Init() {
+    _time = _Get_Tick();
     Player_Init();
 }
 
