@@ -2,6 +2,7 @@
 #define _PLAYER_H_
 
 #include "entity.h"
+#include "window.h"
 
 #define BUTTON_UP           (1 << 0)
 #define BUTTON_DOWN         (1 << 1)
@@ -9,12 +10,14 @@
 #define BUTTON_RIGHT        (1 << 3)
 #define BUTTON_SPACE        (1 << 4)
 
-#define PLAYER_SPAWN_X      50.f
-#define PLAYER_SPAWN_Y      100.f
-#define PLAYER_VEL          0.5f
-#define PLAYER_WIDTH        15.f
-#define PLAYER_HEIGHT       15.f
 #define PLAYER_TEXTURE      "images/player.png"
+
+#define PLAYER_WIDTH        66.f
+#define PLAYER_HEIGHT       48.f
+
+#define PLAYER_VELOCITY     0.5f
+#define PLAYER_SPAWN_X      ((WINDOW_WIDTH - PLAYER_WIDTH) / 2)
+#define PLAYER_SPAWN_Y      50.f
 
 typedef struct {
     int buttons;
