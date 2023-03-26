@@ -1,6 +1,6 @@
-#include "include/app.h"
-#include "include/game.h"
-#include "include/player.h"
+#include "inc/app.h"
+#include "inc/game.h"
+#include "inc/player.h"
 
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>

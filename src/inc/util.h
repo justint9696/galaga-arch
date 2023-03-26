@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-// #define DEBUG
+#define DEBUG
 
 int clamp(int min, int current, int max);
 

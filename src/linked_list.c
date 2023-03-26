@@ -1,6 +1,8 @@
-#include "include/linked_list.h"
+#include "inc/linked_list.h"
 
+#include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 void LinkedList_Add(LinkedList *head, void *item) {
     if (!head->item)
@@ -12,22 +14,27 @@ void LinkedList_Add(LinkedList *head, void *item) {
         }
 
         tmp->next = (LinkedList *)malloc(sizeof(LinkedList));
+	memset(tmp->next, 0, sizeof(LinkedList));
         tmp->next->item = item;
     }
 }
 
-void LinkedList_Remove(LinkedList *head, void *item) {
-    if (head->item == item) 
-        head = head->next;
-    else {
-        LinkedList *tmp = head;
-        while (tmp->next) {
-            if (tmp->next->item == item) {
-                tmp->next = tmp->next->next;
-                break;
-            }
+void LinkedList_Remove(LinkedList **head, void *item) {
+	LinkedList *tmp = *head, *prev = NULL;
+	while (tmp) {
+		if (tmp->item == item) {
+			if (prev == NULL) {
+				if (tmp->next)
+					memcpy(head, &tmp->next, sizeof(LinkedList));
+				else
+					memset(head, 0, sizeof(LinkedList));
+			} else
+				prev->next = tmp->next;
+			break;
+		}
+		prev = tmp;
+		tmp = tmp->next;
+	}
 
-            tmp = tmp->next;
-        }
-    }
+	assert(tmp);
 }

@@ -1,5 +1,5 @@
-#include "include/entity.h"
-#include "include/player.h"
+#include "inc/entity.h"
+#include "inc/player.h"
 
 static Player _self;
 static vec2 _vel;
@@ -12,7 +12,11 @@ void Player_Init() {
     printf("Player initialized.\n");
 }
 
-void Player_Update(int buttons) {
+void Player_Update(int buttons, uint64_t tick) {
+    if (buttons & BUTTON_SPACE) {
+        Entity_Fire(_self.ent, tick);
+    }
+    
     if (buttons == _self.buttons) 
         return;
 
@@ -31,9 +35,4 @@ void Player_Update(int buttons) {
         _vel.x = PLAYER_VELOCITY;
         
     Entity_SetVelocity(_self.ent, _vel);
-
-    if (buttons & BUTTON_SPACE) {
-        _vel.y = BULLET_VELOCITY;
-        Entity_Fire(_self.ent->team, _self.ent->pos, _vel);
-    }
 }

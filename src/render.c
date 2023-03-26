@@ -1,6 +1,6 @@
-#include "include/render.h"
-#include "include/util.h"
-#include "include/window.h"
+#include "inc/render.h"
+#include "inc/util.h"
+#include "inc/window.h"
 
 #include <assert.h>
 #include <SDL2/SDL_render.h>
@@ -9,18 +9,16 @@ static SDL_Renderer *_renderer;
 
 void Renderer_Init(SDL_Renderer *renderer) {
     _renderer = renderer;
+
+    assert(_renderer);
 }
 
 void Renderer_Prepare() {
-    assert(_renderer);
-
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
-	SDL_RenderClear(_renderer);
+    SDL_RenderClear(_renderer);
 }
 
 void Renderer_Update() {
-    assert(_renderer);
-
     SDL_RenderPresent(_renderer);
 }
 
@@ -36,15 +34,12 @@ void DrawRect(float x, float y, int width, int height, uint64_t color) {
 		xf = clamp(0, x0 + width, WINDOW_WIDTH),
 		yf = clamp(0, y0 + height, WINDOW_HEIGHT);
 
-	SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0);
-	SDL_RenderClear(_renderer);
-	SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
 	for (int i = x0; i < xf; i++) {
 		for (int j = y0; j < yf; j++) {
 			SDL_RenderDrawPoint(_renderer, i, j);
 		}
 	}
-	SDL_RenderPresent(_renderer);
 }
 
 void DrawTexture(SDL_Texture *texture, float x, float y, int width, int height) {

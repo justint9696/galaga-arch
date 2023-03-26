@@ -1,7 +1,7 @@
-#include "include/app.h"
-#include "include/render.h"
-#include "include/util.h"
-#include "include/window.h"
+#include "inc/app.h"
+#include "inc/render.h"
+#include "inc/util.h"
+#include "inc/window.h"
 
 #include <assert.h>
 #include <SDL2/SDL_image.h>

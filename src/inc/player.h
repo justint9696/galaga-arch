@@ -10,8 +10,7 @@
 #define BUTTON_RIGHT        (1 << 3)
 #define BUTTON_SPACE        (1 << 4)
 
-#define PLAYER_TEXTURE      "images/player.png"
-
+#define PLAYER_TEXTURE	    "images/player.png"	
 #define PLAYER_WIDTH        66.f
 #define PLAYER_HEIGHT       48.f
 
@@ -26,6 +25,6 @@ typedef struct {
 
 void Player_Init();
 
-void Player_Update(int buttons);
+void Player_Update(int buttons, uint64_t tick);
 
 #endif

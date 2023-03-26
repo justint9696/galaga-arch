@@ -7,6 +7,6 @@ typedef struct LinkedList_s {
 } LinkedList;
 
 void LinkedList_Add(LinkedList *head, void *item);
-void LinkedList_Remove(LinkedList *head, void *item);
+void LinkedList_Remove(LinkedList **head, void *item);
 
 #endif
