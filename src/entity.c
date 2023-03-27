@@ -19,33 +19,40 @@ static inline Entity *_Entity_Alloc() {
 
     LinkedList_Add(_entities, (void *)self);
 
+    printf("entity spawned. number of entities: %i\n", _num_ent);
+
     return self;
 }
 
 static inline void _Entity_Free(Entity *self) {
     assert(self);
 
-    LinkedList_Remove(&_entities, &self);
+    const int id = self->id;
+
+    LinkedList_Remove(&_entities, (void *)self);
     free(self);
 
-    printf("entity released. number of entities: %i\n", --_num_ent);
+    printf("entity %i released. number of entities: %i\n", id, --_num_ent);
 }
 
-static void _Entity_Render_Rect(Entity *self) {
+static inline void _Entity_Render_Rect(const Entity *self) {
     DrawRect(self->pos.x, self->pos.y, self->width, self->height, self->color);
 }
 
-static void _Entity_Render_Texure(Entity *self) {
+static inline void _Entity_Render_Texure(const Entity *self) {
     DrawTexture(self->texture, self->pos.x, self->pos.y, self->width, self->height);
 }
 
 static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
-    // update entity position
-    self->pos.x += round(1.f * deltaTime * self->vel.x),
-    self->pos.x = clamp(0, self->pos.x, WINDOW_WIDTH - self->width);
+    if ((self->pos.x > WINDOW_WIDTH || self->pos.x < 0.f) || 
+            (self->pos.y > WINDOW_HEIGHT || self->pos.y < 0.f)) {
+        _Entity_Free(self);
+        return;
+    }
 
+    // update entity position
+    self->pos.x += round(1.f * deltaTime * self->vel.x);
     self->pos.y += round(1.f * deltaTime * self->vel.y);
-    self->pos.y = clamp(0, self->pos.y, WINDOW_HEIGHT - self->height);
 
     #ifdef DEBUG
         //printf("\nentity debug information: \n\t- id: %i \n\t- origin (%.2f, %.2f) \n\t- velocity: (%.2f, %.2f)\n", self->id, self->pos.x, self->pos.y, self->vel.x, self->vel.y);
@@ -59,6 +66,10 @@ static inline vec2 _Entity_Midpoint(const Entity *self) {
     pos.x = self->pos.x + (self->width / 2.f);
     pos.y = self->pos.y + (self->type == TYPE_PLAYER ? self->height : -self->height);
     return pos;
+}
+
+float Distance(const vec2 from, const vec2 to) {
+    return fabs(from.x - to.x) + fabs(from.y - to.y);
 }
 
 void Entity_InitList() {
