@@ -1,5 +1,6 @@
 #include "inc/game.h"
 #include "inc/entity.h"
+#include "inc/enemy.h"
 #include "inc/player.h"
 #include "inc/render.h"
 
@@ -31,6 +32,7 @@ void Game_Init() {
     _time = _Get_Tick();
     Entity_InitList();
     Player_Init();
+    Enemy_InitAll(1);
 }
 
 void Game_Main(int buttons) {
