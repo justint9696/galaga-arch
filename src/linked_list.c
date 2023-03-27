@@ -14,7 +14,7 @@ void LinkedList_Add(LinkedList *head, void *item) {
         }
 
         tmp->next = (LinkedList *)malloc(sizeof(LinkedList));
-	memset(tmp->next, 0, sizeof(LinkedList));
+        memset(tmp->next, 0, sizeof(LinkedList));
         tmp->next->item = item;
     }
 }
@@ -28,13 +28,13 @@ void LinkedList_Remove(LinkedList **head, void *item) {
 					memcpy(head, &tmp->next, sizeof(LinkedList));
 				else
 					memset(head, 0, sizeof(LinkedList));
-			} else
+			} else if (tmp->next)
 				prev->next = tmp->next;
+            else
+                memset(&prev->next, 0, sizeof(LinkedList));
 			break;
 		}
 		prev = tmp;
 		tmp = tmp->next;
 	}
-
-	assert(tmp);
 }
