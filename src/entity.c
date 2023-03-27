@@ -43,6 +43,61 @@ static inline void _Entity_Render_Texure(const Entity *self) {
     DrawTexture(self->texture, self->pos.x, self->pos.y, self->width, self->height);
 }
 
+static LinkedList *_Entity_FilterByAll(const team_t team, const type_t type) {
+    Entity *entity;
+    LinkedList *head = (LinkedList *)malloc(sizeof(LinkedList)), *tmp = _entities;
+
+    memset(head, 0, sizeof(LinkedList));
+
+    while (tmp) {
+        entity = (Entity *)tmp->item;
+        assert(entity);
+
+        if ((team == -1 && entity->type == type) ||
+                (type == -1 && entity->team == team) ||
+                (entity->team == team && entity->type == type))
+            LinkedList_Add(head, tmp->item);
+
+        tmp = tmp->next;
+    }
+
+    return head;
+}
+
+static inline team_t _Entity_GetOtherTeam(const team_t team) {
+    return (team == TEAM_ALLY ? TEAM_ENEMY : TEAM_ALLY);
+}
+
+static inline bool _Entity_IsColliding(const Entity *e1, const Entity *e2) {
+    return ((e1->pos.x + e1->width) >= e2->pos.x 
+            && (e1->pos.y + e1->height) >= e2->pos.y)
+            && e1->pos.x <= (e2->pos.x + e2->width)
+            && e1->pos.y <= (e2->pos.y + e2->height);        
+}
+
+static inline void _Entity_CollisionHandler(Entity *self) {
+    Entity *entity;
+    LinkedList *tmp = _Entity_FilterByAll(_Entity_GetOtherTeam(self->team), -1);
+
+    while (tmp && tmp->item) {
+        entity = (Entity *)tmp->item;
+        assert(entity);
+
+        if (_Entity_IsColliding(self, entity)) {
+            printf("entity %i is colliding with entity %i\n", entity->id, self->id);
+
+            _Entity_Free(self);
+            _Entity_Free(entity);
+
+            break;
+        }
+            
+        tmp = tmp->next;
+    }
+
+    free(tmp);
+}
+
 static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
     if ((self->pos.x > WINDOW_WIDTH || self->pos.x < 0.f) || 
             (self->pos.y > WINDOW_HEIGHT || self->pos.y < 0.f)) {
@@ -54,10 +109,20 @@ static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
     self->pos.x += round(1.f * deltaTime * self->vel.x);
     self->pos.y += round(1.f * deltaTime * self->vel.y);
 
+    switch (self->type) {
+    case TYPE_PLAYER:
+        self->pos.x = clamp(0, self->pos.x, WINDOW_WIDTH - self->width);
+        self->pos.y = clamp(0, self->pos.y, WINDOW_HEIGHT - self->height);
+        break;
+    default:
+        break;
+    }
+
     #ifdef DEBUG
         //printf("\nentity debug information: \n\t- id: %i \n\t- origin (%.2f, %.2f) \n\t- velocity: (%.2f, %.2f)\n", self->id, self->pos.x, self->pos.y, self->vel.x, self->vel.y);
     #endif
     
+    _Entity_CollisionHandler(self);
     ((void(*)(Entity *))self->render)(self);
 }
 
@@ -68,8 +133,8 @@ static inline vec2 _Entity_Midpoint(const Entity *self) {
     return pos;
 }
 
-float Distance(const vec2 from, const vec2 to) {
-    return fabs(from.x - to.x) + fabs(from.y - to.y);
+float Distance(const vec2 pt1, const vec2 pt2) {
+    return fabs(pt1.x - pt2.x) + fabs(pt1.y - pt2.y);
 }
 
 void Entity_InitList() {
