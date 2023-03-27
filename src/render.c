@@ -26,13 +26,11 @@ void DrawRect(float x, float y, int width, int height, uint64_t color) {
     // make origin at bottom of screen
 	y = WINDOW_HEIGHT - y - height;
 
-	const int 
-		x0 = clamp(0, x, WINDOW_WIDTH - width),
-		y0 = clamp(0, y, WINDOW_HEIGHT - height);
+	const int x0 = x, y0 = y;
 
 	const int 
-		xf = clamp(0, x0 + width, WINDOW_WIDTH),
-		yf = clamp(0, y0 + height, WINDOW_HEIGHT);
+		xf = x0 + width,
+		yf = y0 + height;
 
     SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
 	for (int i = x0; i < xf; i++) {
