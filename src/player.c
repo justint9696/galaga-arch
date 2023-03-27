@@ -13,9 +13,8 @@ void Player_Init() {
 }
 
 void Player_Update(int buttons, uint64_t tick) {
-    if (buttons & BUTTON_SPACE) {
+    if (buttons & BUTTON_SPACE) 
         Entity_Fire(_self.ent, tick);
-    }
     
     if (buttons == _self.buttons) 
         return;
