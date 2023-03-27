@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #define BULLET_DELAY        250 
+#define BULLET_DISTANCE     50.f
 #define BULLET_TEXTURE      NULL
 #define BULLET_VELOCITY     1.f
 #define BULLET_WIDTH        5.f
@@ -36,6 +37,8 @@ typedef struct {
     uint32_t color;
     void *render;
 } Entity;
+
+float Distance(const vec2 pt1, const vec2 pt2);
 
 void Entity_InitList();
 
