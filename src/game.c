@@ -15,7 +15,7 @@ static inline uint64_t _Get_Tick() {
     return tick;
 }
 
-static void _Game_Tick() {
+static inline void _Game_Tick() {
     const uint64_t tick = _Get_Tick();
 
     _delta_time = tick - _time;
