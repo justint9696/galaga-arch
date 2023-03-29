@@ -5,6 +5,6 @@
 
 #define DEBUG
 
-int clamp(int min, int current, int max);
+float clamp(int min, float current, int max);
 
 #endif

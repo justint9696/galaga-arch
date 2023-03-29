@@ -1,5 +1,5 @@
 #include "inc/util.h"
 
-int clamp(int min, int current, int max) {
+float clamp(int min, float current, int max) {
     return (current < min ? min : current > max ? max : current);
 }
