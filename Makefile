@@ -20,5 +20,8 @@ $(TARGET): $(OBJ)
 run: all
 	$(BIN)$(TARGET)
 
+%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $< 
+
 clean:
 	rm -rf $(BIN) $(OBJ)
