@@ -1,6 +1,8 @@
 #ifndef _ENTITY_H_
 #define _ENTITY_H_
 
+#include "type.h"
+
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 
@@ -10,6 +12,10 @@
 #define BULLET_VELOCITY     1.f
 #define BULLET_WIDTH        5.f
 #define BULLET_HEIGHT       15.f
+
+#define COLOR_PLAYER        0xFFFFFFFF
+#define COLOR_ENEMY         0xFF0000FF
+#define COLOR_PROJECTILE    0x00FF00FF
 
 typedef enum {
     TYPE_PLAYER,
@@ -21,10 +27,6 @@ typedef enum {
     TEAM_ALLY,
     TEAM_ENEMY,
 } team_t;
-
-typedef struct {
-    float x, y;
-} vec2;
 
 typedef struct {
     int id;

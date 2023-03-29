@@ -36,11 +36,11 @@ static inline void _Entity_Free(Entity *self) {
 }
 
 static inline void _Entity_Render_Rect(const Entity *self) {
-    DrawRect(self->pos.x, self->pos.y, self->width, self->height, self->color);
+    DrawRect(round(self->pos.x), round(self->pos.y), self->width, self->height, self->color);
 }
 
 static inline void _Entity_Render_Texure(const Entity *self) {
-    DrawTexture(self->texture, self->pos.x, self->pos.y, self->width, self->height);
+    DrawTexture(self->texture, round(self->pos.x), round(self->pos.y), self->width, self->height);
 }
 
 static LinkedList *_Entity_FilterByAll(const team_t team, const type_t type) {
@@ -106,8 +106,9 @@ static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
     }
 
     // update entity position
-    self->pos.x += round(1.f * deltaTime * self->vel.x);
-    self->pos.y += round(1.f * deltaTime * self->vel.y);
+    //self->pos.x += round(1.f * deltaTime * self->vel.x);
+    self->pos.x += (1.f * deltaTime * self->vel.x);
+    self->pos.y += (1.f * deltaTime * self->vel.y);
 
     switch (self->type) {
     case TYPE_PLAYER:
@@ -171,6 +172,22 @@ Entity *Entity_Init(type_t type, team_t team, float x, float y, int width, int h
 
     self->texture = texture == NULL ? NULL : LoadTexture(texture);
 
+    switch (type) {
+    case TYPE_PLAYER:
+        self->color = COLOR_PLAYER;
+        break;
+    case TYPE_ENEMY:
+        self->color = COLOR_ENEMY;
+        break;
+    case TYPE_PROJECTILE:
+        self->color = COLOR_PROJECTILE;
+        break;
+    default:
+        printf("ERROR: Unknown entity type: %i.\n", type);
+        exit(1);
+        break;
+    }
+
     self->render = texture == NULL ? &_Entity_Render_Rect : &_Entity_Render_Texure;
 
     #ifdef DEBUG
@@ -192,7 +209,7 @@ void Entity_SetVelocity(Entity *self, vec2 vel) {
     memcpy(&self->vel, &vel, sizeof(vec2));
 
     #ifdef DEBUG
-        printf("entity %i's velocity updated.\n", self->id);
+        printf("entity %i's velocity updated to (%.2f, %.2f).\n", self->id, vel.x, vel.y);
     #endif
 }
 
