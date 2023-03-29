@@ -10,8 +10,8 @@ void Renderer_Prepare();
 
 void Renderer_Update();
 
-void DrawRect(float x, float y, int width, int height, uint64_t color);
+void DrawRect(int x, int y, int width, int height, uint32_t color);
 
-void DrawTexture(SDL_Texture *texture, float x, float y, int width, int height);
+void DrawTexture(SDL_Texture *texture, int x, int y, int width, int height);
 
 #endif
