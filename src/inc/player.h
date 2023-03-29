@@ -14,7 +14,7 @@
 #define PLAYER_WIDTH        66.7f
 #define PLAYER_HEIGHT       48.f
 
-#define PLAYER_VELOCITY     0.5f
+#define PLAYER_VELOCITY     0.35f
 #define PLAYER_SPAWN_X      ((WINDOW_WIDTH - PLAYER_WIDTH) / 2)
 #define PLAYER_SPAWN_Y      50.f
 
