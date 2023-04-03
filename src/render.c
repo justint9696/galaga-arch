@@ -10,13 +10,6 @@
 static Color _color;
 static SDL_Renderer *_renderer;
 
-static void RGBA(uint32_t color, Color *dst) {
-    dst->r = (color >> 24) & 0xFF;
-    dst->g = (color >> 16) & 0xFF;
-    dst->b = (color >> 8) & 0xFF;
-    dst->a = (color) & 0xFF;
-}
-
 void Renderer_Init(SDL_Renderer *renderer) {
     _renderer = renderer;
 
@@ -39,9 +32,6 @@ void DrawRect(int x, int y, int width, int height, uint32_t color) {
 
     // make origin at bottom of the screen
     y = WINDOW_HEIGHT - y - height;
-
-    const int x0 = x, y0 = y;
-    const int xf = x0 + width, yf = y0 + width;
 
     SDL_Rect rect;
     rect.x = x;
