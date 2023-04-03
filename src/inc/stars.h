@@ -6,18 +6,26 @@
 
 #include <stdint.h>
 
-#define STAR_WIDTH          5.f
-#define STAR_HEIGHT         5.f
-#define STAR_MAX_COUNT      50
+#define STAR_WIDTH          1.f
+#define STAR_HEIGHT         STAR_WIDTH
+#define STAR_MAX_COUNT      100
 
-#define COLOR_STAR          0xFFFFFFFF
+#define COLOR_STAR          0xFFFFFF00
+
+typedef enum {
+    STATE_NORMAL,
+    STATE_FADEIN,
+    STATE_FADEOUT,
+} state_t;
 
 typedef struct {
+    state_t state;
+    uint32_t color;
     vec2 pos, vel;
 } Star;
 
 void Stars_Init();
 
-void Stars_Update(uint64_t tick, uint64_t deltaTime);
+void Stars_Update(uint64_t deltaTime);
 
 #endif
