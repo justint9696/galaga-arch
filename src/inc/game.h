@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 
-uint64_t Time_Passed(uint64_t tick);
+#define FPS_TARGET      120
+#define FRAME_DELAY     (1000.f / FPS_TARGET)
 
 void Game_Init();
 
