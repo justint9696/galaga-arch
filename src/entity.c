@@ -3,6 +3,7 @@
 #include "inc/game.h"
 #include "inc/linked_list.h"
 #include "inc/render.h"
+#include "inc/time.h"
 #include "inc/util.h"
 #include "inc/window.h"
 
