@@ -9,6 +9,7 @@
 
 static Color _color;
 static SDL_Renderer *_renderer;
+static TTF_Font *_font;
 
 void Renderer_Init(SDL_Renderer *renderer) {
     _renderer = renderer;
@@ -16,6 +17,10 @@ void Renderer_Init(SDL_Renderer *renderer) {
     assert(_renderer);
 
     SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
+}
+
+void Renderer_SetFont(TTF_Font *font) {
+    _font = font;
 }
 
 void Renderer_Prepare() {
@@ -55,4 +60,17 @@ void DrawTexture(SDL_Texture *texture, int x, int y, int width, int height) {
 
     // SDL_QueryTexture(texture, NULL, NULL, &dst.w, &dst.h);
     SDL_RenderCopy(_renderer, texture, NULL, &dst);
+}
+
+void DrawText(const char *text, int x, int y, uint32_t color) {
+    RGBA(color, &_color);
+    SDL_Color textColor = { _color.r, _color.g, _color.b, _color.a};
+    SDL_Surface *surface = TTF_RenderText_Solid(_font, text, textColor);
+    
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(_renderer, surface);
+
+    const int width = surface->w, height = surface->h;
+    SDL_FreeSurface(surface);
+
+    DrawTexture(texture, x, y, width, height);
 }

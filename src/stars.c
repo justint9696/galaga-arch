@@ -24,7 +24,7 @@ static float _rand_y_position() {
     return 1.f * (rand() % WINDOW_HEIGHT);
 }
 
-static state_t _rand_state() {
+static star_state_t _rand_state() {
     switch (rand() % 2) {
     case 0:
         return STATE_FADEIN;

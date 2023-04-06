@@ -29,7 +29,9 @@ void initSDL() {
 
 	assert(_app.renderer);
 
-	Renderer_Init(_app.renderer);
+    TTF_Init();
+    
+    Renderer_Init(_app.renderer);
 }
 
 SDL_Texture *LoadTexture(const char *filename) {
@@ -39,5 +41,27 @@ SDL_Texture *LoadTexture(const char *filename) {
 
 	texture = IMG_LoadTexture(_app.renderer, filename);
 
+    assert(texture);
+
 	return texture;
+}
+
+TTF_Font *LoadFont(const char *filename, int size) {
+    TTF_Font *font = TTF_OpenFont(filename, size);
+
+    assert(font);
+
+    return font; 
+}
+
+int GetFontWidth(TTF_Font *font) {
+    int width, height;
+    TTF_SizeText(font, "", &width, &height);
+    return width;
+}
+
+int GetFontHeight(TTF_Font *font) {
+    int width, height;
+    TTF_SizeText(font, "", &width, &height);
+    return height;
 }

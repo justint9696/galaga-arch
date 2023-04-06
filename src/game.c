@@ -1,6 +1,7 @@
 #include "inc/game.h"
 #include "inc/entity.h"
 #include "inc/enemy.h"
+#include "inc/hud.h"
 #include "inc/player.h"
 #include "inc/render.h"
 #include "inc/stars.h"
@@ -42,6 +43,7 @@ void Game_Init() {
     Enemy_InitAll(1);
 
     // prepare gfx
+    Hud_Init();
     Stars_Init();
 }
 
@@ -52,10 +54,18 @@ void Game_Main(int buttons) {
     // prepare renderer
     Renderer_Prepare();
 
-    // update entities
+    // update enemies
+    Enemy_UpdateAll(_time);
+
+    // update gfx
     Stars_Update(_delta_time);
+
+    // update entities
     Player_Update(buttons, _time);
     Entity_UpdateAll(_delta_time);
+
+    // draw hud
+    Hud_Draw();
 
     // render screen
     Renderer_Update();

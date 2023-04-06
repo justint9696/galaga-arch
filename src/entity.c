@@ -20,7 +20,9 @@ static inline Entity *_Entity_Alloc() {
 
     LinkedList_Add(_entities, (void *)self);
 
-    printf("entity spawned. number of entities: %i\n", _num_ent);
+    #ifdef DEBUG
+        printf("entity spawned. number of entities: %i\n", _num_ent);
+    #endif
 
     return self;
 }
@@ -33,7 +35,9 @@ static inline void _Entity_Free(Entity *self) {
     LinkedList_Remove(&_entities, (void *)self);
     free(self);
 
-    printf("entity %i released. number of entities: %i\n", id, --_num_ent);
+    #ifdef DEBUG
+        printf("entity %i released. number of entities: %i\n", id, --_num_ent);
+    #endif
 }
 
 static inline void _Entity_Render_Rect(const Entity *self) {
@@ -85,7 +89,9 @@ static inline void _Entity_CollisionHandler(Entity *self) {
         assert(entity);
 
         if (_Entity_IsColliding(self, entity)) {
+            #ifdef DEBUG
             printf("entity %i is colliding with entity %i\n", entity->id, self->id);
+            #endif
 
             _Entity_Free(self);
             _Entity_Free(entity);
@@ -131,12 +137,8 @@ static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
 static inline vec2 _Entity_Midpoint(const Entity *self) {
     vec2 pos;
     pos.x = self->pos.x + (self->width / 2.f);
-    pos.y = self->pos.y + (self->type == TYPE_PLAYER ? self->height : -self->height);
+    pos.y = self->pos.y + (self->type == TYPE_PLAYER ? self->height : 0.f);
     return pos;
-}
-
-float Distance(const vec2 pt1, const vec2 pt2) {
-    return fabs(pt1.x - pt2.x) + fabs(pt1.y - pt2.y);
 }
 
 void Entity_InitList() {
@@ -164,6 +166,7 @@ Entity *Entity_Init(type_t type, team_t team, float x, float y, int width, int h
 
     self->type = type;
     self->team = team;
+    self->state = STATE_IDLE;
 
     self->pos.x = x;
     self->pos.y = y;
@@ -215,6 +218,8 @@ void Entity_SetVelocity(Entity *self, vec2 vel) {
 }
 
 void Entity_Fire(Entity *self, uint64_t tick) {
+    assert(self->type == (TYPE_PLAYER | TYPE_ENEMY));
+    
     const uint64_t time = Time_Passed(self->tick);
     if (time < BULLET_DELAY)
         return;
@@ -231,4 +236,7 @@ void Entity_Fire(Entity *self, uint64_t tick) {
     Entity_SetVelocity(entity, vel);
 
     self->tick = tick;
+
+    self->prev_state = self->state;
+    self->state = STATE_ATTACK;
 }

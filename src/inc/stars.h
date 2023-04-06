@@ -16,10 +16,10 @@ typedef enum {
     STATE_NORMAL,
     STATE_FADEIN,
     STATE_FADEOUT,
-} state_t;
+} star_state_t;
 
 typedef struct {
-    state_t state;
+    star_state_t state;
     uint32_t color;
     vec2 pos, vel;
 } Star;

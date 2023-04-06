@@ -4,9 +4,16 @@
 static Player _self;
 static vec2 _vel;
 
+vec2 Player_GetPosition() {
+    return _self.ent->pos;
+}
+
+vec2 Player_GetVelocity() {
+    return _self.ent->vel;
+}
+
 void Player_Init() {
     memset(&_self, 0, sizeof(Player));
-    _self.buttons = 0;
     _self.ent = Entity_Init(TYPE_PLAYER, TEAM_ALLY, PLAYER_SPAWN_X, PLAYER_SPAWN_Y, PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_TEXTURE);
 
     printf("Player initialized.\n");

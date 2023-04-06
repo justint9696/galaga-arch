@@ -28,19 +28,25 @@ typedef enum {
     TEAM_ENEMY,
 } team_t;
 
+typedef enum {
+    STATE_IDLE,
+    STATE_ATTACK,
+    STATE_TRAVEL,
+    STATE_DEAD,
+} state_t;
+
 typedef struct {
     int id;
     type_t type;
     team_t team;
+    state_t state, prev_state;
     int width, height;
     uint64_t tick;
-    vec2 pos, vel;
+    vec2 pos, dst, vel;
     SDL_Texture *texture;
     uint32_t color;
     void *render;
 } Entity;
-
-float Distance(const vec2 pt1, const vec2 pt2);
 
 void Entity_InitList();
 

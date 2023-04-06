@@ -23,6 +23,10 @@ typedef struct {
     Entity *ent;
 } Player;
 
+vec2 Player_GetPosition();
+
+vec2 Player_GetVelocity();
+
 void Player_Init();
 
 void Player_Update(int buttons, uint64_t tick);
