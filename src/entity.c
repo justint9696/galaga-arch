@@ -13,6 +13,14 @@
 static int _num_ent = 0;
 static LinkedList *_entities;
 
+static bool _Entity_IsAlive(const Entity *self) {
+    return (self->state != STATE_DEAD && self->health > 0.f);
+}
+
+static team_t _Entity_GetOtherTeam(const team_t team) {
+    return (team == TEAM_ALLY ? TEAM_ENEMY : TEAM_ALLY);
+}
+
 static inline Entity *_Entity_Alloc() {
     Entity *self = (Entity *)malloc(sizeof(Entity));
     memset(self, 0, sizeof(Entity));
@@ -38,6 +46,11 @@ static inline void _Entity_Free(Entity *self) {
     #ifdef DEBUG
         printf("entity %i released. number of entities: %i\n", id, --_num_ent);
     #endif
+}
+
+static void _Entity_Damage(Entity *self) {
+    if (--self->health <= 0.f)
+        self->state = STATE_DEAD;    
 }
 
 static inline void _Entity_Render_Rect(const Entity *self) {
@@ -69,15 +82,31 @@ static LinkedList *_Entity_FilterByAll(const team_t team, const type_t type) {
     return head;
 }
 
-static inline team_t _Entity_GetOtherTeam(const team_t team) {
-    return (team == TEAM_ALLY ? TEAM_ENEMY : TEAM_ALLY);
-}
-
 static inline bool _Entity_IsColliding(const Entity *e1, const Entity *e2) {
     return ((e1->pos.x + e1->width) >= e2->pos.x 
             && (e1->pos.y + e1->height) >= e2->pos.y)
             && e1->pos.x <= (e2->pos.x + e2->width)
             && e1->pos.y <= (e2->pos.y + e2->height);        
+}
+
+static void _Entity_Collide(Entity *e1, Entity *e2) {
+    switch (e1->type) {
+    case TYPE_PROJECTILE:
+        _Entity_Free(e1);
+        break;
+    default:
+        _Entity_Damage(e1);
+        break;
+    }
+
+    switch (e2->type) {
+    case TYPE_PROJECTILE:
+        _Entity_Free(e2);
+        break;
+    default:
+        _Entity_Damage(e2);
+        break;
+    }
 }
 
 static inline void _Entity_CollisionHandler(Entity *self) {
@@ -88,13 +117,20 @@ static inline void _Entity_CollisionHandler(Entity *self) {
         entity = (Entity *)tmp->item;
         assert(entity);
 
-        if (_Entity_IsColliding(self, entity)) {
+        if (_Entity_IsAlive(entity) && _Entity_IsColliding(self, entity)) {
             #ifdef DEBUG
-            printf("entity %i is colliding with entity %i\n", entity->id, self->id);
+                printf("entity %i is colliding with entity %i\n", entity->id, self->id);
             #endif
 
-            _Entity_Free(self);
-            _Entity_Free(entity);
+            // _Entity_Free(self);
+            //_Entity_Free(entity);
+
+            // since freeing enemies.c points to the same memory addresses, freeing entities breaks game
+            // rather than freeing both entities, just free projectile and damage player/enemy ents
+             _Entity_Collide(self, entity);
+
+            // TODO: free entities upon loading a new level
+             
 
             break;
         }
@@ -141,7 +177,7 @@ static inline vec2 _Entity_Midpoint(const Entity *self) {
     return pos;
 }
 
-void Entity_InitList() {
+void Entity_InitAll() {
 	_entities = (LinkedList *)malloc(sizeof(LinkedList));
 	memset(_entities, 0, sizeof(LinkedList));
 	
@@ -155,14 +191,20 @@ void Entity_UpdateAll(uint64_t deltaTime) {
 
     while (tmp) {
         entity = (Entity *)tmp->item;
-        _Entity_Update(entity, deltaTime);
+        assert(entity);
+
+        if (_Entity_IsAlive(entity)) {
+            _Entity_Update(entity, deltaTime);
+        }
 
         tmp = tmp->next;
     }
 }
 
-Entity *Entity_Init(type_t type, team_t team, float x, float y, int width, int height, const char *texture) {
+Entity *Entity_Init(type_t type, team_t team, float health, float x, float y, int width, int height, const char *texture) {
     Entity *self = _Entity_Alloc();
+
+    self->health = health;
 
     self->type = type;
     self->team = team;
@@ -218,7 +260,7 @@ void Entity_SetVelocity(Entity *self, vec2 vel) {
 }
 
 void Entity_Fire(Entity *self, uint64_t tick) {
-    assert(self->type == (TYPE_PLAYER | TYPE_ENEMY));
+    assert((self->type == TYPE_PLAYER) || (self->type == TYPE_ENEMY));
     
     const uint64_t time = Time_Passed(self->tick);
     if (time < BULLET_DELAY)
@@ -231,7 +273,7 @@ void Entity_Fire(Entity *self, uint64_t tick) {
     vel.x = 0.f;
     vel.y = self->team == TEAM_ALLY ? BULLET_VELOCITY : -BULLET_VELOCITY;
 
-    Entity *entity = Entity_Init(TYPE_PROJECTILE, self->team, pos.x, pos.y, BULLET_WIDTH, BULLET_HEIGHT, BULLET_TEXTURE);
+    Entity *entity = Entity_Init(TYPE_PROJECTILE, self->team, 1.f, pos.x, pos.y, BULLET_WIDTH, BULLET_HEIGHT, BULLET_TEXTURE);
 
     Entity_SetVelocity(entity, vel);
 

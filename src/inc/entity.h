@@ -30,6 +30,7 @@ typedef enum {
 
 typedef enum {
     STATE_IDLE,
+    STATE_SPAWN,
     STATE_ATTACK,
     STATE_TRAVEL,
     STATE_DEAD,
@@ -37,6 +38,7 @@ typedef enum {
 
 typedef struct {
     int id;
+    float health;
     type_t type;
     team_t team;
     state_t state, prev_state;
@@ -48,9 +50,9 @@ typedef struct {
     void *render;
 } Entity;
 
-void Entity_InitList();
+void Entity_InitAll();
 
-Entity *Entity_Init(type_t type, team_t team, float x, float y, int width, int height, const char *texture);
+Entity *Entity_Init(type_t type, team_t team, float health, float x, float y, int width, int height, const char *texture);
 
 void Entity_UpdateAll(uint64_t deltaTime);
 
