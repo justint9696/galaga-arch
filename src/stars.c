@@ -13,7 +13,7 @@
 static Star _stars[STAR_MAX_COUNT];
 
 static float _rand_velocity() {
-    return (5.f * (1 + (rand() % 3)) / 100); 
+    return (5.f * (1 + (rand() % 5)) / 100); 
 }
 
 static float _rand_x_position() {
@@ -46,6 +46,8 @@ static Star *_Star_Init(int index) {
     memset(star, 0, sizeof(Star));
 
     star->pos.x = _rand_x_position();
+    star->pos.y = WINDOW_HEIGHT - STAR_HEIGHT;
+
     star->vel.y = _rand_velocity();
 
     star->state = _rand_state();
@@ -54,16 +56,12 @@ static Star *_Star_Init(int index) {
     return star;
 }
 
-static void _Star_Reset(Star *self) {
-    self->pos.y = 0.f;
-}
-
 static void _Star_Update(Star *self, uint64_t deltaTime) {
-    self->pos.y += (1.f * deltaTime * self->vel.y);
+    self->pos.y -= (1.f * deltaTime * self->vel.y);
 }
 
 static bool _Star_Check(const Star *self) {
-    return ((self->pos.y + STAR_HEIGHT) < WINDOW_HEIGHT); 
+    return (self->pos.y > 0.f); 
 }
 
 static void _Star_Render(const Star *self) {
