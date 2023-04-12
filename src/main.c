@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
 	printf("%s Initialized.\n", APP_TITLE);
 
 	SDL_Event event;
-	while (1) {
+	while (Game_IsRunning()) {
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 			case SDL_QUIT:
@@ -74,6 +74,8 @@ int main(int argc, char *argv[]) {
 
 		Game_Main(buttons);
 	}
+
+    printf("Game Over.\n");
 
 	return 0;
 }
