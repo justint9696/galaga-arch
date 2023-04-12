@@ -1,6 +1,7 @@
 #include "inc/game.h"
 #include "inc/entity.h"
 #include "inc/enemy.h"
+#include "inc/level.h"
 #include "inc/hud.h"
 #include "inc/player.h"
 #include "inc/render.h"
@@ -33,14 +34,20 @@ static inline void _Game_Tick() {
     _ticks++;
 }
 
+bool Game_IsRunning() {
+    return (Player_IsAlive());
+}
+
 void Game_Init() {
     // store current tick
     _time = Get_Tick();
 
+    // prepare level
+
     // prepare entities
-    Entity_InitList();
-    Player_Init();
-    Enemy_InitAll(1);
+    Entity_InitAll();
+    Player_Init(_time);
+    Enemy_InitAll(_time);
 
     // prepare gfx
     Hud_Init();
