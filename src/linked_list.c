@@ -5,18 +5,18 @@
 #include <string.h>
 
 void LinkedList_Add(LinkedList *head, void *item) {
-    if (!head->item)
-        head->item = item;
-    else {
-        LinkedList *tmp = head;
-        while (tmp->next) {
-            tmp = tmp->next;
-        }
+	if (!head->item)
+		head->item = item;
+	else {
+		LinkedList *tmp = head;
+		while (tmp->next) {
+			tmp = tmp->next;
+		}
 
-        tmp->next = (LinkedList *)malloc(sizeof(LinkedList));
-        memset(tmp->next, 0, sizeof(LinkedList));
-        tmp->next->item = item;
-    }
+		tmp->next = (LinkedList *)malloc(sizeof(LinkedList));
+		memset(tmp->next, 0, sizeof(LinkedList));
+		tmp->next->item = item;
+	}
 }
 
 void LinkedList_Remove(LinkedList **head, void *item) {
@@ -30,8 +30,8 @@ void LinkedList_Remove(LinkedList **head, void *item) {
 					memset(head, 0, sizeof(LinkedList));
 			} else if (tmp->next)
 				prev->next = tmp->next;
-            else
-                memset(&prev->next, 0, sizeof(LinkedList));
+			else
+				memset(&prev->next, 0, sizeof(LinkedList));
 			break;
 		}
 		prev = tmp;

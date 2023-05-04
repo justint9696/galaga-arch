@@ -9,31 +9,62 @@ static int _count;
 static Entity **_entities;
 
 static inline Entity *_Enemy_Init() {
-    return Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, ENEMY_SPAWN_X, ENEMY_SPAWN_Y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
-}
-
-static void _Enemy_ThinkPath(Entity *self) {
-    self->dst = self->pos;
-
-    if (self->pos.x < WINDOW_WIDTH - self->width)
-        self->dst.x = WINDOW_WIDTH - self->width;
-    else
-        self->dst.x = 0.f;
-
-    self->prev_state = self->state;
-    self->state = STATE_TRAVEL;
-
-    Path_Linear(self, self->dst, ENEMY_VELOCITY);
+    return Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
 }
 
 static void _Enemy_ResetPath(Entity *self) {
     self->state = STATE_IDLE;
-    memset(&self->dst, 0, sizeof(vec2));    
+    memset(&self->path, 0, sizeof(path_s));
+}
+
+static void _Enemy_ThinkPath(Entity *self) {
+    switch (self->state) {
+    case STATE_IDLE:
+        self->path.dst = self->pos;
+
+        if (self->pos.x < WINDOW_WIDTH - self->width)
+            self->path.dst.x = WINDOW_WIDTH - self->width;
+        else
+            self->path.dst.x = 0.f;
+
+        Path_Linear(self, self->pos, self->path.dst, ENEMY_VELOCITY);
+
+        self->path.type = PATH_LINEAR;
+        break;
+    case STATE_SPAWN:
+        self->path.org = self->pos;
+
+        self->path.dst.x = ENEMY_SPAWN_X;
+        self->path.dst.y = ENEMY_SPAWN_Y;
+            
+        Path_Circular(self, self->path.org, self->path.dst, ENEMY_VELOCITY);
+
+        self->path.type = PATH_CIRCULAR;
+        break;
+    }
+
+    self->state = STATE_TRAVEL;
+}
+
+static void _Enemy_TravelPath(Entity *self) {
+    // TODO: decide enemy pathing here    
+    Hud_AddText("Entity Path: %s", self->path.type == PATH_LINEAR ? "Linear" : "Circular");
+    switch (self->path.type) {
+    case PATH_LINEAR:
+        break;
+    case PATH_CIRCULAR:
+        Path_Circular(self, self->path.org, self->path.dst, ENEMY_VELOCITY);
+        break;
+    }
+
+    if (Distance(self->pos, self->path.dst) < 5.f)
+        _Enemy_ResetPath(self);
 }
 
 static void _Enemy_ThinkAttack(Entity *self, uint64_t tick) {
-    const vec2 pos = Player_Position(),
-          vel = Player_Velocity();
+    const vec2 
+        pos = Player_Position(),
+        vel = Player_Velocity();
 
     // velocity = distance / time
     // distance / velocity = time
@@ -49,7 +80,7 @@ static void _Enemy_ThinkAttack(Entity *self, uint64_t tick) {
         return;
     }
 
-    // player is going in the same direction
+    // player is moving in the same direction
     if ((dx < 0.f && vel.x < 0.f) || (dx > 0.f && vel.x > 0.f)) 
         return;
     
@@ -62,21 +93,20 @@ static void _Enemy_ThinkAttack(Entity *self, uint64_t tick) {
 }
 
 static void _Enemy_Think(Entity *self, uint64_t tick) {
+    state_t p_state = self->state;
     _Enemy_ThinkAttack(self, tick);
     
     switch (self->state) {
     case STATE_IDLE:
+    case STATE_SPAWN:
         _Enemy_ThinkPath(self);
         break;
-    case STATE_SPAWN:
-        // TODO: make enemies fly in from off screen
-        break;
     case STATE_ATTACK:
-        self->state = self->prev_state;
+        // return to state prior attack
+        self->state = p_state;
         break;
     case STATE_TRAVEL:
-        if (Distance(self->pos, self->dst) < 5.f)
-            _Enemy_ResetPath(self);
+        _Enemy_TravelPath(self);
         break;
     default:
         break;
@@ -90,7 +120,7 @@ void Enemy_InitAll(uint64_t tick) {
     
     for (int i = 0; i < _count; i++) {
         entity = _Enemy_Init(tick);
-        entity->state = STATE_SPAWN;
+        entity->state = ENEMY_START_STATE;
         entity->tick = tick;
         _entities[i] = entity;
     }
@@ -99,7 +129,7 @@ void Enemy_InitAll(uint64_t tick) {
 }
 
 void Enemy_UpdateAll(uint64_t tick) {
-   Entity *entity;
+    Entity *entity;
     
     for (int i = 0; i < _count; i++) {
         entity = _entities[i];

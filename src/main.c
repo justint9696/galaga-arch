@@ -23,47 +23,47 @@ int main(int argc, char *argv[]) {
 				exit(0);
 				break;
 
-			case SDL_KEYDOWN:
+				case SDL_KEYDOWN:
 				switch (event.key.keysym.scancode) {
-				case SDL_SCANCODE_UP:
-					buttons |= BUTTON_UP;
+					case SDL_SCANCODE_UP:
+						buttons |= BUTTON_UP;
+						break;
+					case SDL_SCANCODE_DOWN:
+						buttons |= BUTTON_DOWN;
+						break;
+					case SDL_SCANCODE_LEFT:
+						buttons |= BUTTON_LEFT;
+						break;
+					case SDL_SCANCODE_RIGHT:
+						buttons |= BUTTON_RIGHT;
+						break;
+					case SDL_SCANCODE_SPACE:
+						buttons |= BUTTON_SPACE;
+						break;
+					default:
+						break;
+					}
 					break;
-				case SDL_SCANCODE_DOWN:
-					buttons |= BUTTON_DOWN;
-					break;
-				case SDL_SCANCODE_LEFT:
-					buttons |= BUTTON_LEFT;
-					break;
-				case SDL_SCANCODE_RIGHT:
-					buttons |= BUTTON_RIGHT;
-					break;
-				case SDL_SCANCODE_SPACE:
-					buttons |= BUTTON_SPACE;
-					break;
-				default:
-					break;
-				}
-				break;
 
-			case SDL_KEYUP:
+				case SDL_KEYUP:
 				switch (event.key.keysym.scancode) {
-				case SDL_SCANCODE_UP:
-					buttons &= ~BUTTON_UP;
-					break;
-				case SDL_SCANCODE_DOWN:
-					buttons &= ~BUTTON_DOWN;
-					break;
-				case SDL_SCANCODE_LEFT:
-					buttons &= ~BUTTON_LEFT;
-					break;
-				case SDL_SCANCODE_RIGHT:
-					buttons &= ~BUTTON_RIGHT;
-					break;
-				case SDL_SCANCODE_SPACE:
-					buttons &= ~BUTTON_SPACE;
-					break;
-				default:
-					break;
+					case SDL_SCANCODE_UP:
+						buttons &= ~BUTTON_UP;
+						break;
+					case SDL_SCANCODE_DOWN:
+						buttons &= ~BUTTON_DOWN;
+						break;
+					case SDL_SCANCODE_LEFT:
+						buttons &= ~BUTTON_LEFT;
+						break;
+					case SDL_SCANCODE_RIGHT:
+						buttons &= ~BUTTON_RIGHT;
+						break;
+					case SDL_SCANCODE_SPACE:
+						buttons &= ~BUTTON_SPACE;
+						break;
+					default:
+						break;
 				}
 				break;
 
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
 		Game_Main(buttons);
 	}
 
-    printf("Game Over.\n");
+	printf("Game Over.\n");
 
 	return 0;
 }

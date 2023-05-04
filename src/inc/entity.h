@@ -36,15 +36,27 @@ typedef enum {
     STATE_DEAD,
 } state_t;
 
+typedef enum {
+    PATH_LINEAR,
+    PATH_CIRCULAR,
+} path_type_t;
+
+typedef struct {
+    float angle;
+    path_type_t type;
+    vec2 org, dst;
+} path_s;
+
 typedef struct {
     int id;
     float health;
     type_t type;
     team_t team;
-    state_t state, prev_state;
+    state_t state;
     int width, height;
     uint64_t tick;
-    vec2 pos, dst, vel;
+    vec2 pos, vel;
+    path_s path;
     SDL_Texture *texture;
     uint32_t color;
     void *render;

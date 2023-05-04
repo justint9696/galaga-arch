@@ -43,6 +43,7 @@ void Game_Init() {
     _time = Get_Tick();
 
     // prepare level
+    Level_Init();
 
     // prepare entities
     Entity_InitAll();

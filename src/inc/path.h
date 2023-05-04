@@ -4,8 +4,12 @@
 #include "entity.h"
 #include "type.h"
 
-void Path_Circle(Entity *entity, vec2 dst, float speed);
+#include <math.h>
 
-void Path_Linear(Entity *entity, vec2 dst, float speed);
+#define DEG(rad) (rad * (180.f / M_PI)) 
+
+void Path_Circular(Entity *entity, const vec2 org, const vec2 dst, float speed);
+
+void Path_Linear(Entity *entity, const vec2 org, const vec2 dst, float speed);
 
 #endif

@@ -1,6 +1,7 @@
 #include "inc/app.h"
 #include "inc/entity.h"
 #include "inc/game.h"
+#include "inc/hud.h"
 #include "inc/linked_list.h"
 #include "inc/render.h"
 #include "inc/time.h"
@@ -42,6 +43,8 @@ static inline void _Entity_Free(Entity *self) {
 
     LinkedList_Remove(&_entities, (void *)self);
     free(self);
+
+    _num_ent--;
 
     #ifdef DEBUG
         printf("entity %i released. number of entities: %i\n", id, --_num_ent);
@@ -125,7 +128,7 @@ static inline void _Entity_CollisionHandler(Entity *self) {
             // _Entity_Free(self);
             //_Entity_Free(entity);
 
-            // since freeing enemies.c points to the same memory addresses, freeing entities breaks game
+            // since enemies.c points to the same memory addresses, freeing entities breaks game
             // rather than freeing both entities, just free projectile and damage player/enemy ents
              _Entity_Collide(self, entity);
 
@@ -142,14 +145,13 @@ static inline void _Entity_CollisionHandler(Entity *self) {
 }
 
 static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
-    if ((self->pos.x > WINDOW_WIDTH || self->pos.x < 0.f) || 
-            (self->pos.y > WINDOW_HEIGHT || self->pos.y < 0.f)) {
+    if ((self->pos.x > (WINDOW_WIDTH + WINDOW_BUFFER) || self->pos.x < -WINDOW_BUFFER) || 
+            (self->pos.y > (WINDOW_HEIGHT + WINDOW_BUFFER) || self->pos.y < -WINDOW_BUFFER)) {
         _Entity_Free(self);
         return;
     }
 
     // update entity position
-    //self->pos.x += round(1.f * deltaTime * self->vel.x);
     self->pos.x += (1.f * deltaTime * self->vel.x);
     self->pos.y += (1.f * deltaTime * self->vel.y);
 
@@ -199,6 +201,7 @@ void Entity_UpdateAll(uint64_t deltaTime) {
 
         tmp = tmp->next;
     }
+    Hud_AddText("Entities: %i", _num_ent);
 }
 
 Entity *Entity_Init(type_t type, team_t team, float health, float x, float y, int width, int height, const char *texture) {
@@ -279,6 +282,5 @@ void Entity_Fire(Entity *self, uint64_t tick) {
 
     self->tick = tick;
 
-    self->prev_state = self->state;
     self->state = STATE_ATTACK;
 }
