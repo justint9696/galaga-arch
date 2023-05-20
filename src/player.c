@@ -1,11 +1,12 @@
+#include "inc/buttons.h"
 #include "inc/entity.h"
 #include "inc/player.h"
 
-static Player _self;
 static vec2 _vel;
+static Player _self;
 
 bool Player_IsAlive() {
-    return (_self.ent->state != STATE_DEAD);
+    return Entity_IsAlive(_self.ent);
 }
 
 vec2 Player_Position() {
@@ -24,8 +25,9 @@ void Player_Init(uint64_t tick) {
     printf("Player initialized.\n");
 }
 
-void Player_Update(int buttons, uint64_t tick) {
-    if (_self.ent->state == STATE_DEAD)
+void Player_Update(uint64_t tick) {
+    int buttons = Buttons_Get();
+    if (!Player_IsAlive())
         return;
 
     if (buttons & BUTTON_SPACE) 
