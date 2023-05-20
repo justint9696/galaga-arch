@@ -34,6 +34,6 @@ vec2 Player_Velocity();
 
 void Player_Init(uint64_t tick);
 
-void Player_Update(int buttons, uint64_t tick);
+void Player_Update(uint64_t tick);
 
 #endif
