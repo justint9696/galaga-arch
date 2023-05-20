@@ -2,44 +2,47 @@
 
 #include <stdio.h>
 
-static inline float _AngleOffset(float dx, float dy) {
-    if (dx < 0 && dy < 0) // Q3
-        return 180.f;
-    else if (dx > 0 && dy < 0) // Q4
-        return 270.f;
-    else if (dx < 0 && dy > 0) // Q2
-        return 90.f;
-    return 0.f; // Q1
-}
-
-inline void Path_Circular(Entity *entity, const vec2 org, const vec2 dst, float speed) {
-        float
-                dx = org.x - dst.x,
-                   dy = org.y - dst.y;
-
-    float 
-        radius = sqrt(pow(dx, 2) + pow(dy, 2)),
-        angle = DEG(acos(dx / radius)); 
-
-    dx = entity->pos.x - dst.x;
-    dy = entity->pos.y - dst.y;
-
-    angle = 90.f + DEG(acos(dx / radius));
-
-    vec2 pos = {
-        cos(angle),
-        sin(angle)
+static inline vec2 _midpoint(vec2 pt0, vec2 pt1) {
+    vec2 midpoint = {
+        (pt0.x + pt1.x) / 2.f,
+        (pt0.y + pt1.y) / 2.f
     };
 
-    //pos.x *= speed;
-    //pos.y *= speed;
-
-    Entity_SetVelocity(entity, pos);
-
-    printf("radius: %.2f\tangle: %.2f\tvelocity(%.2f, %.2f)\n", radius, angle, pos.x, pos.y);
+    return midpoint;
 }
 
-inline void Path_Linear(Entity *entity, const vec2 org, const vec2 dst, float speed) {
+static inline float _radius(vec2 point, vec2 midpoint) {
+    return sqrtf(powf(point.x - midpoint.x, 2) + powf(point.y - midpoint.y, 2));
+}
+
+static inline float _angle(vec2 point, vec2 midpoint) {
+    float 
+        dx = point.x - midpoint.x,
+        dy = point.y - midpoint.y;
+
+    if (dx > 0 && dy > 0) 
+        return DEG(atan(dy / dx)); 
+    else if (dx < 0 && dy > 0)
+        return DEG(atan(dy / dx)) + 90.f;
+    else if (dx < 0 && dy < 0) 
+        return DEG(atan(dy / dx)) + 180.f;
+    return DEG(atan(dy / dx)) + 270.f;
+}
+
+inline void Path_Circular(Entity *entity, vec2 org, vec2 dst, float speed) {
+    vec2 midpoint = _midpoint(org, dst);
+    float radius = _radius(org, midpoint);
+    float angle = _angle(entity->pos, midpoint) + speed;
+    
+    vec2 vel = {
+        midpoint.x + (radius * cos(RAD(angle))) - entity->pos.x,
+        midpoint.y + (radius * sin(RAD(angle))) - entity->pos.y
+    };
+
+    Entity_SetVelocity(entity, vel);
+}
+
+inline void Path_Linear(Entity *entity, vec2 org, vec2 dst, float speed) {
     vec2 vel = { 
         entity->pos.x == dst.x ? 0 : entity->pos.x < dst.x ? speed : -speed,
         entity->pos.y == dst.y ? 0 : entity->pos.y < dst.y ? speed : -speed
