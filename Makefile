@@ -5,7 +5,7 @@ SRC=$(wildcard src/*.c)
 
 CFLAGS=-Wall
 LDFLAGS=-L ../ludo -lSDL2 -lSDL2_image -lSDL2_ttf -lm
-OBJ=$(SRC:.c=.o)
+OBJ=$(SRC:src/%.c=$(BIN)%.o)
 
 TARGET=game
 
@@ -20,7 +20,7 @@ $(TARGET): $(OBJ)
 run: all
 	$(BIN)$(TARGET)
 
-%.o: %.c
+$(BIN)%.o: src/%.c
 	$(CC) $(CFLAGS) -o $@ -c $< 
 
 clean:
