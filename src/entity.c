@@ -14,7 +14,7 @@
 static int _num_ent = 0;
 static LinkedList *_entities;
 
-static bool _Entity_IsAlive(const Entity *self) {
+bool Entity_IsAlive(const Entity *self) {
     return (self->state != STATE_DEAD && self->health > 0.f);
 }
 
@@ -120,7 +120,7 @@ static inline void _Entity_CollisionHandler(Entity *self) {
         entity = (Entity *)tmp->item;
         assert(entity);
 
-        if (_Entity_IsAlive(entity) && _Entity_IsColliding(self, entity)) {
+        if (Entity_IsAlive(entity) && _Entity_IsColliding(self, entity)) {
             #ifdef DEBUG
                 printf("entity %i is colliding with entity %i\n", entity->id, self->id);
             #endif
@@ -195,7 +195,7 @@ void Entity_UpdateAll(uint64_t deltaTime) {
         entity = (Entity *)tmp->item;
         assert(entity);
 
-        if (_Entity_IsAlive(entity)) {
+        if (Entity_IsAlive(entity)) {
             _Entity_Update(entity, deltaTime);
         }
 

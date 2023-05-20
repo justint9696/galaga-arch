@@ -62,6 +62,8 @@ typedef struct {
     void *render;
 } Entity;
 
+bool Entity_IsAlive(const Entity *self);
+
 void Entity_InitAll();
 
 Entity *Entity_Init(type_t type, team_t team, float health, float x, float y, int width, int height, const char *texture);
