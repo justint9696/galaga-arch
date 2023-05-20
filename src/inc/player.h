@@ -6,12 +6,6 @@
 
 #include <stdbool.h>
 
-#define BUTTON_UP           (1 << 0)
-#define BUTTON_DOWN         (1 << 1)
-#define BUTTON_LEFT         (1 << 2)
-#define BUTTON_RIGHT        (1 << 3)
-#define BUTTON_SPACE        (1 << 4)
-
 #define PLAYER_TEXTURE	    "assets/images/player.png"	
 #define PLAYER_WIDTH        66.7f
 #define PLAYER_HEIGHT       48.f
