@@ -9,6 +9,6 @@ typedef struct {
 
 typedef struct {
     uint8_t r, g, b, a;
-} Color;
+} color_s;
 
 #endif

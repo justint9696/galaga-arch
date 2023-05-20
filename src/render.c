@@ -7,7 +7,7 @@
 #include <math.h>
 #include <SDL2/SDL_render.h>
 
-static Color _color;
+static color_s _color;
 static SDL_Renderer *_renderer;
 static TTF_Font *_font;
 
@@ -33,7 +33,7 @@ void Renderer_Update() {
 }
 
 void DrawRect(int x, int y, int width, int height, uint32_t color) {
-    RGBA(color, &_color);
+    _color = rgba(color);
 
     // make origin at bottom of the screen
     y = WINDOW_HEIGHT - y - height;
@@ -63,8 +63,8 @@ void DrawTexture(SDL_Texture *texture, int x, int y, int width, int height) {
 }
 
 void DrawText(const char *text, int x, int y, uint32_t color) {
-    RGBA(color, &_color);
-    SDL_Color textColor = { _color.r, _color.g, _color.b, _color.a};
+    SDL_Color textColor;
+    memcpy(&textColor, &rgba(color), sizeof(uint8_t) * 4);
     SDL_Surface *surface = TTF_RenderText_Solid(_font, text, textColor);
     
     SDL_Texture *texture = SDL_CreateTextureFromSurface(_renderer, surface);

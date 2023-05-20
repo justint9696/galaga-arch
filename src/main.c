@@ -8,36 +8,34 @@
 #include <SDL2/SDL_scancode.h>
 
 int main(int argc, char *argv[]) {
-	int buttons = 0;
+    initSDL();
 
-	initSDL();
+    Game_Init();
+    printf("%s Initialized.\n", APP_TITLE);
 
-	Game_Init();
-	printf("%s Initialized.\n", APP_TITLE);
-
-	SDL_Event event;
-	while (Game_IsRunning()) {
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
-			case SDL_QUIT:
-				printf("%s Terminated.\n", APP_TITLE);
-				exit(0);
-				break;
+    SDL_Event event;
+    while (Game_IsRunning()) {
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+            case SDL_QUIT:
+                printf("%s Terminated.\n", APP_TITLE);
+                exit(0);
+                break;
 
             case SDL_KEYDOWN:
             case SDL_KEYUP:
                 Buttons_Update(event);
-				break;
+                break;
 
-			default:
-				break;
-			}
-		}
+            default:
+                break;
+            }
+        }
 
-		Game_Main();
-	}
+        Game_Main();
+    }
 
-	printf("Game Over.\n");
+    printf("Game Over.\n");
 
-	return 0;
+    return 0;
 }

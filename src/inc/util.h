@@ -7,10 +7,14 @@
 #include <stdint.h>
 
 // #define DEBUG
+#define clamp(a, b, c) ((a > b) ? a : (c < b) ? c : b)
 
-float clamp(int min, float current, int max);
-
-void RGBA(uint32_t src, Color *dst);
+#define rgba(c) ((color_s) {\
+        (c >> 24) & 0xff,\
+        (c >> 16) & 0xff,\
+        (c >>  8) & 0xff,\
+        (c >>  0) & 0xff\
+    })
 
 float Distance(const vec2 pt1, const vec2 pt2);
 
