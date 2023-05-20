@@ -50,7 +50,7 @@ void DrawRect(int x, int y, int width, int height, uint32_t color) {
 
 void DrawTexture(SDL_Texture *texture, int x, int y, int width, int height) {
     // make origin at bottom of screen
-	y = WINDOW_HEIGHT - y - height;
+    y = WINDOW_HEIGHT - y - height;
 
     SDL_Rect dst;
     dst.x = x;
@@ -66,7 +66,7 @@ void DrawText(const char *text, int x, int y, uint32_t color) {
     SDL_Color textColor;
     memcpy(&textColor, &rgba(color), sizeof(uint8_t) * 4);
     SDL_Surface *surface = TTF_RenderText_Solid(_font, text, textColor);
-    
+
     SDL_Texture *texture = SDL_CreateTextureFromSurface(_renderer, surface);
 
     const int width = surface->w, height = surface->h;
