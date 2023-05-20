@@ -11,6 +11,6 @@ bool Game_IsRunning();
 
 void Game_Init();
 
-void Game_Main(int buttons);
+void Game_Main();
 
 #endif

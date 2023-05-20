@@ -55,7 +55,7 @@ void Game_Init() {
     Stars_Init();
 }
 
-void Game_Main(int buttons) {
+void Game_Main() {
     // store current tick
     _frame_start = Get_Tick();
 
@@ -69,7 +69,7 @@ void Game_Main(int buttons) {
     Stars_Update(_delta_time);
 
     // update entities
-    Player_Update(buttons, _time);
+    Player_Update(_time);
     Entity_UpdateAll(_delta_time);
 
     // draw hud
