@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 // #define DEBUG
-#define clamp(a, b, c) ((a > b) ? a : (c < b) ? c : b)
+#define clamp(mn, x, mx) ((mn > x) ? mn : (mx < x) ? mx : x)
 
 #define rgba(c) ((color_s) {\
         (c >> 24) & 0xff,\
