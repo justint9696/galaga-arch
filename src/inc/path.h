@@ -13,4 +13,6 @@ void Path_Circular(Entity *entity, vec2 org, vec2 dst, float speed);
 
 void Path_Linear(Entity *entity, vec2 org, vec2 dst, float speed);
 
+void Path_Bezier(Entity *, vec2, vec2, float);
+
 #endif

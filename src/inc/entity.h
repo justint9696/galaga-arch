@@ -39,10 +39,11 @@ typedef enum {
 typedef enum {
     PATH_LINEAR,
     PATH_CIRCULAR,
+    PATH_BEZIER,
 } path_type_t;
 
 typedef struct {
-    float angle;
+    float time;
     path_type_t type;
     vec2 org, dst;
 } path_s;

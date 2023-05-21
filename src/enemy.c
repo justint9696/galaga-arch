@@ -37,9 +37,9 @@ static void _Enemy_ThinkPath(Entity *self) {
         self->path.dst.x = ENEMY_SPAWN_X;
         self->path.dst.y = ENEMY_SPAWN_Y;
             
-        Path_Circular(self, self->path.org, self->path.dst, ENEMY_VELOCITY);
+        Path_Bezier(self, self->path.org, self->path.dst, ENEMY_VELOCITY);
 
-        self->path.type = PATH_CIRCULAR;
+        self->path.type = PATH_BEZIER;
         break;
     }
 
@@ -48,16 +48,19 @@ static void _Enemy_ThinkPath(Entity *self) {
 
 static void _Enemy_TravelPath(Entity *self) {
     // TODO: decide enemy pathing here    
-    Hud_AddText("Entity Path: %s", self->path.type == PATH_LINEAR ? "Linear" : "Circular");
+    Hud_AddText("Entity Path: %s", self->path.type == PATH_LINEAR ? "Linear" : self->path.type == PATH_BEZIER ? "Bezier" : "Circular");
     switch (self->path.type) {
     case PATH_LINEAR:
         break;
     case PATH_CIRCULAR:
         Path_Circular(self, self->path.org, self->path.dst, ENEMY_VELOCITY);
         break;
+    case PATH_BEZIER:
+        Path_Bezier(self, self->path.org, self->path.dst, ENEMY_VELOCITY);
+        break;
     }
 
-    if (Distance(self->pos, self->path.dst) < 5.f)
+    if (Distance(self->pos, self->path.dst) < .5f)
         _Enemy_ResetPath(self);
 }
 
@@ -66,8 +69,6 @@ static void _Enemy_ThinkAttack(Entity *self, uint64_t tick) {
         pos = Player_Position(),
         vel = Player_Velocity();
 
-    // velocity = distance / time
-    // distance / velocity = time
     const float
         dx = (pos.x - self->pos.x),
         dy = fabs(pos.y - self->pos.y);
@@ -133,10 +134,8 @@ void Enemy_UpdateAll(uint64_t tick) {
     
     for (int i = 0; i < _count; i++) {
         entity = _entities[i];
-        if (!entity)
-            break;
 
-        if (!entity->health)
+        if (!entity || !Entity_IsAlive(entity))
             continue;
 
         _Enemy_Think(entity, tick);

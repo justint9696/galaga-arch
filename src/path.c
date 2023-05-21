@@ -1,4 +1,5 @@
 #include "inc/path.h"
+#include "inc/util.h"
 
 #include <stdio.h>
 
@@ -52,4 +53,22 @@ inline void Path_Linear(Entity *entity, vec2 org, vec2 dst, float speed) {
         return;
 
     Entity_SetVelocity(entity, vel);
+}
+
+static inline float _bezier_quad(float p0, float p1, float p2, float t) {
+    return p1 + powf((1 - t), 2) * (p0 - p1) + powf(t, 2) * (p2 - p1);
+}
+
+static inline vec2 _bezier_path(vec2 src, vec2 mid, vec2 dst, float time) {
+    return (vec2) { _bezier_quad(src.x, mid.x, dst.x, time), _bezier_quad(src.y, mid.y, dst.y, time) };
+}
+
+inline void Path_Bezier(Entity *entity, vec2 org, vec2 dst, float speed) {
+    float distance = Distance(org, dst); 
+    entity->path.time += (1.f / (distance / speed));
+
+    vec2 midpoint = { org.x, dst.y };
+    vec2 pos = _bezier_path(org, midpoint, dst, entity->path.time);
+ 
+    Entity_SetPosition(entity, pos);
 }
