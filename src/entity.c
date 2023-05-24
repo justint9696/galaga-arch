@@ -211,7 +211,7 @@ Entity *Entity_Init(type_t type, team_t team, float health, float x, float y, in
 
     self->type = type;
     self->team = team;
-    self->state = STATE_IDLE;
+    self->state = STATE_ALIVE;
 
     self->pos.x = x;
     self->pos.y = y;
@@ -281,6 +281,4 @@ void Entity_Fire(Entity *self, uint64_t tick) {
     Entity_SetVelocity(entity, vel);
 
     self->tick = tick;
-
-    self->state = STATE_ATTACK;
 }
