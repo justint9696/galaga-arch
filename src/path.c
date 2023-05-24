@@ -64,11 +64,17 @@ static inline vec2 _bezier_path(vec2 src, vec2 mid, vec2 dst, float time) {
 }
 
 inline void Path_Bezier(Entity *entity, vec2 org, vec2 dst, float speed) {
-    float distance = Distance(org, dst); 
-    entity->path.time += (1.f / (distance / speed));
+    //float distance = Distance(org, dst); 
+    //entity->path.time += (1.f / (distance / speed));
+    float distance = Distance(entity->pos, dst);
+    float time = (distance / speed);
+
+    distance = Distance(org, dst);
+    time += (1.f / (distance / speed));
 
     vec2 midpoint = { org.x, dst.y };
-    vec2 pos = _bezier_path(org, midpoint, dst, entity->path.time);
+    vec2 pos = _bezier_path(org, midpoint, dst, time);
+    //vec2 pos = _bezier_path(org, midpoint, dst, entity->path.time);
  
     Entity_SetPosition(entity, pos);
 }
