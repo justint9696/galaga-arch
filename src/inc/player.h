@@ -17,7 +17,7 @@
 
 typedef struct {
     int buttons;
-    Entity *ent;
+    Entity *entity;
 } Player;
 
 bool Player_IsAlive();
