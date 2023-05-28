@@ -40,7 +40,7 @@ typedef struct {
     team_t team;
     state_t state;
     int width, height;
-    uint64_t tick;
+    uint64_t tick, deltaTime;
     vec2 pos, vel;
     SDL_Texture *texture;
     uint32_t color;

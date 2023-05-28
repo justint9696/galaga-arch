@@ -155,6 +155,8 @@ static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
     self->pos.x += (1.f * deltaTime * self->vel.x);
     self->pos.y += (1.f * deltaTime * self->vel.y);
 
+    self->deltaTime = deltaTime;
+
     switch (self->type) {
     case TYPE_PLAYER:
         self->pos.x = clamp(0, self->pos.x, WINDOW_WIDTH - self->width);

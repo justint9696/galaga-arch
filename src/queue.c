@@ -32,6 +32,7 @@ void enqueue(Queue *q, void *item) {
 
 void dequeue(Queue *q) {
     assert(q->size > 0);
+    free(queue_front(q));
     q->index = (++q->index % MAX_QUEUE);
     --q->size;
 }

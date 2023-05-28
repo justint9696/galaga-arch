@@ -3,6 +3,8 @@
 #include "inc/linked_list.h"
 #include "inc/path.h"
 #include "inc/player.h"
+#include "inc/route.h"
+#include "inc/time.h"
 #include "inc/util.h"
 
 #include <assert.h>
@@ -11,72 +13,58 @@ static int _count;
 static Enemy **_enemies;
 
 static inline Enemy *_Enemy_Init() {
-    Enemy *self = (Enemy *)malloc(sizeof(Enemy));
-    memset(self, 0, sizeof(Enemy));
+    Enemy *self = (Enemy *)calloc(1, sizeof(Enemy));
 
-    self->ent = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
-    self->state = STATE_IDLE;
+    self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
+    self->state = STATE_SPAWN;
 
     return self;
 }
 
-static void _Enemy_ResetPath(Enemy *self) {
-    self->ent->state = STATE_IDLE;
-    queue_free(&self->path);
-}
-
 static void _Enemy_ThinkPath(Enemy *self) {
-    path_s *path = (path_s *)malloc(sizeof(path_s));
-
     switch (self->state) {
     case STATE_IDLE:
-        path->dst = self->ent->pos;
-
-        if (self->ent->pos.x < WINDOW_WIDTH - self->ent->width)
-            path->dst.x = WINDOW_WIDTH - self->ent->width;
+        if (Time_Passed(self->tick) > ENEMY_IDLE_TIME)
+            Route_Swoop(&self->path, self->entity->pos);
         else
-            path->dst.x = 0.f;
-
-        Path_Linear(self->ent, self->ent->pos, path->dst, ENEMY_VELOCITY);
-
-        path->type = PATH_LINEAR;
+            Route_Idle(&self->path, self->entity->pos);
         break;
     case STATE_SPAWN:
-        path->org = self->ent->pos;
-
-        path->dst.x = ENEMY_SPAWN_X;
-        path->dst.y = ENEMY_SPAWN_Y;
-            
-        Path_Linear(self->ent, path->org, path->dst, ENEMY_VELOCITY);
-
-        path->type = PATH_LINEAR;
+        Route_Spawn(&self->path, self->entity->pos);
+        break;
+    default:
         break;
     }
 
-    printf("path queued\n");
-    enqueue(&self->path, (void *)path);
-    self->ent->state = STATE_TRAVEL;
+    self->entity->state = STATE_TRAVEL;
+    printf("path queued. items remaining in queue: %li.\n", self->path.size);
 }
 
-static void _Enemy_TravelPath(Enemy *self) {
+static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
     path_s *path = (path_s *)queue_front(&self->path);
     assert(path);
 
     switch (path->type) {
     case PATH_LINEAR:
-        Path_Linear(self->ent, path->org, path->dst, ENEMY_VELOCITY);
+        Path_Linear(self->entity, path);
         break;
     case PATH_CIRCULAR:
-        Path_Circular(self->ent, path->org, path->dst, ENEMY_VELOCITY);
+        Path_Circular(self->entity, path);
         break;
     case PATH_BEZIER:
-        Path_Bezier(self->ent, path->org, path->dst, ENEMY_VELOCITY);
+        Path_Bezier(self->entity, path);
         break;
     }
 
-    if (Distance(self->ent->pos, path->dst) < .5f) {
+    if (Distance(self->entity->pos, path->dst) < 5.f) {
         dequeue(&self->path);
-        self->state = STATE_IDLE;
+
+        if (!self->path.size) {
+            self->tick = self->state == STATE_SPAWN ? tick : 0;
+            self->state = STATE_IDLE;
+        }
+
+        printf("path dequeued. items remaining in queue: %li.\n", self->path.size);
     }
 }
 
@@ -85,7 +73,7 @@ static void _Enemy_ThinkAttack(Enemy *self, uint64_t tick) {
         pos = Player_Position(),
         vel = Player_Velocity();
 
-    Entity *ent = self->ent;
+    Entity *ent = self->entity;
 
     const float
         dx = (pos.x - ent->pos.x),
@@ -126,7 +114,7 @@ static void _Enemy_Think(Enemy *self, uint64_t tick) {
         self->state = p_state;
         break;
     case STATE_TRAVEL:
-        _Enemy_TravelPath(self);
+        _Enemy_TravelPath(self, tick);
         break;
     default:
         break;
@@ -136,12 +124,12 @@ static void _Enemy_Think(Enemy *self, uint64_t tick) {
 void Enemy_InitAll(uint64_t tick) {
     Enemy *enemy;
     _count = Level_EnemyCount();
-    _enemies = (Entity **)malloc(sizeof(Entity *) * _count);
+    _enemies = (Enemy **)malloc(sizeof(Enemy *) * _count);
     
     for (int i = 0; i < _count; i++) {
         enemy = _Enemy_Init(tick);
         enemy->state = ENEMY_START_STATE;
-        enemy->ent->tick = tick;
+        enemy->entity->tick = tick;
         _enemies[i] = enemy;
     }
 
@@ -154,7 +142,7 @@ void Enemy_UpdateAll(uint64_t tick) {
     for (int i = 0; i < _count; i++) {
         enemy = _enemies[i];
 
-        if (!enemy || !Entity_IsAlive(enemy->ent))
+        if (!enemy || !Entity_IsAlive(enemy->entity))
             continue;
 
         _Enemy_Think(enemy, tick);

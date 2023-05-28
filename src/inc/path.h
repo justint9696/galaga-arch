@@ -16,15 +16,14 @@ typedef enum {
 } ptype_t;
 
 typedef struct {
-    float time;
+    float angle, time, speed;
     ptype_t type;
     vec2 org, dst;
 } path_s;
 
-void Path_Circular(Entity *entity, vec2 org, vec2 dst, float speed);
-
-void Path_Linear(Entity *entity, vec2 org, vec2 dst, float speed);
-
-void Path_Bezier(Entity *, vec2, vec2, float);
+path_s *Path_Init();
+void Path_Linear(Entity *, path_s *);
+void Path_Circular(Entity *, path_s *);
+void Path_Bezier(Entity *, path_s *);
 
 #endif

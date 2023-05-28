@@ -6,6 +6,8 @@
 #include "queue.h"
 #include "window.h"
 
+#include <stdint.h>
+
 #define ENEMY_TEXTURE       "assets/images/enemy01.png"
 #define ENEMY_START_STATE   STATE_SPAWN
 #define ENEMY_SPAWN_HEALTH  1.f
@@ -13,19 +15,22 @@
 #define ENEMY_HEIGHT        101.3f
 #define ENEMY_SPAWN_X       ((WINDOW_WIDTH - ENEMY_WIDTH) / 2)
 #define ENEMY_SPAWN_Y       (WINDOW_HEIGHT - ENEMY_HEIGHT - 50.f)
-#define ENEMY_VELOCITY      0.25f
+#define ENEMY_VELOCITY      0.4f
+#define ENEMY_IDLE_TIME     1500    
 
 typedef enum {
     STATE_IDLE,
     STATE_SPAWN,
     STATE_TRAVEL,
+    STATE_SWOOP,
     STATE_ATTACK,
 } estate_t;
 
 typedef struct {
     estate_t state;
+    uint64_t tick;
     Queue path;
-    Entity *ent;
+    Entity *entity;
 } Enemy;
 
 void Enemy_InitAll(uint64_t tick);
