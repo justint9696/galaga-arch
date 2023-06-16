@@ -27,6 +27,20 @@ static inline float _radius(vec2 point, vec2 midpoint) {
     return sqrtf(powf(point.x - midpoint.x, 2) + powf(point.y - midpoint.y, 2));
 }
 
+/*static inline void _angle(v2 p, v2 m) {
+    pv(p);
+
+    if (p.x > m.x && p.y >= m.y)
+        printf("q1\n");
+    else if (p.x <= m.x && p.y > m.y)
+        printf("q2\n");
+    else if (p.x < m.x && p.y <= m.y)
+        printf("q3\n");
+    else
+        printf("q4\n");
+}
+*/
+
 /**
  *  Calculates the angle in radians of a point on a circle in reference to its center.
  *  @param point        a point on a circle
@@ -34,17 +48,17 @@ static inline float _radius(vec2 point, vec2 midpoint) {
  */
 static inline float _angle(vec2 point, vec2 midpoint) {
     float 
-        dx = point.x - midpoint.x,
-        dy = point.y - midpoint.y;
+        dx = fabs(midpoint.x - point.x),
+        dy = fabs(midpoint.y - point.y);
 
     // offset based on the quadrant in reference to the midpoint.
-    if (dx >= 0 && dy >= 0) 
+    if (point.x >= midpoint.x && point.y >= midpoint.y)
         return atan(dy / dx); 
-    else if (dx < 0 && dy >= 0)
+    else if (point.x <= midpoint.x && point.y > midpoint.y)
         return atan(dy / dx) + (M_PI / 2.f);
-    else if (dx < 0 && dy < 0) 
+    else if (point.x <= midpoint.x && point.y <= midpoint.y)
         return atan(dy / dx) + M_PI;
-    return atan(dy / dx) + ((3 * M_PI) / 2.f);
+    return atan(dy / dx) + ((3 * M_PI) / 2.f);  // quadrant 4
 }
 
 /**
