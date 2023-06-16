@@ -23,8 +23,7 @@ static team_t _Entity_GetOtherTeam(const team_t team) {
 }
 
 static inline Entity *_Entity_Alloc() {
-    Entity *self = (Entity *)malloc(sizeof(Entity));
-    memset(self, 0, sizeof(Entity));
+    Entity *self = (Entity *)calloc(1, sizeof(Entity));
     self->id = _num_ent++;
 
     LinkedList_Add(_entities, (void *)self);
@@ -44,10 +43,10 @@ static inline void _Entity_Free(Entity *self) {
     LinkedList_Remove(&_entities, (void *)self);
     free(self);
 
-    _num_ent--;
+    --_num_ent;
 
     #ifdef DEBUG
-        printf("entity %i released. number of entities: %i\n", id, --_num_ent);
+        printf("entity %i released. number of entities: %i\n", id, _num_ent);
     #endif
 }
 
@@ -66,9 +65,8 @@ static inline void _Entity_Render_Texure(const Entity *self) {
 
 static LinkedList *_Entity_FilterByAll(const team_t team, const type_t type) {
     Entity *entity;
-    LinkedList *head = (LinkedList *)malloc(sizeof(LinkedList)), *tmp = _entities;
-
-    memset(head, 0, sizeof(LinkedList));
+    LinkedList *head = LinkedList_Init(),
+               *tmp = head;
 
     while (tmp) {
         entity = (Entity *)tmp->item;
@@ -77,7 +75,7 @@ static LinkedList *_Entity_FilterByAll(const team_t team, const type_t type) {
         if ((team == -1 && entity->type == type) ||
                 (type == -1 && entity->team == team) ||
                 (entity->team == team && entity->type == type))
-            LinkedList_Add(head, tmp->item);
+            LinkedList_Add(head, (void *)tmp->item);
 
         tmp = tmp->next;
     }
@@ -114,7 +112,8 @@ static void _Entity_Collide(Entity *e1, Entity *e2) {
 
 static inline void _Entity_CollisionHandler(Entity *self) {
     Entity *entity;
-    LinkedList *tmp = _Entity_FilterByAll(_Entity_GetOtherTeam(self->team), -1);
+    LinkedList *head = _Entity_FilterByAll(_Entity_GetOtherTeam(self->team), -1);
+    LinkedList *tmp = head;
 
     while (tmp && tmp->item) {
         entity = (Entity *)tmp->item;
@@ -141,7 +140,7 @@ static inline void _Entity_CollisionHandler(Entity *self) {
         tmp = tmp->next;
     }
 
-    free(tmp);
+    free(head);
 }
 
 static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
@@ -170,7 +169,7 @@ static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
         //printf("\nentity debug information: \n\t- id: %i \n\t- origin (%.2f, %.2f) \n\t- velocity: (%.2f, %.2f)\n", self->id, self->pos.x, self->pos.y, self->vel.x, self->vel.y);
     #endif
     
-    _Entity_CollisionHandler(self);
+    // _Entity_CollisionHandler(self);
     ((void(*)(Entity *))self->render)(self);
 }
 
@@ -182,10 +181,10 @@ static inline vec2 _Entity_Midpoint(const Entity *self) {
 }
 
 void Entity_InitAll() {
-	_entities = (LinkedList *)malloc(sizeof(LinkedList));
-	memset(_entities, 0, sizeof(LinkedList));
-	
+    _entities = LinkedList_Init();	
+
     assert(_entities);
+
 	printf("Entity list initialized.\n");
 }
 
@@ -203,6 +202,7 @@ void Entity_UpdateAll(uint64_t deltaTime) {
 
         tmp = tmp->next;
     }
+
     Hud_AddText("Entities: %i", _num_ent);
 }
 

@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+LinkedList *LinkedList_Init() {
+    return (LinkedList *)calloc(1, sizeof(LinkedList));
+}
+
 void LinkedList_Add(LinkedList *head, void *item) {
 	if (!head->item)
 		head->item = item;
