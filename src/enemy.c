@@ -11,17 +11,17 @@
 
 #include <assert.h>
 
-static int _count;
-static Enemy **_enemies;
+static int _count = 0;
+static LinkedList *_enemies;
 
 static inline Enemy *_Enemy_Init() {
     Enemy *self = (Enemy *)calloc(1, sizeof(Enemy));
 
-    self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
-    self->state = STATE_SPAWN;
+    // self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
+    // self->state = STATE_SPAWN;
    
-    // self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, ENEMY_SPAWN_X, ENEMY_SPAWN_Y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
-    // self->state = STATE_IDLE;
+    self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, ENEMY_SPAWN_X, ENEMY_SPAWN_Y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
+    self->state = STATE_IDLE;
 
     return self;
 }
@@ -59,21 +59,23 @@ static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
         break;
     }
 
+    float distance = Distance(self->entity->pos, path->dst);
     Hud_AddText("Path: %s",
             path->type == PATH_LINEAR ? "Linear" : 
             path->type == PATH_BEZIER ? "Bezier" : "Circular");
 
     Hud_AddText("Queue: %i", self->path.size);
+    Hud_AddText("Distance: %.2f", distance);
 
-    if (Distance(self->entity->pos, path->dst) < 5.f) {
-        dequeue(&self->path);
-        
-        Entity_SetVelocity(self->entity, (vec2) { 0.f, 0.f });
+    if (distance < 15.f) {
         Entity_SetPosition(self->entity, path->dst);
+        Entity_SetVelocity(self->entity, (vec2) { 0.f, 0.f });
 
+        dequeue(&self->path);
         if (!self->path.size) {
-            self->tick = self->state == STATE_SPAWN ? tick : 0;
             self->state = STATE_IDLE;
+            self->tick = tick;
+            queue_free(&self->path);
         }
 
         printf("path dequeued. items remaining in queue: %li.\n", self->path.size);
@@ -118,22 +120,23 @@ static void _Enemy_Think(Enemy *self, uint64_t tick) {
     estate_t p_state = self->state;
     // _Enemy_ThinkAttack(self, tick);
     
-    switch (self->state) {
-    case STATE_IDLE:
-    case STATE_SPAWN:
-        _Enemy_ThinkPath(self);
-        break;
-    case STATE_ATTACK:
-        // return to state prior attack
-        self->state = p_state;
-        break;
-    case STATE_TRAVEL:
-        _Enemy_TravelPath(self, tick);
-        break;
-    default:
-        break;
-    }    
-
+    if (Time_Passed(self->tick) > 1000.f) {
+        switch (self->state) {
+            case STATE_IDLE:
+            case STATE_SPAWN:
+                _Enemy_ThinkPath(self);
+                break;
+            case STATE_ATTACK:
+                // return to state prior attack
+                self->state = p_state;
+                break;
+            case STATE_TRAVEL:
+                _Enemy_TravelPath(self, tick);
+                break;
+            default:
+                break;
+        }    
+    }
     Hud_AddText("State: %s", 
             self->state == STATE_IDLE ? "Idle" :
             self->state == STATE_TRAVEL ? "Travel" :
@@ -143,13 +146,14 @@ static void _Enemy_Think(Enemy *self, uint64_t tick) {
 
 void Enemy_InitAll(uint64_t tick) {
     Enemy *enemy;
-    _count = Level_EnemyCount();
-    _enemies = (Enemy **)malloc(sizeof(Enemy *) * _count);
+    int count = Level_EnemyCount();
+
+    _enemies = LinkedList_Init();
     
-    for (int i = 0; i < _count; i++) {
+    for (int i = 0; i < count; i++) {
         enemy = _Enemy_Init();
         enemy->entity->tick = tick;
-        _enemies[i] = enemy;
+        LinkedList_Add(_enemies, (void *)enemy);
     }
 
     printf("Enemies initialized.\n");
@@ -157,13 +161,14 @@ void Enemy_InitAll(uint64_t tick) {
 
 void Enemy_UpdateAll(uint64_t tick) {
     Enemy *enemy;
+    LinkedList *tmp = _enemies;
     
-    for (int i = 0; i < _count; i++) {
-        enemy = _enemies[i];
-
-        if (!enemy)
-            continue;
+    while (tmp) {
+        enemy = (Enemy *)tmp->item;
+        assert(enemy && Entity_IsAlive(enemy->entity));
 
         _Enemy_Think(enemy, tick);
+
+        tmp = tmp->next;
     }
 }

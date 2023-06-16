@@ -5,9 +5,7 @@
 #include <string.h>
 
 Queue *queue_init() {
-    Queue *q = (Queue *)malloc(sizeof(Queue));
-    memset(q, 0, sizeof(Queue));
-    return q;
+    return (Queue *)calloc(1, sizeof(Queue));
 }
 
 void queue_free(Queue *q) {
