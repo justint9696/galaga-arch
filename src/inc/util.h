@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-// #define DEBUG
+#define DEBUG
 #define clamp(mn, x, mx) ((mn > x) ? mn : (mx < x) ? mx : x)
 
 #define rgba(c) ((color_s) {\

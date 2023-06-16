@@ -13,13 +13,15 @@
 
 static float _fps;
 static uint64_t _frame_start, _frame_end, _frame_time;
-static uint64_t _time, _ticks, _delta_time;
+static uint64_t _time, _frames, _delta_time, _start;
+
+static inline uint64_t _Count_Ticks() {
+    return Get_Tick() - _start;
+}
 
 static inline void _Calculate_FPS() {
-   /*if (_frame_time) {
-       _fps = (1000.f / (float)_frame_time);
-       printf("FPS: %.2f\n", _fps);
-   }*/
+    _fps = _frames / (_Count_Ticks() / 1000.f);
+    Hud_AddText("FPS: %.2f", _fps);
 }
 
 static inline void _Game_Tick() {
@@ -31,7 +33,7 @@ static inline void _Game_Tick() {
     _frame_end = tick;
     _frame_time = _frame_end - _frame_start;
 
-    _ticks++;
+    _frames++;
 }
 
 bool Game_IsRunning() {
@@ -40,6 +42,8 @@ bool Game_IsRunning() {
 
 void Game_Init() {
     // store current tick
+    _frames = 0;
+    _start = Get_Tick();
     _time = Get_Tick();
 
     // prepare level
@@ -81,7 +85,9 @@ void Game_Main() {
     // game tick
     _Game_Tick();
 
-    #ifdef DEBUG
-        // _Calculate_FPS();
-    #endif
+    int delay = (1000.f / (FPS_TARGET - _frame_time));
+    delay = delay > 0 ? delay : 0;
+    SDL_Delay(delay); 
+
+    _Calculate_FPS();
 }

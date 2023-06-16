@@ -1,4 +1,6 @@
 #include "inc/enemy.h"
+#include "inc/entity.h"
+#include "inc/hud.h"
 #include "inc/level.h"
 #include "inc/linked_list.h"
 #include "inc/path.h"
@@ -17,6 +19,9 @@ static inline Enemy *_Enemy_Init() {
 
     self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
     self->state = STATE_SPAWN;
+   
+    // self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, ENEMY_SPAWN_X, ENEMY_SPAWN_Y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
+    // self->state = STATE_IDLE;
 
     return self;
 }
@@ -24,10 +29,7 @@ static inline Enemy *_Enemy_Init() {
 static void _Enemy_ThinkPath(Enemy *self) {
     switch (self->state) {
     case STATE_IDLE:
-        if (Time_Passed(self->tick) > ENEMY_IDLE_TIME)
-            Route_Swoop(&self->path, self->entity->pos);
-        else
-            Route_Idle(&self->path, self->entity->pos);
+        Route_Swoop(&self->path, self->entity->pos);
         break;
     case STATE_SPAWN:
         Route_Spawn(&self->path, self->entity->pos);
@@ -36,8 +38,9 @@ static void _Enemy_ThinkPath(Enemy *self) {
         break;
     }
 
-    self->entity->state = STATE_TRAVEL;
+    self->state = STATE_TRAVEL;
     printf("path queued. items remaining in queue: %li.\n", self->path.size);
+
 }
 
 static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
@@ -56,8 +59,17 @@ static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
         break;
     }
 
+    Hud_AddText("Path: %s",
+            path->type == PATH_LINEAR ? "Linear" : 
+            path->type == PATH_BEZIER ? "Bezier" : "Circular");
+
+    Hud_AddText("Queue: %i", self->path.size);
+
     if (Distance(self->entity->pos, path->dst) < 5.f) {
         dequeue(&self->path);
+        
+        Entity_SetVelocity(self->entity, (vec2) { 0.f, 0.f });
+        Entity_SetPosition(self->entity, path->dst);
 
         if (!self->path.size) {
             self->tick = self->state == STATE_SPAWN ? tick : 0;
@@ -81,9 +93,10 @@ static void _Enemy_ThinkAttack(Enemy *self, uint64_t tick) {
 
     // player is not moving
     if (vel.x == 0.f) {
-        if (fabs(dx) < 5.f)
+        if (fabs(dx) < 5.f) {
             Entity_Fire(ent, tick);
-
+            self->state = STATE_ATTACK;
+        }
         return;
     }
 
@@ -95,19 +108,20 @@ static void _Enemy_ThinkAttack(Enemy *self, uint64_t tick) {
         tx = fabs(dx / PLAYER_VELOCITY),
         ty = fabs(dy / BULLET_VELOCITY);
 
-   if (fabs(dx) < 30.f || (fabs(tx - ty) < 1.f))
+    if (fabs(dx) < 30.f || (fabs(tx - ty) < 1.f)) {
         Entity_Fire(ent, tick);
+        self->state = STATE_ATTACK;
+    }
 }
 
 static void _Enemy_Think(Enemy *self, uint64_t tick) {
-    state_t p_state = self->state;
-    _Enemy_ThinkAttack(self, tick);
+    estate_t p_state = self->state;
+    // _Enemy_ThinkAttack(self, tick);
     
     switch (self->state) {
     case STATE_IDLE:
     case STATE_SPAWN:
         _Enemy_ThinkPath(self);
-        self->state = STATE_TRAVEL;
         break;
     case STATE_ATTACK:
         // return to state prior attack
@@ -119,6 +133,12 @@ static void _Enemy_Think(Enemy *self, uint64_t tick) {
     default:
         break;
     }    
+
+    Hud_AddText("State: %s", 
+            self->state == STATE_IDLE ? "Idle" :
+            self->state == STATE_TRAVEL ? "Travel" :
+            self->state == STATE_SPAWN ? "Spawn" : 
+            self->state == STATE_SWOOP ? "Swoop" : "Attack");
 }
 
 void Enemy_InitAll(uint64_t tick) {
@@ -127,8 +147,7 @@ void Enemy_InitAll(uint64_t tick) {
     _enemies = (Enemy **)malloc(sizeof(Enemy *) * _count);
     
     for (int i = 0; i < _count; i++) {
-        enemy = _Enemy_Init(tick);
-        enemy->state = ENEMY_START_STATE;
+        enemy = _Enemy_Init();
         enemy->entity->tick = tick;
         _enemies[i] = enemy;
     }
@@ -142,7 +161,7 @@ void Enemy_UpdateAll(uint64_t tick) {
     for (int i = 0; i < _count; i++) {
         enemy = _enemies[i];
 
-        if (!enemy || !Entity_IsAlive(enemy->entity))
+        if (!enemy)
             continue;
 
         _Enemy_Think(enemy, tick);

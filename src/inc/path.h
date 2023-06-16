@@ -6,8 +6,10 @@
 
 #include <math.h>
 
-#define DEG(rad) (rad * (180.f / M_PI)) 
-#define RAD(deg) (deg * (M_PI / 180.f))
+#define PI_2        (M_PI * 2)
+
+#define DEG(rad)    (rad * (180.f / M_PI)) 
+#define RAD(deg)    (deg * (M_PI / 180.f))
 
 typedef enum {
     PATH_LINEAR,
