@@ -2,6 +2,10 @@
 #include "inc/path.h"
 #include "inc/route.h"
 
+static inline vec2 _rear(Queue *q) {
+    return (*(path_s *)(queue_rear(q))).dst;
+}
+
 static inline void _Route_Start(Queue *q, vec2 org, vec2 dst, float speed, ptype_t type) {
     path_s *path = Path_Init();
     path->org = org;
@@ -13,15 +17,11 @@ static inline void _Route_Start(Queue *q, vec2 org, vec2 dst, float speed, ptype
 
 static inline void _Route_Append(Queue *q, vec2 dst, float speed, ptype_t type) {
     path_s *path = Path_Init();
-    path->org = (*(path_s *)(queue_rear(q))).dst;
+    path->org = _rear(q);
     path->dst = dst;
     path->type = type;
     path->speed = speed;
     enqueue(q, path);
-}
-
-static inline vec2 _rear(Queue *q) {
-    return (*(path_s *)(queue_rear(q))).dst;
 }
 
 inline void Route_Spawn(Queue *q, vec2 org) {
@@ -47,14 +47,14 @@ inline void Route_Idle(Queue *q, vec2 org) {
 }
 
 inline void Route_Swoop(Queue *q, vec2 org) {
-    float speed = 0.25;
+    float speed = 0.25f;
     float radius = 100.f;
-    _Route_Start(q, org, (vec2) { org.x, org.y + (radius) }, -speed, PATH_CIRCULAR);
-    _Route_Append(q, org, -speed, PATH_CIRCULAR);
-    _Route_Append(q, (vec2) { org.x - (1 * radius), org.y - (1.5 * radius)}, speed, PATH_CIRCULAR);
-    _Route_Append(q, (vec2) { org.x + (1 * radius), org.y - (3 * radius)}, speed, PATH_CIRCULAR);
+    _Route_Start(q, org, (vec2) { org.x, org.y + (radius) }, speed, PATH_CIRCULAR);
+    _Route_Append(q, org, speed, PATH_CIRCULAR);
+    _Route_Append(q, (vec2) { org.x - (2.f * radius), org.y - (1.5 * radius) }, speed, PATH_BEZIER);
+    _Route_Append(q, (vec2) { org.x + (2.f * radius), org.y - (3.0 * radius) }, speed, PATH_BEZIER);
 
     // keep here
-    _Route_Append(q, org, speed, PATH_CIRCULAR);
+    _Route_Append(q, org, speed, PATH_BEZIER);
 }
 

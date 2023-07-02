@@ -21,6 +21,7 @@ typedef struct {
     float angle, time, speed;
     ptype_t type;
     vec2 org, dst;
+    bool complete;
 } path_s;
 
 path_s *Path_Init();

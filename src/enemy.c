@@ -9,6 +9,7 @@
 #include "inc/time.h"
 #include "inc/util.h"
 
+#include <SDL2/SDL_timer.h>
 #include <assert.h>
 
 static int _count = 0;
@@ -67,7 +68,7 @@ static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
     Hud_AddText("Queue: %i", self->path.size);
     Hud_AddText("Distance: %.2f", distance);
 
-    if (distance < 15.f) {
+    if (path->complete) {
         Entity_SetPosition(self->entity, path->dst);
         Entity_SetVelocity(self->entity, (vec2) { 0.f, 0.f });
 
@@ -93,8 +94,7 @@ static void _Enemy_ThinkAttack(Enemy *self, uint64_t tick) {
         dx = (pos.x - ent->pos.x),
         dy = fabs(pos.y - ent->pos.y);
 
-    // player is not moving
-    if (vel.x == 0.f) {
+    if (!Player_IsMoving()) {
         if (fabs(dx) < 5.f) {
             Entity_Fire(ent, tick);
             self->state = STATE_ATTACK;
@@ -122,21 +122,22 @@ static void _Enemy_Think(Enemy *self, uint64_t tick) {
     
     if (Time_Passed(self->tick) > 1000.f) {
         switch (self->state) {
-            case STATE_IDLE:
-            case STATE_SPAWN:
-                _Enemy_ThinkPath(self);
-                break;
-            case STATE_ATTACK:
-                // return to state prior attack
-                self->state = p_state;
-                break;
-            case STATE_TRAVEL:
-                _Enemy_TravelPath(self, tick);
-                break;
-            default:
-                break;
+        case STATE_IDLE:
+        case STATE_SPAWN:
+            _Enemy_ThinkPath(self);
+            break;
+        case STATE_ATTACK:
+            // return to state prior attack
+            self->state = p_state;
+            break;
+        case STATE_TRAVEL:
+            _Enemy_TravelPath(self, tick);
+            break;
+        default:
+            break;
         }    
     }
+
     Hud_AddText("State: %s", 
             self->state == STATE_IDLE ? "Idle" :
             self->state == STATE_TRAVEL ? "Travel" :
