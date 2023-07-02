@@ -21,13 +21,12 @@ typedef struct {
 } Player;
 
 bool Player_IsAlive();
+bool Player_IsMoving();
 
 vec2 Player_Position();
-
 vec2 Player_Velocity();
 
 void Player_Init(uint64_t tick);
-
 void Player_Update(uint64_t tick);
 
 #endif

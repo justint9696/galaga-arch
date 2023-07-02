@@ -9,6 +9,11 @@ bool Player_IsAlive() {
     return Entity_IsAlive(_self.entity);
 }
 
+bool Player_IsMoving() {
+    vec2 vel = Player_Velocity();
+    return (vel.x > 0 || vel.y > 0);
+}
+
 vec2 Player_Position() {
     return _self.entity->pos;
 }
