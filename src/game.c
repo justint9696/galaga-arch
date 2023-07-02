@@ -1,6 +1,7 @@
 #include "inc/game.h"
 #include "inc/entity.h"
 #include "inc/enemy.h"
+#include "inc/fps.h"
 #include "inc/level.h"
 #include "inc/hud.h"
 #include "inc/player.h"
