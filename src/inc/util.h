@@ -17,5 +17,6 @@
     })
 
 float Distance(const vec2 pt1, const vec2 pt2);
+float Closer(const vec2 pt1, const vec2 pt2, const vec2 dst);
 
 #endif
