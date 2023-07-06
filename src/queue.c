@@ -25,7 +25,7 @@ void *queue_rear(const Queue *q) {
 
 void enqueue(Queue *q, void *item) {
     assert(q->size < MAX_QUEUE);
-    q->queue[q->index + q->size++] = item;
+    q->queue[(q->index + q->size++) % MAX_QUEUE] = item;
 }
 
 void dequeue(Queue *q) {
