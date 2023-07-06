@@ -25,7 +25,7 @@ static inline float _radius(vec2 point, vec2 midpoint) {
 }
 
 /**
- *  Calculates the angle in radians of a point on a circle in reference to its center.
+ *  Calculates the angle in degrees of a point on a circle in reference to its center.
  *  @param point        a point on a circle
  *  @param midpoint     midpoint of a circle
  */
@@ -35,13 +35,14 @@ static inline float _angle(vec2 point, vec2 midpoint) {
         dy = fabs(midpoint.y - point.y);
 
     // offset based on the quadrant in reference to the midpoint.
+    float angle = DEG(atan2(dy, dx));
     if (point.x >= midpoint.x && point.y >= midpoint.y)
-        return atan(dy / dx); 
+        return angle; 
     else if (point.x <= midpoint.x && point.y > midpoint.y)
-        return atan(dy / dx) + (M_PI / 2.f);
+        return angle + DEG(M_PI / 2.f);
     else if (point.x <= midpoint.x && point.y <= midpoint.y)
-        return atan(dy / dx) + M_PI;
-    return atan(dy / dx) + ((3 * M_PI) / 2.f);  // quadrant 4
+        return angle + DEG(M_PI);
+    return angle + DEG((3 * M_PI) / 2.f);  // quadrant 4
 }
 
 /**
@@ -54,8 +55,9 @@ static inline float _arc_length(vec2 point1, vec2 point2) {
     const float radius = _radius(point1, midpoint);
     const float angle1 = _angle(point1, midpoint);
     const float angle2 = _angle(point2, midpoint);
+    const float d_angle = fabs(angle1 - angle2);
 
-    return ((PI_2 * radius) / 360.f) * fabs(angle1 - angle2);
+    return (PI_2 * radius) * (d_angle / 360.f);
 }
 
 /**
@@ -80,16 +82,12 @@ static inline vec2 _bezier_path(vec2 src, vec2 mid, vec2 dst, float time) {
 }
 
 /**
- * Determines a midpoint on a bezier curve, ensuring an outside point.
+ * Determines a midpoint on a bezier curve.
  * @param org       starting coordinates
  * @param dst       desination coordinates
  */
 static inline vec2 _bezier_midpoint(vec2 org, vec2 dst, float speed) {
-    if ((org.x <= dst.x && org.y >= dst.y) ||
-            (org.x >= dst.x && org.y <= dst.y))
-        return (vec2) { dst.x, org.y };
-    else 
-        return (vec2) { org.x, dst.y };
+    return (speed > 0.f ? (vec2) { dst.x, org.y } : (vec2) { org.x, dst.y });
 }
 
 inline path_s *Path_Init() {
@@ -105,7 +103,7 @@ inline void Path_Linear(Entity *entity, path_s *path) {
         dx = dst.x - org.x,
         dy = dst.y - org.y;
 
-    float angle = atan(dy / dx);
+    float angle = fabs(atan2(dy, dx));
 
     float 
         sign_x = dx < 0 ? -1 : 1,
@@ -116,15 +114,18 @@ inline void Path_Linear(Entity *entity, path_s *path) {
         sign_y * path->speed * sin(angle),
     };
 
-    if (Closer(entity->pos, (vec2) { entity->pos.x + vel.x, entity->pos.y + vel.y }, dst)) {
-        path->complete = true;
+    Hud_AddText("Angle: %.2f", angle);
+
+    path->complete = Closer(entity->pos, (vec2) { entity->pos.x + vel.x, entity->pos.y + vel.y }, dst);
+
+    if (path->complete) 
         return;
-    }
 
     if (vel.x == entity->vel.x && vel.y == entity->vel.y) 
         return;
 
     Entity_SetVelocity(entity, vel);
+    Entity_SetRotation(entity, 0.f);
 }
 
 inline void Path_Circular(Entity *entity, path_s *path) {
@@ -135,29 +136,34 @@ inline void Path_Circular(Entity *entity, path_s *path) {
     vec2 midpoint = _midpoint(org, dst);
     float radius = _radius(org, midpoint);
     float distance = _arc_length(org, dst);
-    float d_theta = fabs(_angle(org, midpoint) - _angle(dst, midpoint));
 
     if (!path->angle)
         path->angle = _angle(entity->pos, midpoint);
 
-    // path->angle += RAD(path->speed * (entity->deltaTime ? entity->deltaTime : 1.f));
-    // v=d/t d=tv t=d/v
-    float time = (distance / path->speed);
-    float speed = (d_theta / time);
+    float time = ((distance / path->speed) / 1000.f);
+    float speed = (PI_2 / time);
 
     path->angle += speed;
 
     vec2 pos = {
-        (midpoint.x + (radius * cos(path->angle))),
-        (midpoint.y + (radius * sin(path->angle)))
+        (midpoint.x + (radius * cos(RAD(path->angle)))),
+        (midpoint.y + (radius * sin(RAD(path->angle))))
     };
 
-    if (Closer(entity->pos, pos, dst)) {
-        path->complete = true;
+    path->complete = Closer(entity->pos, pos, dst);
+
+    if (path->complete) 
         return;
-    }
+
+    vec2 vel = {
+        (pos.x - entity->pos.x),
+        (pos.y - entity->pos.y)
+    };
+
+    float dir = 90.f - DEG(atan2(vel.y, vel.x));
 
     Entity_SetPosition(entity, pos);
+    Entity_SetRotation(entity, dir);
 }
 
 inline void Path_Bezier(Entity *entity, path_s *path) {
@@ -167,15 +173,24 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
 
     // TODO: get actual distance and time estimate (if possible) but approximation works
     float distance = Distance(org, dst);
-    path->time += (1.f / (distance / (path->speed * (entity->deltaTime ? entity->deltaTime : 1.f))));
+    float time = ((distance / fabs(path->speed)) / 1000.f);
+    path->time += (1.f / (time * (entity->deltaTime ? entity->deltaTime : 1.f)));
 
     vec2 midpoint = _bezier_midpoint(org, dst, path->speed);
     vec2 pos = _bezier_path(org, midpoint, dst, path->time);
 
-    if (Closer(entity->pos, pos, dst)) {
-        path->complete = true;
+    path->complete = Closer(entity->pos, pos, dst);
+
+    if (path->complete) 
         return;
-    }
+
+    vec2 vel = {
+        (pos.x - entity->pos.x),
+        (pos.y - entity->pos.y)
+    };
+
+    float dir = 90.f - DEG(atan2(vel.y, vel.x));
 
     Entity_SetPosition(entity, pos);
+    Entity_SetRotation(entity, dir);
 }

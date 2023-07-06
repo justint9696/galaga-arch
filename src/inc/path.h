@@ -19,6 +19,7 @@ typedef enum {
 
 typedef struct {
     float angle, time, speed;
+    uint64_t tick;
     ptype_t type;
     vec2 org, dst;
     bool complete;
