@@ -35,7 +35,7 @@ typedef enum {
 
 typedef struct {
     int id;
-    float health;
+    float health, rotation;
     type_t type;
     team_t team;
     state_t state;
@@ -58,6 +58,8 @@ void Entity_UpdateAll(uint64_t deltaTime);
 void Entity_SetPosition(Entity *self, vec2 pos);
 
 void Entity_SetVelocity(Entity *self, vec2 vel);
+
+void Entity_SetRotation(Entity *self, float angle);
 
 void Entity_Fire(Entity *self, uint64_t tick);
 

@@ -60,13 +60,13 @@ static inline void _Entity_Render_Rect(const Entity *self) {
 }
 
 static inline void _Entity_Render_Texure(const Entity *self) {
-    DrawTexture(self->texture, round(self->pos.x), round(self->pos.y), self->width, self->height);
+    DrawTexture(self->texture, round(self->pos.x), round(self->pos.y), self->width, self->height, self->rotation);
 }
 
 static LinkedList *_Entity_FilterByAll(const team_t team, const type_t type) {
     Entity *entity;
     LinkedList *head = LinkedList_Init(),
-               *tmp = head;
+               *tmp = _entities;
 
     while (tmp) {
         entity = (Entity *)tmp->item;
@@ -169,7 +169,7 @@ static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
         //printf("\nentity debug information: \n\t- id: %i \n\t- origin (%.2f, %.2f) \n\t- velocity: (%.2f, %.2f)\n", self->id, self->pos.x, self->pos.y, self->vel.x, self->vel.y);
     #endif
     
-    // _Entity_CollisionHandler(self);
+    _Entity_CollisionHandler(self);
     ((void(*)(Entity *))self->render)(self);
 }
 
@@ -261,6 +261,14 @@ void Entity_SetVelocity(Entity *self, vec2 vel) {
 
     #ifdef DEBUG
         printf("entity %i's velocity updated to (%.2f, %.2f).\n", self->id, vel.x, vel.y);
+    #endif
+}
+
+void Entity_SetRotation(Entity *self, float angle) {
+    memcpy(&self->rotation, &angle, sizeof(float)); 
+
+    #ifdef DEBUG
+        printf("entity %i's rotation updated to %.2f\n", self->rotation);
     #endif
 }
 
