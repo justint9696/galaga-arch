@@ -48,7 +48,7 @@ void DrawRect(int x, int y, int width, int height, uint32_t color) {
     SDL_RenderFillRect(_renderer, &rect);
 }
 
-void DrawTexture(SDL_Texture *texture, int x, int y, int width, int height) {
+void DrawTexture(SDL_Texture *texture, int x, int y, int width, int height, float angle) {
     // make origin at bottom of screen
     y = WINDOW_HEIGHT - y - height;
 
@@ -59,7 +59,8 @@ void DrawTexture(SDL_Texture *texture, int x, int y, int width, int height) {
     dst.h = height;
 
     // SDL_QueryTexture(texture, NULL, NULL, &dst.w, &dst.h);
-    SDL_RenderCopy(_renderer, texture, NULL, &dst);
+    // SDL_RenderCopy(_renderer, texture, NULL, &dst);
+    SDL_RenderCopyEx(_renderer, texture, NULL, &dst, angle, NULL, false);
 }
 
 void DrawText(const char *text, int x, int y, uint32_t color) {
@@ -72,5 +73,5 @@ void DrawText(const char *text, int x, int y, uint32_t color) {
     const int width = surface->w, height = surface->h;
     SDL_FreeSurface(surface);
 
-    DrawTexture(texture, x, y, width, height);
+    DrawTexture(texture, x, y, width, height, 0.f);
 }

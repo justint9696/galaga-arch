@@ -15,7 +15,7 @@ void Renderer_Update();
 
 void DrawRect(int x, int y, int width, int height, uint32_t color);
 
-void DrawTexture(SDL_Texture *texture, int x, int y, int width, int height);
+void DrawTexture(SDL_Texture *texture, int x, int y, int width, int height, float angle);
 
 void DrawText(const char *text, int x, int y, uint32_t color);
 
