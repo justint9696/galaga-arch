@@ -12,29 +12,13 @@
 
 #include <SDL2/SDL.h>
 
-static float _fps;
-static uint64_t _frame_start, _frame_end, _frame_time;
-static uint64_t _time, _frames, _delta_time, _start;
-
-static inline uint64_t _Count_Ticks() {
-    return Get_Tick() - _start;
-}
-
-static inline void _Calculate_FPS() {
-    _fps = _frames / (_Count_Ticks() / 1000.f);
-    Hud_AddText("FPS: %.2f", _fps);
-}
+static uint64_t _time, _delta_time;
 
 static inline void _Game_Tick() {
     const uint64_t tick = Get_Tick();
 
     _delta_time = tick - _time;
     _time += _delta_time;
-    
-    _frame_end = tick;
-    _frame_time = _frame_end - _frame_start;
-
-    _frames++;
 }
 
 bool Game_IsRunning() {
@@ -42,10 +26,9 @@ bool Game_IsRunning() {
 }
 
 void Game_Init() {
-    // store current tick
-    _frames = 0;
-    _start = Get_Tick();
+    // prepare time
     _time = Get_Tick();
+    fps_init();
 
     // prepare level
     Level_Init();
@@ -61,8 +44,8 @@ void Game_Init() {
 }
 
 void Game_Main() {
-    // store current tick
-    _frame_start = Get_Tick();
+    // frame start
+    frame_start();
 
     // prepare renderer
     Renderer_Prepare();
@@ -85,10 +68,8 @@ void Game_Main() {
 
     // game tick
     _Game_Tick();
-
-    int delay = (1000.f / (FPS_TARGET - _frame_time));
-    delay = delay > 0 ? delay : 0;
-    SDL_Delay(delay); 
-
-    _Calculate_FPS();
+    frame_end();
+    
+    // frame delay
+    fps_limit();
 }
