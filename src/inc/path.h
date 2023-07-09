@@ -17,7 +17,14 @@ typedef enum {
     PATH_BEZIER,
 } ptype_t;
 
+typedef enum {
+    STATE_INACTIVE,
+    STATE_ONGOING,
+    STATE_COMPLETE,
+} pstate_t;
+
 typedef struct {
+    pstate_t state;
     float angle, time, speed;
     uint64_t tick;
     ptype_t type;

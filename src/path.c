@@ -114,7 +114,13 @@ inline void Path_Linear(Entity *entity, path_s *path) {
         sign_y * path->speed * sin(angle),
     };
 
-    Hud_AddText("Angle: %.2f", angle);
+    switch (path->state) {
+    case STATE_INACTIVE: 
+        path->state = STATE_ONGOING;
+        break;
+    default:
+        break;
+    }
 
     path->complete = Closer(entity->pos, (vec2) { entity->pos.x + vel.x, entity->pos.y + vel.y }, dst);
 
@@ -137,8 +143,14 @@ inline void Path_Circular(Entity *entity, path_s *path) {
     float radius = _radius(org, midpoint);
     float distance = _arc_length(org, dst);
 
-    if (!path->angle)
+    switch (path->state) {
+    case STATE_INACTIVE:
         path->angle = _angle(entity->pos, midpoint);
+        path->state = STATE_ONGOING;
+        break;
+    default:
+        break;
+    }
 
     float time = ((distance / path->speed) / 1000.f);
     float speed = (PI_2 / time);
@@ -151,6 +163,7 @@ inline void Path_Circular(Entity *entity, path_s *path) {
     };
 
     path->complete = Closer(entity->pos, pos, dst);
+    // path->complete = (_arc_length(entity->pos, dst) < _arc_length(pos, dst));
 
     if (path->complete) 
         return;
@@ -160,10 +173,10 @@ inline void Path_Circular(Entity *entity, path_s *path) {
         (pos.y - entity->pos.y)
     };
 
-    float dir = 90.f - DEG(atan2(vel.y, vel.x));
+    float direction = 90.f - DEG(atan2(vel.y, vel.x));
 
     Entity_SetPosition(entity, pos);
-    Entity_SetRotation(entity, dir);
+    Entity_SetRotation(entity, direction);
 }
 
 inline void Path_Bezier(Entity *entity, path_s *path) {
@@ -179,6 +192,14 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
     vec2 midpoint = _bezier_midpoint(org, dst, path->speed);
     vec2 pos = _bezier_path(org, midpoint, dst, path->time);
 
+    switch (path->state) {
+    case STATE_INACTIVE: 
+        path->state = STATE_ONGOING;
+        break;
+    default:
+        break;
+    }
+
     path->complete = Closer(entity->pos, pos, dst);
 
     if (path->complete) 
@@ -189,8 +210,8 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
         (pos.y - entity->pos.y)
     };
 
-    float dir = 90.f - DEG(atan2(vel.y, vel.x));
+    float direction = 90.f - DEG(atan2(vel.y, vel.x));
 
     Entity_SetPosition(entity, pos);
-    Entity_SetRotation(entity, dir);
+    Entity_SetRotation(entity, direction);
 }
