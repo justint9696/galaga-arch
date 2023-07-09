@@ -1,4 +1,5 @@
 #include "inc/app.h"
+#include "inc/fps.h"
 #include "inc/hud.h"
 #include "inc/render.h"
 #include "inc/window.h"
@@ -35,6 +36,10 @@ void Hud_Draw() {
     }
 
     _hud.count = 0;
+}
+
+void Hud_DrawFPS() {
+    Hud_AddText("FPS: %.2f", fps_get());
 }
 
 void Hud_AddText(const char *format, ...) {

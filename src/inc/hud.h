@@ -15,6 +15,8 @@ void Hud_Init();
 
 void Hud_Draw();
 
+void Hud_DrawFPS();
+
 void Hud_AddText(const char *format, ...);
 
 #endif
