@@ -7,7 +7,7 @@
 #define FRAME_DELAY     (1000.f / FPS_TARGET)
 
 typedef struct {
-    int frames;
+    int frames, time;
     uint64_t start, end;
 } fps_s;
 

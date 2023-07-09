@@ -28,6 +28,7 @@ bool Game_IsRunning() {
 void Game_Init() {
     // prepare time
     _time = Get_Tick();
+    Time_Init();
     fps_init();
 
     // prepare level
@@ -72,4 +73,7 @@ void Game_Main() {
     
     // frame delay
     fps_limit();
+
+    // draw fps
+    Hud_DrawFPS();
 }
