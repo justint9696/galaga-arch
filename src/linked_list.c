@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-LinkedList *LinkedList_Init() {
+inline LinkedList *LinkedList_Init() {
     return (LinkedList *)calloc(1, sizeof(LinkedList));
 }
 
@@ -17,8 +17,7 @@ void LinkedList_Add(LinkedList *head, void *item) {
 			tmp = tmp->next;
 		}
 
-		tmp->next = (LinkedList *)malloc(sizeof(LinkedList));
-		memset(tmp->next, 0, sizeof(LinkedList));
+		tmp->next = LinkedList_Init();
 		tmp->next->item = item;
 	}
 }
