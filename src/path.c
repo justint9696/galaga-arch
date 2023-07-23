@@ -103,15 +103,11 @@ inline void Path_Linear(Entity *entity, path_s *path) {
         dx = dst.x - org.x,
         dy = dst.y - org.y;
 
-    float angle = fabs(atan2(dy, dx));
-
-    float 
-        sign_x = dx < 0 ? -1 : 1,
-        sign_y = dy < 0 ? -1 : 1;
+    float angle = atan2(dy, dx);
 
     vec2 vel = {
-        sign_x * path->speed * cos(angle),
-        sign_y * path->speed * sin(angle),
+        fabs(path->speed) * cos(angle),
+        fabs(path->speed) * sin(angle),
     };
 
     switch (path->state) {
@@ -127,11 +123,22 @@ inline void Path_Linear(Entity *entity, path_s *path) {
     if (path->complete) 
         return;
 
-    if (vel.x == entity->vel.x && vel.y == entity->vel.y) 
+    if (!memcmp(&entity->vel, &vel, sizeof(vec2)))
         return;
 
+    float direction = 90.f;
+    switch (path->orientation) {
+    case ORIENTATE_DESTINATION: 
+        direction -= DEG(atan2(vel.y, vel.x));
+        Entity_SetRotation(entity, direction);
+        break;
+    default:
+        Entity_SetRotation(entity, 0.f);
+        break;
+    }
+
     Entity_SetVelocity(entity, vel);
-    Entity_SetRotation(entity, 0.f);
+
 }
 
 inline void Path_Circular(Entity *entity, path_s *path) {
@@ -145,17 +152,19 @@ inline void Path_Circular(Entity *entity, path_s *path) {
 
     switch (path->state) {
     case STATE_INACTIVE:
-        path->angle = _angle(entity->pos, midpoint);
+        path->angle = _angle(org, midpoint);
         path->state = STATE_ONGOING;
         break;
     default:
+        Entity_SetRotation(entity, 0.f);
         break;
     }
 
-    float time = ((distance / path->speed) / 1000.f);
-    float speed = (PI_2 / time);
+    float circumference = (PI_2 * radius);
+    float period = (distance / (path->speed / radius));
+    float speed = DEG(circumference / period);
 
-    path->angle += speed;
+    path->angle += speed * (entity->deltaTime ? entity->deltaTime : 1.f);
 
     vec2 pos = {
         (midpoint.x + (radius * cos(RAD(path->angle)))),
@@ -163,7 +172,6 @@ inline void Path_Circular(Entity *entity, path_s *path) {
     };
 
     path->complete = Closer(entity->pos, pos, dst);
-    // path->complete = (_arc_length(entity->pos, dst) < _arc_length(pos, dst));
 
     if (path->complete) 
         return;
@@ -173,10 +181,18 @@ inline void Path_Circular(Entity *entity, path_s *path) {
         (pos.y - entity->pos.y)
     };
 
-    float direction = 90.f - DEG(atan2(vel.y, vel.x));
+    float direction = 90.f;
+    switch (path->orientation) {
+    case ORIENTATE_DESTINATION: 
+        direction -= DEG(atan2(vel.y, vel.x));
+        Entity_SetRotation(entity, direction);
+        break;
+    default:
+        Entity_SetRotation(entity, 0.f);
+        break;
+    }
 
     Entity_SetPosition(entity, pos);
-    Entity_SetRotation(entity, direction);
 }
 
 inline void Path_Bezier(Entity *entity, path_s *path) {
@@ -185,12 +201,13 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
         dst = path->dst;
 
     // TODO: get actual distance and time estimate (if possible) but approximation works
-    float distance = Distance(org, dst);
-    float time = ((distance / fabs(path->speed)) / 1000.f);
-    path->time += (1.f / (time * (entity->deltaTime ? entity->deltaTime : 1.f)));
 
     vec2 midpoint = _bezier_midpoint(org, dst, path->speed);
+    float distance = Distance(org, midpoint) + Distance(midpoint, dst);
     vec2 pos = _bezier_path(org, midpoint, dst, path->time);
+
+    float time = ((distance / fabs(path->speed)) / 1000.f);
+    path->time += (1.f / (time * entity->deltaTime ? entity->deltaTime : 1.f));
 
     switch (path->state) {
     case STATE_INACTIVE: 
@@ -210,8 +227,15 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
         (pos.y - entity->pos.y)
     };
 
-    float direction = 90.f - DEG(atan2(vel.y, vel.x));
+    float direction = 90.f;
+    switch (path->orientation) {
+    case ORIENTATE_DESTINATION: 
+        direction -= DEG(atan2(vel.y, vel.x));
+        Entity_SetRotation(entity, direction);
+        break;
+    default:
+        break;
+    }
 
     Entity_SetPosition(entity, pos);
-    Entity_SetRotation(entity, direction);
 }
