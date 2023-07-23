@@ -3,36 +3,36 @@
 #include "inc/hud.h"
 #include "inc/level.h"
 #include "inc/linked_list.h"
-#include "inc/path.h"
 #include "inc/player.h"
 #include "inc/route.h"
 #include "inc/time.h"
 #include "inc/util.h"
 
-#include <SDL2/SDL_timer.h>
 #include <assert.h>
 
 static int _count = 0;
 static LinkedList *_enemies;
 
-static inline Enemy *_Enemy_Init() {
+static inline Enemy *_Enemy_Init(uint64_t tick) {
     Enemy *self = (Enemy *)calloc(1, sizeof(Enemy));
 
-    // self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
-    // self->state = STATE_SPAWN;
+    self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
+    self->state = STATE_SPAWN;
    
-    self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, ENEMY_SPAWN_X, ENEMY_SPAWN_Y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
-    self->state = STATE_IDLE;
+    // self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, ENEMY_SPAWN_X, ENEMY_SPAWN_Y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
+    // self->state = STATE_IDLE;
 
+    self->entity->tick = tick;
     return self;
 }
 
 static void _Enemy_ThinkPath(Enemy *self) {
     switch (self->state) {
     case STATE_IDLE:
-        Route_Swoop(&self->path, self->entity->pos);
+        Route_Idle(&self->path, self->entity->pos);
         break;
     case STATE_SPAWN:
+        self->idle_tick = -1;
         Route_Spawn(&self->path, self->entity->pos);
         break;
     default:
@@ -40,7 +40,7 @@ static void _Enemy_ThinkPath(Enemy *self) {
     }
 
     self->state = STATE_TRAVEL;
-    printf("path queued. items remaining in queue: %li.\n", self->path.size);
+    // printf("path queued. items remaining in queue: %li.\n", self->path.size);
 
 }
 
@@ -75,11 +75,20 @@ static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
         dequeue(&self->path);
         if (!self->path.size) {
             self->state = STATE_IDLE;
-            self->tick = tick;
-            queue_free(&self->path);
+            self->idle_tick = tick;
         }
 
-        printf("path dequeued. items remaining in queue: %li.\n", self->path.size);
+        // printf("path dequeued. items remaining in queue: %li.\n", self->path.size);
+    } 
+
+    if (self->idle_tick == -1)
+        return;
+
+    if (Time_Passed(self->idle_tick) > ENEMY_IDLE_TIME) {
+        self->idle_tick = -1;
+
+        queue_free(&self->path);
+        Route_Swoop(&self->path, self->entity->pos);
     }
 }
 
@@ -90,59 +99,57 @@ static void _Enemy_ThinkAttack(Enemy *self, uint64_t tick) {
 
     Entity *ent = self->entity;
 
-    const float
-        dx = (pos.x - ent->pos.x),
-        dy = fabs(pos.y - ent->pos.y);
+    const vec2 diff = {
+        (pos.x - ent->pos.x),
+        fabs(pos.y - ent->pos.y)
+    };
 
     if (!Player_IsMoving()) {
-        if (fabs(dx) < 5.f) {
+        if (fabs(diff.x) < 5.f)
             Entity_Fire(ent, tick);
-            self->state = STATE_ATTACK;
-        }
+
         return;
     }
 
     // player is moving in the same direction
-    if ((dx < 0.f && vel.x < 0.f) || (dx > 0.f && vel.x > 0.f)) 
+    if ((diff.x < 0.f && vel.x < 0.f) || (diff.x > 0.f && vel.x > 0.f)) 
         return;
     
-    const float 
-        tx = fabs(dx / PLAYER_VELOCITY),
-        ty = fabs(dy / BULLET_VELOCITY);
+    const vec2 time = {
+        fabs(diff.x / PLAYER_VELOCITY),
+        fabs(diff.y / BULLET_VELOCITY)
+    };
 
-    if (fabs(dx) < 30.f || (fabs(tx - ty) < 1.f)) {
+    if (fabs(diff.x) < 30.f || (fabs(time.x - time.y) < 1.f))
         Entity_Fire(ent, tick);
-        self->state = STATE_ATTACK;
-    }
 }
 
 static void _Enemy_Think(Enemy *self, uint64_t tick) {
     estate_t p_state = self->state;
-    // _Enemy_ThinkAttack(self, tick);
+    _Enemy_ThinkAttack(self, tick);
     
-    if (Time_Passed(self->tick) > 1000.f) {
-        switch (self->state) {
-        case STATE_IDLE:
-        case STATE_SPAWN:
-            _Enemy_ThinkPath(self);
-            break;
-        case STATE_ATTACK:
-            // return to state prior attack
+    switch (self->state) {
+    case STATE_IDLE:
+    case STATE_SPAWN:
+        _Enemy_ThinkPath(self);
+        break;
+    case STATE_ATTACK:
+        if (self->state == p_state)
+            self->state = STATE_IDLE;
+        else
             self->state = p_state;
-            break;
-        case STATE_TRAVEL:
-            _Enemy_TravelPath(self, tick);
-            break;
-        default:
-            break;
-        }    
-    }
+        break;
+    case STATE_TRAVEL:
+        _Enemy_TravelPath(self, tick);
+        break;
+    default:
+        break;
+    }    
 
     Hud_AddText("State: %s", 
             self->state == STATE_IDLE ? "Idle" :
             self->state == STATE_TRAVEL ? "Travel" :
-            self->state == STATE_SPAWN ? "Spawn" : 
-            self->state == STATE_SWOOP ? "Swoop" : "Attack");
+            self->state == STATE_SPAWN ? "Spawn" : "Attack");
 }
 
 void Enemy_InitAll(uint64_t tick) {
@@ -152,8 +159,7 @@ void Enemy_InitAll(uint64_t tick) {
     _enemies = LinkedList_Init();
     
     for (int i = 0; i < count; i++) {
-        enemy = _Enemy_Init();
-        enemy->entity->tick = tick;
+        enemy = _Enemy_Init(tick);
         LinkedList_Add(_enemies, (void *)enemy);
     }
 
@@ -166,9 +172,10 @@ void Enemy_UpdateAll(uint64_t tick) {
     
     while (tmp) {
         enemy = (Enemy *)tmp->item;
-        assert(enemy && Entity_IsAlive(enemy->entity));
+        assert(enemy);
 
-        _Enemy_Think(enemy, tick);
+        if (Entity_IsAlive(enemy->entity))
+            _Enemy_Think(enemy, tick);
 
         tmp = tmp->next;
     }

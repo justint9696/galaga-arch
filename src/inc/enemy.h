@@ -9,7 +9,6 @@
 #include <stdint.h>
 
 #define ENEMY_TEXTURE           "assets/images/enemy01.png"
-#define ENEMY_START_STATE       STATE_SPAWN
 #define ENEMY_SPAWN_HEALTH      1.f
 #define ENEMY_WIDTH             66.67f
 #define ENEMY_HEIGHT            101.3f
@@ -23,13 +22,12 @@ typedef enum {
     STATE_IDLE,
     STATE_SPAWN,
     STATE_TRAVEL,
-    STATE_SWOOP,
     STATE_ATTACK,
 } estate_t;
 
 typedef struct {
     estate_t state;
-    uint64_t tick;
+    int64_t idle_tick;
     Queue path;
     Entity *entity;
 } Enemy;
