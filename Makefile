@@ -17,13 +17,13 @@ dir:
 	mkdir -p $(BIN)
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $(BIN)/$(TARGET) $^ $(LDFLAGS)
+	$(CC) -o $(BIN)/$(TARGET) $^ $(LDFLAGS)
 
 run: all
 	$(BIN)/$(TARGET)
 
 $(BIN)/%.o: $(SRC)/%.c
-	$(CC) -o $@ -c $< 
+	$(CC) $(CFLAGS) -o $@ -c $< 
 
 clean:
 	rm -rf $(BIN) $(OBJ)
