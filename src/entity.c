@@ -169,7 +169,7 @@ static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
         //printf("\nentity debug information: \n\t- id: %i \n\t- origin (%.2f, %.2f) \n\t- velocity: (%.2f, %.2f)\n", self->id, self->pos.x, self->pos.y, self->vel.x, self->vel.y);
     #endif
     
-    _Entity_CollisionHandler(self);
+    // _Entity_CollisionHandler(self);
     ((void(*)(Entity *))self->render)(self);
 }
 

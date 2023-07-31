@@ -12,7 +12,7 @@ static int _font_height;
 static hud_s _hud;
 
 void Hud_Init() {
-    TTF_Font *font = LoadFont(FONT_PATH, 12);
+    TTF_Font *font = LoadFont(FONT_PATH, FONT_SIZE);
 
     Renderer_SetFont(font);
 
