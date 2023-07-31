@@ -162,7 +162,6 @@ inline void Path_Circular(Entity *entity, path_s *path) {
         path->state = STATE_ONGOING;
         break;
     default:
-        Entity_SetRotation(entity, 0.f);
         break;
     }
 
@@ -213,7 +212,7 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
     vec2 pos = _bezier_path(org, midpoint, dst, path->time);
 
     float time = ((distance / fabs(path->speed)) / 1000.f);
-    path->time += (1.f / (time * entity->deltaTime ? entity->deltaTime : 1.f));
+    path->time += (1.f / (time * (entity->deltaTime ? entity->deltaTime : 1.f)));
 
     switch (path->state) {
     case STATE_INACTIVE: 
@@ -240,6 +239,7 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
         Entity_SetRotation(entity, direction);
         break;
     default:
+        Entity_SetRotation(entity, 0.f);
         break;
     }
 
