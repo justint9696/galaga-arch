@@ -1,6 +1,6 @@
 #include "../game/time.h"
 
-#include "render.h"
+#include "renderer.h"
 #include "stars.h"
 
 #include <assert.h>

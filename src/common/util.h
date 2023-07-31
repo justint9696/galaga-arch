@@ -7,9 +7,9 @@
 #include <stdint.h>
 
 // #define DEBUG
-#define CLAMP(mn, x, mx) ((mn > x) ? mn : (mx < x) ? mx : x)
+#define clamp(mn, x, mx) ((mn > x) ? mn : (mx < x) ? mx : x)
 
-#define RGBA(c) ((color_s) {\
+#define rgba(c) ((color_s) {\
         (c >> 24) & 0xff,\
         (c >> 16) & 0xff,\
         (c >>  8) & 0xff,\

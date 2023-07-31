@@ -1,29 +1,28 @@
-CC			:= gcc
+CC			= gcc
 
-BIN			:= ./bin
-SRC			:= ./src
+BIN			= bin/
 
-SRCS		:= $(wildcard $(SRC)/*.c) $(wildcard $(SRC)/**/*.c)
-OBJS 		:= $(SRCS:$(SRC)/%.c=$(BIN)/%.o)
+SRCS		= $(wildcard src/*.c) $(wildcard src/**/*.c)
+OBJS 		= $(SRCS:%.c=%.o)
 
-CFLAGS 		:= -Wall
-LDFLAGS 	:= -L ../ludo -lSDL2 -lSDL2_image -lSDL2_ttf -lm
+CFLAGS 		= -Wall
+LDFLAGS 	= -L ../ludo -lSDL2 -lSDL2_image -lSDL2_ttf -lm
 
-TARGET		:= galaga
+TARGET		= $(BIN)galaga
 
-all: dir $(TARGET)
+all: dir build
 
 dir:
 	mkdir -p $(BIN)
 
-$(TARGET): $(OBJS)
-	$(CC) -o $(BIN)/$(TARGET) $^ $(LDFLAGS)
+build: $(OBJS)
+	$(CC) -o $(TARGET) $^ $(LDFLAGS)
 
 run: all
-	$(BIN)/$(TARGET)
+	$(TARGET)
 
-$(BIN)/%.o: $(SRC)/%.c
+%.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $< 
 
 clean:
-	rm -rf $(BIN) $(OBJ)
+	rm -rf $(BIN) $(OBJS)

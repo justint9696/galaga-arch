@@ -1,7 +1,7 @@
 #include "../common/type.h"
 #include "../common/util.h"
 
-#include "render.h"
+#include "renderer.h"
 #include "window.h"
 
 #include <assert.h>

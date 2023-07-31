@@ -9,8 +9,6 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_scancode.h>
 
-#define GAME_TITLE          "GALAGA"
-
 void Poll_Events() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {

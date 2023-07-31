@@ -1,7 +1,7 @@
 #ifndef _STARS_H_
 #define _STARS_H_
 
-#include "type.h"
+#include "../common/type.h"
 #include "window.h"
 
 #include <stdint.h>

@@ -2,6 +2,7 @@
 #define _PLAYER_H_
 
 #include "../common/type.h"
+#include "../game/window.h"
 #include "entity.h"
 
 #include <stdbool.h>
