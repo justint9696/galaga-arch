@@ -111,6 +111,11 @@ inline void Path_Linear(Entity *entity, path_s *path) {
         fabs(path->speed) * sin(angle),
     };
 
+    vec2 pos = { 
+        entity->pos.x + vel.x, 
+        entity->pos.y + vel.y 
+    };
+
     switch (path->state) {
     case STATE_INACTIVE: 
         path->state = STATE_ONGOING;
@@ -119,7 +124,7 @@ inline void Path_Linear(Entity *entity, path_s *path) {
         break;
     }
 
-    path->complete = Closer(entity->pos, (vec2) { entity->pos.x + vel.x, entity->pos.y + vel.y }, dst);
+    path->complete = closer(entity->pos, pos, dst);
 
     if (path->complete) 
         return;
@@ -172,7 +177,7 @@ inline void Path_Circular(Entity *entity, path_s *path) {
         (midpoint.y + (radius * sin(RAD(path->angle))))
     };
 
-    path->complete = Closer(entity->pos, pos, dst);
+    path->complete = closer(entity->pos, pos, dst);
 
     if (path->complete) 
         return;
@@ -204,7 +209,7 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
     // TODO: get actual distance and time estimate (if possible) but approximation works
 
     vec2 midpoint = _bezier_midpoint(org, dst, path->speed);
-    float distance = Distance(org, midpoint) + Distance(midpoint, dst);
+    float distance = distance(org, midpoint) + distance(midpoint, dst);
     vec2 pos = _bezier_path(org, midpoint, dst, path->time);
 
     float time = ((distance / fabs(path->speed)) / 1000.f);
@@ -218,7 +223,7 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
         break;
     }
 
-    path->complete = Closer(entity->pos, pos, dst);
+    path->complete = closer(entity->pos, pos, dst);
 
     if (path->complete) 
         return;

@@ -5,31 +5,23 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <math.h>
 
-// #define DEBUG
 #define clamp(mn, x, mx) ((mn > x) ? mn : (mx < x) ? mx : x)
 
-#define rgba(c) ((color_s) {\
+#define RGBA(c) ((color_s) {\
         (c >> 24) & 0xff,\
         (c >> 16) & 0xff,\
         (c >>  8) & 0xff,\
         (c >>  0) & 0xff\
     })
 
-#define DISTANCE(pt0, pt1) {\
-        p0 = (vec2) pt0;\
-        p1 = (vec2) pt1;\
-        sqrtf(powf(p0.x - p1.x) + powf(p0.y - p1.y))\
-    }
+#define distance(a, b) ({ \
+        __typeof__ (a) _a = (a); \
+        __typeof__ (b) _b = (b); \
+        (sqrtf(powf(_a.x - _b.x, 2) + powf(_a.y - _b.y, 2))); \
+    })
 
-#define CLOSER(pt0, pt1, dst) {\
-        p0 = (vec2) pt0;\
-        p1 = (vec2) pt1;\
-        dest = (vec2) dst; \
-        DISTANCE(p0, dst) < DISTANCE(p1, dst)\
-    }
-
-float Distance(const vec2 pt1, const vec2 pt2);
-float Closer(const vec2 pt1, const vec2 pt2, const vec2 dst);
+#define closer(a, b, c) (distance(a, c) < distance(b, c))
 
 #endif

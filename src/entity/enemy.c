@@ -63,7 +63,7 @@ static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
         break;
     }
 
-    float distance = Distance(self->entity->pos, path->dst);
+    float distance = distance(self->entity->pos, path->dst);
     Hud_AddText("Path: %s",
             path->type == PATH_LINEAR ? "Linear" : 
             path->type == PATH_BEZIER ? "Bezier" : "Circular");
