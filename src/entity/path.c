@@ -132,12 +132,16 @@ inline void Path_Linear(Entity *entity, path_s *path) {
     if (!memcmp(&entity->vel, &vel, sizeof(vec2)))
         return;
 
-    float direction = 90.f;
+    float direction;
     switch (path->orientation) {
     case ORIENTATE_DESTINATION: 
-        direction -= DEG(atan2(vel.y, vel.x));
-        Entity_SetRotation(entity, direction);
+        direction = DEG(atan2(vel.y, vel.x));
+        if (direction == path->angle)
+            break;
+        
+        Entity_SetRotation(entity, 90.f - direction);
         break;
+
     default:
         Entity_SetRotation(entity, 0.f);
         break;
@@ -186,15 +190,19 @@ inline void Path_Circular(Entity *entity, path_s *path) {
         (pos.y - entity->pos.y)
     };
 
-    float direction = 90.f;
+    float direction;
     switch (path->orientation) {
-    case ORIENTATE_DESTINATION: 
-        direction -= DEG(atan2(vel.y, vel.x));
-        Entity_SetRotation(entity, direction);
-        break;
-    default:
-        Entity_SetRotation(entity, 0.f);
-        break;
+        case ORIENTATE_DESTINATION: 
+            direction = DEG(atan2(vel.y, vel.x));
+            if (direction == path->angle)
+                break;
+
+            Entity_SetRotation(entity, 90.f - direction);
+            break;
+
+        default:
+            Entity_SetRotation(entity, 0.f);
+            break;
     }
 
     Entity_SetPosition(entity, pos);
@@ -232,12 +240,16 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
         (pos.y - entity->pos.y)
     };
 
-    float direction = 90.f;
+    float direction;
     switch (path->orientation) {
     case ORIENTATE_DESTINATION: 
-        direction -= DEG(atan2(vel.y, vel.x));
-        Entity_SetRotation(entity, direction);
+        direction = DEG(atan2(vel.y, vel.x));
+        if (direction == path->angle)
+            break;
+
+        Entity_SetRotation(entity, 90.f - direction);
         break;
+
     default:
         Entity_SetRotation(entity, 0.f);
         break;

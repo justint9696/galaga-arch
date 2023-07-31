@@ -271,7 +271,7 @@ void Entity_SetRotation(Entity *self, float angle) {
     memcpy(&self->rotation, &angle, sizeof(float)); 
 
     #ifdef DEBUG
-        printf("entity %i's rotation updated to %.2f\n", self->rotation);
+        printf("entity %i's rotation updated to %.2f\n", self->id, self->rotation);
     #endif
 }
 
