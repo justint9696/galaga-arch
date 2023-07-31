@@ -1,7 +1,8 @@
-#include "inc/render.h"
-#include "inc/type.h"
-#include "inc/util.h"
-#include "inc/window.h"
+#include "../common/type.h"
+#include "../common/util.h"
+
+#include "render.h"
+#include "window.h"
 
 #include <assert.h>
 #include <math.h>

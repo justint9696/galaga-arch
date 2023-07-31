@@ -1,10 +1,11 @@
 #ifndef _ENEMY_H_
 #define _ENEMY_H_
 
+#include "../game/window.h"
+
 #include "entity.h"
 #include "path.h"
 #include "queue.h"
-#include "window.h"
 
 #include <stdint.h>
 

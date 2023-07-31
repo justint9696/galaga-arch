@@ -1,12 +1,15 @@
-#include "inc/app.h"
-#include "inc/entity.h"
-#include "inc/game.h"
-#include "inc/hud.h"
-#include "inc/linked_list.h"
-#include "inc/render.h"
-#include "inc/time.h"
-#include "inc/util.h"
-#include "inc/window.h"
+#include "../gfx/app.h"
+#include "../gfx/hud.h"
+#include "../gfx/renderer.h"
+
+#include "../common/linked_list.h"
+#include "../common/util.h"
+
+#include "../game/game.h"
+#include "../game/time.h"
+#include "../game/window.h"
+
+#include "entity.h"
 
 #include <assert.h>
 #include <math.h>

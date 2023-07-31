@@ -1,6 +1,6 @@
-#include "inc/enemy.h"
-#include "inc/path.h"
-#include "inc/route.h"
+#include "enemy.h"
+#include "path.h"
+#include "route.h"
 
 static inline vec2 _rear(Queue *q) {
     return (*(path_s *)(queue_rear(q))).dst;

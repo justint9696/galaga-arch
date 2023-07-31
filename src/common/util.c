@@ -1,4 +1,4 @@
-#include "inc/util.h"
+#include "util.h"
 
 #include <math.h>
 

@@ -4,8 +4,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-#define APP_TITLE       "GALAGA"
-
 typedef struct {
 	SDL_Renderer *renderer;
 	SDL_Window *window;

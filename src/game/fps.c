@@ -1,5 +1,5 @@
-#include "inc/fps.h"
-#include "inc/time.h"
+#include "fps.h"
+#include "time.h"
 
 #include <SDL2/SDL.h>
 

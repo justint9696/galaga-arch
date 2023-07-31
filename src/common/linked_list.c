@@ -1,4 +1,4 @@
-#include "inc/linked_list.h"
+#include "linked_list.h"
 
 #include <assert.h>
 #include <stdlib.h>

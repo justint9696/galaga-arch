@@ -1,7 +1,7 @@
 #ifndef _ENTITY_H_
 #define _ENTITY_H_
 
-#include "type.h"
+#include "../common/type.h"
 
 #include <SDL2/SDL.h>
 #include <stdbool.h>

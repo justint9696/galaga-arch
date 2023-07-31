@@ -1,9 +1,9 @@
 CC			:= gcc
 
-BIN			:= bin
-SRC			:= src
+BIN			:= ./bin
+SRC			:= ./src
 
-SRCS		:= $(wildcard $(SRC)/*.c)
+SRCS		:= $(wildcard $(SRC)/*.c) $(wildcard $(SRC)/**/*.c)
 OBJS 		:= $(SRCS:$(SRC)/%.c=$(BIN)/%.o)
 
 CFLAGS 		:= -Wall

@@ -1,5 +1,5 @@
-#ifndef _RENDER_H_
-#define _RENDER_H_
+#ifndef _RENDERER_H_
+#define _RENDERER_H_
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_render.h>

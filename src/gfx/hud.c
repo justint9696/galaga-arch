@@ -1,8 +1,9 @@
-#include "inc/app.h"
-#include "inc/fps.h"
-#include "inc/hud.h"
-#include "inc/render.h"
-#include "inc/window.h"
+#include "../game/fps.h"
+
+#include "app.h"
+#include "hud.h"
+#include "renderer.h"
+#include "window.h"
 
 #include <assert.h>
 #include <string.h>

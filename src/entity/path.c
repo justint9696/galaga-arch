@@ -1,8 +1,9 @@
-#include "inc/fps.h"
-#include "inc/entity.h"
-#include "inc/hud.h"
-#include "inc/path.h"
-#include "inc/util.h"
+#include "../gfx/hud.h"
+#include "../game/fps.h"
+#include "../common/util.h"
+
+#include "entity.h"
+#include "path.h"
 
 #include <stdio.h>
 

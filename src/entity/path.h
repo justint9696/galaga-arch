@@ -1,8 +1,8 @@
 #ifndef _PATH_H_
 #define _PATH_H_
 
+#include "../common/type.h"
 #include "entity.h"
-#include "type.h"
 
 #include <math.h>
 

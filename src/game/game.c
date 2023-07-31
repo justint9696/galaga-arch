@@ -1,14 +1,16 @@
-#include "inc/game.h"
-#include "inc/entity.h"
-#include "inc/enemy.h"
-#include "inc/fps.h"
-#include "inc/level.h"
-#include "inc/hud.h"
-#include "inc/player.h"
-#include "inc/render.h"
-#include "inc/stars.h"
-#include "inc/time.h"
-#include "inc/util.h"
+#include "../gfx/hud.h"
+#include "../gfx/renderer.h"
+#include "../gfx/stars.h"
+
+#include "../common/util.h"
+
+#include "../entity/enemy.h"
+#include "../entity/player.h"
+
+#include "game.h"
+#include "fps.h"
+#include "level.h"
+#include "time.h"
 
 #include <SDL2/SDL.h>
 

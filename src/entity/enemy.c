@@ -1,12 +1,15 @@
-#include "inc/enemy.h"
-#include "inc/entity.h"
-#include "inc/hud.h"
-#include "inc/level.h"
-#include "inc/linked_list.h"
-#include "inc/player.h"
-#include "inc/route.h"
-#include "inc/time.h"
-#include "inc/util.h"
+#include "../gfx/hud.h"
+
+#include "../game/level.h"
+#include "../game/time.h"
+
+#include "../common/linked_list.h"
+#include "../common/util.h"
+
+#include "enemy.h"
+#include "entity.h"
+#include "player.h"
+#include "route.h"
 
 #include <assert.h>
 
