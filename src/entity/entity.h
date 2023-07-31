@@ -1,7 +1,7 @@
 #ifndef _ENTITY_H_
 #define _ENTITY_H_
 
-#include "type.h"
+#include "../common/type.h"
 
 #include <SDL2/SDL.h>
 #include <stdbool.h>
@@ -29,35 +29,19 @@ typedef enum {
 } team_t;
 
 typedef enum {
-    STATE_IDLE,
-    STATE_SPAWN,
-    STATE_ATTACK,
-    STATE_TRAVEL,
+    STATE_ALIVE,
     STATE_DEAD,
 } state_t;
 
-typedef enum {
-    PATH_LINEAR,
-    PATH_CIRCULAR,
-    PATH_BEZIER,
-} path_type_t;
-
-typedef struct {
-    float time;
-    path_type_t type;
-    vec2 org, dst;
-} path_s;
-
 typedef struct {
     int id;
-    float health;
+    float health, rotation;
     type_t type;
     team_t team;
     state_t state;
     int width, height;
-    uint64_t tick;
+    uint64_t tick, deltaTime;
     vec2 pos, vel;
-    path_s path;
     SDL_Texture *texture;
     uint32_t color;
     void *render;
@@ -74,6 +58,8 @@ void Entity_UpdateAll(uint64_t deltaTime);
 void Entity_SetPosition(Entity *self, vec2 pos);
 
 void Entity_SetVelocity(Entity *self, vec2 vel);
+
+void Entity_SetRotation(Entity *self, float angle);
 
 void Entity_Fire(Entity *self, uint64_t tick);
 

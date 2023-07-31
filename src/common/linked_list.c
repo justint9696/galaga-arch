@@ -1,8 +1,12 @@
-#include "inc/linked_list.h"
+#include "linked_list.h"
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+
+inline LinkedList *LinkedList_Init() {
+    return (LinkedList *)calloc(1, sizeof(LinkedList));
+}
 
 void LinkedList_Add(LinkedList *head, void *item) {
 	if (!head->item)
@@ -13,8 +17,7 @@ void LinkedList_Add(LinkedList *head, void *item) {
 			tmp = tmp->next;
 		}
 
-		tmp->next = (LinkedList *)malloc(sizeof(LinkedList));
-		memset(tmp->next, 0, sizeof(LinkedList));
+		tmp->next = LinkedList_Init();
 		tmp->next->item = item;
 	}
 }

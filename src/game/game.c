@@ -1,37 +1,26 @@
-#include "inc/game.h"
-#include "inc/entity.h"
-#include "inc/enemy.h"
-#include "inc/level.h"
-#include "inc/hud.h"
-#include "inc/player.h"
-#include "inc/render.h"
-#include "inc/stars.h"
-#include "inc/time.h"
-#include "inc/util.h"
+#include "../gfx/hud.h"
+#include "../gfx/renderer.h"
+#include "../gfx/stars.h"
+
+#include "../common/util.h"
+
+#include "../entity/enemy.h"
+#include "../entity/player.h"
+
+#include "game.h"
+#include "fps.h"
+#include "level.h"
+#include "time.h"
 
 #include <SDL2/SDL.h>
 
-static float _fps;
-static uint64_t _frame_start, _frame_end, _frame_time;
-static uint64_t _time, _ticks, _delta_time;
-
-static inline void _Calculate_FPS() {
-   /*if (_frame_time) {
-       _fps = (1000.f / (float)_frame_time);
-       printf("FPS: %.2f\n", _fps);
-   }*/
-}
+static uint64_t _time, _delta_time;
 
 static inline void _Game_Tick() {
     const uint64_t tick = Get_Tick();
 
     _delta_time = tick - _time;
     _time += _delta_time;
-    
-    _frame_end = tick;
-    _frame_time = _frame_end - _frame_start;
-
-    _ticks++;
 }
 
 bool Game_IsRunning() {
@@ -39,8 +28,10 @@ bool Game_IsRunning() {
 }
 
 void Game_Init() {
-    // store current tick
+    // prepare time
     _time = Get_Tick();
+    Time_Init();
+    fps_init();
 
     // prepare level
     Level_Init();
@@ -56,8 +47,8 @@ void Game_Init() {
 }
 
 void Game_Main() {
-    // store current tick
-    _frame_start = Get_Tick();
+    // frame start
+    frame_start();
 
     // prepare renderer
     Renderer_Prepare();
@@ -80,8 +71,11 @@ void Game_Main() {
 
     // game tick
     _Game_Tick();
+    frame_end();
+    
+    // frame delay
+    fps_limit();
 
-    #ifdef DEBUG
-        // _Calculate_FPS();
-    #endif
+    // draw fps
+    Hud_DrawFPS();
 }

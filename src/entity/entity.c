@@ -1,12 +1,15 @@
-#include "inc/app.h"
-#include "inc/entity.h"
-#include "inc/game.h"
-#include "inc/hud.h"
-#include "inc/linked_list.h"
-#include "inc/render.h"
-#include "inc/time.h"
-#include "inc/util.h"
-#include "inc/window.h"
+#include "../gfx/app.h"
+#include "../gfx/hud.h"
+#include "../gfx/renderer.h"
+
+#include "../common/linked_list.h"
+#include "../common/util.h"
+
+#include "../game/game.h"
+#include "../game/time.h"
+#include "../game/window.h"
+
+#include "entity.h"
 
 #include <assert.h>
 #include <math.h>
@@ -23,8 +26,7 @@ static team_t _Entity_GetOtherTeam(const team_t team) {
 }
 
 static inline Entity *_Entity_Alloc() {
-    Entity *self = (Entity *)malloc(sizeof(Entity));
-    memset(self, 0, sizeof(Entity));
+    Entity *self = (Entity *)calloc(1, sizeof(Entity));
     self->id = _num_ent++;
 
     LinkedList_Add(_entities, (void *)self);
@@ -44,10 +46,10 @@ static inline void _Entity_Free(Entity *self) {
     LinkedList_Remove(&_entities, (void *)self);
     free(self);
 
-    _num_ent--;
+    --_num_ent;
 
     #ifdef DEBUG
-        printf("entity %i released. number of entities: %i\n", id, --_num_ent);
+        printf("entity %i released. number of entities: %i\n", id, _num_ent);
     #endif
 }
 
@@ -61,14 +63,13 @@ static inline void _Entity_Render_Rect(const Entity *self) {
 }
 
 static inline void _Entity_Render_Texure(const Entity *self) {
-    DrawTexture(self->texture, round(self->pos.x), round(self->pos.y), self->width, self->height);
+    DrawTexture(self->texture, round(self->pos.x), round(self->pos.y), self->width, self->height, self->rotation);
 }
 
 static LinkedList *_Entity_FilterByAll(const team_t team, const type_t type) {
     Entity *entity;
-    LinkedList *head = (LinkedList *)malloc(sizeof(LinkedList)), *tmp = _entities;
-
-    memset(head, 0, sizeof(LinkedList));
+    LinkedList *head = LinkedList_Init(),
+               *tmp = _entities;
 
     while (tmp) {
         entity = (Entity *)tmp->item;
@@ -77,7 +78,7 @@ static LinkedList *_Entity_FilterByAll(const team_t team, const type_t type) {
         if ((team == -1 && entity->type == type) ||
                 (type == -1 && entity->team == team) ||
                 (entity->team == team && entity->type == type))
-            LinkedList_Add(head, tmp->item);
+            LinkedList_Add(head, (void *)tmp->item);
 
         tmp = tmp->next;
     }
@@ -114,7 +115,8 @@ static void _Entity_Collide(Entity *e1, Entity *e2) {
 
 static inline void _Entity_CollisionHandler(Entity *self) {
     Entity *entity;
-    LinkedList *tmp = _Entity_FilterByAll(_Entity_GetOtherTeam(self->team), -1);
+    LinkedList *head = _Entity_FilterByAll(_Entity_GetOtherTeam(self->team), -1);
+    LinkedList *tmp = head;
 
     while (tmp && tmp->item) {
         entity = (Entity *)tmp->item;
@@ -141,7 +143,7 @@ static inline void _Entity_CollisionHandler(Entity *self) {
         tmp = tmp->next;
     }
 
-    free(tmp);
+    free(head);
 }
 
 static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
@@ -154,6 +156,8 @@ static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
     // update entity position
     self->pos.x += (1.f * deltaTime * self->vel.x);
     self->pos.y += (1.f * deltaTime * self->vel.y);
+
+    self->deltaTime = deltaTime;
 
     switch (self->type) {
     case TYPE_PLAYER:
@@ -168,7 +172,7 @@ static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
         //printf("\nentity debug information: \n\t- id: %i \n\t- origin (%.2f, %.2f) \n\t- velocity: (%.2f, %.2f)\n", self->id, self->pos.x, self->pos.y, self->vel.x, self->vel.y);
     #endif
     
-    _Entity_CollisionHandler(self);
+    // _Entity_CollisionHandler(self);
     ((void(*)(Entity *))self->render)(self);
 }
 
@@ -180,10 +184,10 @@ static inline vec2 _Entity_Midpoint(const Entity *self) {
 }
 
 void Entity_InitAll() {
-	_entities = (LinkedList *)malloc(sizeof(LinkedList));
-	memset(_entities, 0, sizeof(LinkedList));
-	
+    _entities = LinkedList_Init();	
+
     assert(_entities);
+
 	printf("Entity list initialized.\n");
 }
 
@@ -201,6 +205,7 @@ void Entity_UpdateAll(uint64_t deltaTime) {
 
         tmp = tmp->next;
     }
+
     Hud_AddText("Entities: %i", _num_ent);
 }
 
@@ -211,7 +216,7 @@ Entity *Entity_Init(type_t type, team_t team, float health, float x, float y, in
 
     self->type = type;
     self->team = team;
-    self->state = STATE_IDLE;
+    self->state = STATE_ALIVE;
 
     self->pos.x = x;
     self->pos.y = y;
@@ -262,6 +267,14 @@ void Entity_SetVelocity(Entity *self, vec2 vel) {
     #endif
 }
 
+void Entity_SetRotation(Entity *self, float angle) {
+    memcpy(&self->rotation, &angle, sizeof(float)); 
+
+    #ifdef DEBUG
+        printf("entity %i's rotation updated to %.2f\n", self->rotation);
+    #endif
+}
+
 void Entity_Fire(Entity *self, uint64_t tick) {
     assert((self->type == TYPE_PLAYER) || (self->type == TYPE_ENEMY));
     
@@ -281,6 +294,4 @@ void Entity_Fire(Entity *self, uint64_t tick) {
     Entity_SetVelocity(entity, vel);
 
     self->tick = tick;
-
-    self->state = STATE_ATTACK;
 }

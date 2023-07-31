@@ -1,8 +1,9 @@
 #ifndef _PLAYER_H_
 #define _PLAYER_H_
 
+#include "../common/type.h"
+#include "../game/window.h"
 #include "entity.h"
-#include "window.h"
 
 #include <stdbool.h>
 
@@ -17,17 +18,16 @@
 
 typedef struct {
     int buttons;
-    Entity *ent;
+    Entity *entity;
 } Player;
 
 bool Player_IsAlive();
+bool Player_IsMoving();
 
 vec2 Player_Position();
-
 vec2 Player_Velocity();
 
 void Player_Init(uint64_t tick);
-
 void Player_Update(uint64_t tick);
 
 #endif

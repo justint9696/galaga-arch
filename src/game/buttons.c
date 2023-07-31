@@ -1,5 +1,5 @@
-#include "inc/buttons.h"
-#include "inc/player.h"
+#include "../entity/player.h"
+#include "buttons.h"
 
 int _buttons = 0;
 

@@ -6,6 +6,7 @@ typedef struct LinkedList_s {
     struct LinkedList_s *next;
 } LinkedList;
 
+LinkedList *LinkedList_Init();
 void LinkedList_Add(LinkedList *head, void *item);
 void LinkedList_Remove(LinkedList **head, void *item);
 

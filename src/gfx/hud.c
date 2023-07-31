@@ -1,7 +1,9 @@
-#include "inc/app.h"
-#include "inc/hud.h"
-#include "inc/render.h"
-#include "inc/window.h"
+#include "../game/fps.h"
+
+#include "app.h"
+#include "hud.h"
+#include "renderer.h"
+#include "window.h"
 
 #include <assert.h>
 #include <string.h>
@@ -11,7 +13,7 @@ static int _font_height;
 static hud_s _hud;
 
 void Hud_Init() {
-    TTF_Font *font = LoadFont(FONT_PATH, 12);
+    TTF_Font *font = LoadFont(FONT_PATH, FONT_SIZE);
 
     Renderer_SetFont(font);
 
@@ -35,6 +37,10 @@ void Hud_Draw() {
     }
 
     _hud.count = 0;
+}
+
+void Hud_DrawFPS() {
+    Hud_AddText("FPS: %.2f", fps_get());
 }
 
 void Hud_AddText(const char *format, ...) {

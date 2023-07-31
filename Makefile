@@ -1,27 +1,28 @@
-CC=gcc
+CC			= gcc
 
-BIN=bin/
-SRC=$(wildcard src/*.c)
+BIN			= bin/
 
-CFLAGS=-Wall
-LDFLAGS=-L ../ludo -lSDL2 -lSDL2_image -lSDL2_ttf -lm
-OBJ=$(SRC:src/%.c=$(BIN)%.o)
+SRCS		= $(wildcard src/*.c) $(wildcard src/**/*.c)
+OBJS 		= $(SRCS:%.c=%.o)
 
-TARGET=game
+CFLAGS 		= -Wall
+LDFLAGS 	= -L ../ludo -lSDL2 -lSDL2_image -lSDL2_ttf -lm
 
-all: dir $(TARGET)
+TARGET		= $(BIN)galaga
+
+all: dir build
 
 dir:
 	mkdir -p $(BIN)
 
-$(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) -o $(BIN)$(TARGET) $^ $(LDFLAGS)
+build: $(OBJS)
+	$(CC) -o $(TARGET) $^ $(LDFLAGS)
 
 run: all
-	$(BIN)$(TARGET)
+	$(TARGET)
 
-$(BIN)%.o: src/%.c
+%.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $< 
 
 clean:
-	rm -rf $(BIN) $(OBJ)
+	rm -rf $(BIN) $(OBJS)

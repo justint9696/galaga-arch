@@ -1,24 +1,20 @@
-#include "inc/app.h"
-#include "inc/buttons.h"
-#include "inc/game.h"
-#include "inc/player.h"
+#include "gfx/app.h"
+
+#include "game/buttons.h"
+#include "game/game.h"
+
+#include "entity/player.h"
 
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_scancode.h>
 
-int main(int argc, char *argv[]) {
-    initSDL();
-
-    Game_Init();
-    printf("%s Initialized.\n", APP_TITLE);
-
+void Poll_Events() {
     SDL_Event event;
-    while (Game_IsRunning()) {
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
             case SDL_QUIT:
-                printf("%s Terminated.\n", APP_TITLE);
+                printf("%s Terminated.\n", GAME_TITLE);
                 exit(0);
                 break;
 
@@ -29,9 +25,18 @@ int main(int argc, char *argv[]) {
 
             default:
                 break;
-            }
         }
+    }
+}
 
+int main(int argc, char *argv[]) {
+    initSDL();
+
+    Game_Init();
+    printf("%s Initialized.\n", GAME_TITLE);
+
+    while (Game_IsRunning()) {
+        Poll_Events();
         Game_Main();
     }
 

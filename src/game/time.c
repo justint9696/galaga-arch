@@ -1,7 +1,9 @@
-#include "inc/time.h"
+#include "time.h"
 
 #include <sys/time.h>
 #include <stddef.h>
+
+static uint64_t _start;
 
 inline uint64_t Get_Tick() {
     struct timeval tv;
@@ -10,7 +12,15 @@ inline uint64_t Get_Tick() {
     return tick;
 }
 
+void Time_Init() {
+    _start = Get_Tick();
+}
+
 uint64_t Time_Passed(uint64_t tick) {
     return (Get_Tick() - tick);
+}
+
+uint64_t Time_Ticks() {
+    return (Get_Tick() - _start);
 }
 

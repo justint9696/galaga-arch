@@ -4,8 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define FPS_TARGET      120
-#define FRAME_DELAY     (1000.f / FPS_TARGET)
+#define GAME_TITLE          "GALAGA"
 
 bool Game_IsRunning();
 
