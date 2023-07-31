@@ -1,4 +1,4 @@
-CC			= gcc
+CC 			= gcc
 
 BIN			= bin/
 
@@ -8,7 +8,7 @@ OBJS 		= $(SRCS:%.c=%.o)
 CFLAGS 		= -Wall
 LDFLAGS 	= -L ../ludo -lSDL2 -lSDL2_image -lSDL2_ttf -lm
 
-TARGET		= $(BIN)galaga
+TARGET 		= $(BIN)galaga
 
 all: dir build
 
