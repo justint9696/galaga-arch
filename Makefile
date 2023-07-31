@@ -14,14 +14,14 @@ TARGET 		= $(BIN)galaga
 all: build
 
 build: $(OBJS)
-	mkdir -p $(BIN)
+	@mkdir -p $(BIN)
 	$(CC) -o $(TARGET) $^ $(LDFLAGS)
 
 run: all
 	$(TARGET)
 
 $(OBJ)%.o: src/%.c
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(CC) -o $@ -c $< $(CFLAGS) 
 
 clean:
