@@ -1,7 +1,7 @@
 CC 			= gcc
 
-BIN			= bin/
-OBJ			= obj/
+BIN 		= bin/
+OBJ 		= obj/
 SRC 		= src/
 
 SRCS		= $(wildcard $(SRC)*.c $(SRC)*/*.c)

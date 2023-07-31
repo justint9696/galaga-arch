@@ -48,13 +48,16 @@ void Hud_AddText(const char *format, ...) {
     assert(*count < MAX_NUM_STR);
 
     va_list argptr;
-	char text[MAX_STR_LEN];
-	va_start(argptr, format);
-	vsnprintf(text, MAX_STR_LEN, format, argptr);
-	va_end(argptr);
+    char text[MAX_STR_LEN];
+    va_start(argptr, format);
+    vsnprintf(text, MAX_STR_LEN, format, argptr);
+    va_end(argptr);
 
-    _hud.text[*count] = (char *)malloc(sizeof(char) * strlen(text));
-    strcpy(_hud.text[*count], text);
+    size_t size = strlen(text) + 1;
+    assert(size < MAX_STR_LEN);
+
+    _hud.text[*count] = (char *)malloc(sizeof(char) * size);
+    strncpy(_hud.text[*count], text, size);
 
     ++*count;
 }

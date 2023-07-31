@@ -4,8 +4,8 @@
 #define FONT_SIZE           12
 #define FONT_PATH           "assets/fonts/press-start-2p-font/font.ttf"
 
-#define MAX_NUM_STR         12
-#define MAX_STR_LEN         1024
+#define MAX_NUM_STR         8
+#define MAX_STR_LEN         32
 
 typedef struct {
     int count;
