@@ -1,13 +1,14 @@
 #include "../gfx/app.h"
 #include "../gfx/hud.h"
 #include "../gfx/renderer.h"
+#include "../gfx/window.h"
 
-#include "../common/linked_list.h"
+#include "../data/linked_list.h"
+
 #include "../common/util.h"
 
 #include "../game/game.h"
 #include "../game/time.h"
-#include "../game/window.h"
 
 #include "entity.h"
 
@@ -29,28 +30,20 @@ static inline Entity *_Entity_Alloc() {
     Entity *self = (Entity *)calloc(1, sizeof(Entity));
     self->id = _num_ent++;
 
-    LinkedList_Add(_entities, (void *)self);
-
-    #ifdef DEBUG
-        printf("entity spawned. number of entities: %i\n", _num_ent);
-    #endif
+    LinkedList_Add(_entities, self);
 
     return self;
 }
 
-static inline void _Entity_Free(Entity *self) {
+inline void Entity_Free(Entity *self) {
     assert(self);
 
     const int id = self->id;
 
-    LinkedList_Remove(&_entities, (void *)self);
+    LinkedList_Remove(&_entities, self);
     free(self);
 
     --_num_ent;
-
-    #ifdef DEBUG
-        printf("entity %i released. number of entities: %i\n", id, _num_ent);
-    #endif
 }
 
 static void _Entity_Damage(Entity *self) {
@@ -96,7 +89,7 @@ static inline bool _Entity_IsColliding(const Entity *e1, const Entity *e2) {
 static void _Entity_Collide(Entity *e1, Entity *e2) {
     switch (e1->type) {
     case TYPE_PROJECTILE:
-        _Entity_Free(e1);
+        Entity_Free(e1);
         break;
     default:
         _Entity_Damage(e1);
@@ -105,7 +98,7 @@ static void _Entity_Collide(Entity *e1, Entity *e2) {
 
     switch (e2->type) {
     case TYPE_PROJECTILE:
-        _Entity_Free(e2);
+        Entity_Free(e2);
         break;
     default:
         _Entity_Damage(e2);
@@ -123,20 +116,7 @@ static inline void _Entity_CollisionHandler(Entity *self) {
         assert(entity);
 
         if (Entity_IsAlive(entity) && _Entity_IsColliding(self, entity)) {
-            #ifdef DEBUG
-                printf("entity %i is colliding with entity %i\n", entity->id, self->id);
-            #endif
-
-            // _Entity_Free(self);
-            //_Entity_Free(entity);
-
-            // since enemies.c points to the same memory addresses, freeing entities breaks game
-            // rather than freeing both entities, just free projectile and damage player/enemy ents
              _Entity_Collide(self, entity);
-
-            // TODO: free entities upon loading a new level
-             
-
             break;
         }
             
@@ -149,7 +129,7 @@ static inline void _Entity_CollisionHandler(Entity *self) {
 static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
     if ((self->pos.x > (WINDOW_WIDTH + WINDOW_BUFFER) || self->pos.x < -WINDOW_BUFFER) || 
             (self->pos.y > (WINDOW_HEIGHT + WINDOW_BUFFER) || self->pos.y < -WINDOW_BUFFER)) {
-        _Entity_Free(self);
+        Entity_Free(self);
         return;
     }
 
@@ -168,10 +148,6 @@ static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
         break;
     }
 
-    #ifdef DEBUG
-        //printf("\nentity debug information: \n\t- id: %i \n\t- origin (%.2f, %.2f) \n\t- velocity: (%.2f, %.2f)\n", self->id, self->pos.x, self->pos.y, self->vel.x, self->vel.y);
-    #endif
-    
     // _Entity_CollisionHandler(self);
     ((void(*)(Entity *))self->render)(self);
 }
@@ -198,12 +174,11 @@ void Entity_UpdateAll(uint64_t deltaTime) {
     while (tmp) {
         entity = (Entity *)tmp->item;
         assert(entity);
+        tmp = tmp->next;
 
         if (Entity_IsAlive(entity)) {
             _Entity_Update(entity, deltaTime);
         }
-
-        tmp = tmp->next;
     }
 
     Hud_AddText("Entities: %i", _num_ent);
@@ -244,35 +219,19 @@ Entity *Entity_Init(type_t type, team_t team, float health, float x, float y, in
 
     self->render = texture == NULL ? &_Entity_Render_Rect : &_Entity_Render_Texure;
 
-    #ifdef DEBUG
-        printf("entity %i initialized.\n", self->id);
-    #endif
-
     return self;
 }
 
 void Entity_SetPosition(Entity *self, vec2 pos) {
     memcpy(&self->pos, &pos, sizeof(vec2));
-
-    #ifdef DEBUG
-        printf("entity %i's position updated.\n", self->id);
-    #endif
 }
 
 void Entity_SetVelocity(Entity *self, vec2 vel) {
     memcpy(&self->vel, &vel, sizeof(vec2));
-
-    #ifdef DEBUG
-        printf("entity %i's velocity updated to (%.2f, %.2f).\n", self->id, vel.x, vel.y);
-    #endif
 }
 
 void Entity_SetRotation(Entity *self, float angle) {
     memcpy(&self->rotation, &angle, sizeof(float)); 
-
-    #ifdef DEBUG
-        printf("entity %i's rotation updated to %.2f\n", self->id, self->rotation);
-    #endif
 }
 
 void Entity_Fire(Entity *self, uint64_t tick) {
