@@ -1,8 +1,8 @@
 #ifndef _ENEMY_H_
 #define _ENEMY_H_
 
-#include "../common/queue.h"
-#include "../game/window.h"
+#include "../data/queue.h"
+#include "../gfx/window.h"
 
 #include "entity.h"
 #include "path.h"
@@ -34,7 +34,7 @@ typedef struct {
 } Enemy;
 
 void Enemy_InitAll(uint64_t tick);
-
+void Enemy_Free(Enemy *self);
 void Enemy_UpdateAll(uint64_t tick);
 
 #endif

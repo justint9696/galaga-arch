@@ -53,6 +53,8 @@ void Entity_InitAll();
 
 Entity *Entity_Init(type_t type, team_t team, float health, float x, float y, int width, int height, const char *texture);
 
+void Entity_Free(Entity *self);
+
 void Entity_UpdateAll(uint64_t deltaTime);
 
 void Entity_SetPosition(Entity *self, vec2 pos);

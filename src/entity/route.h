@@ -1,7 +1,7 @@
 #ifndef _ROUTE_H_
 #define _ROUTE_H_
 
-#include "../common/queue.h"
+#include "../data/queue.h"
 #include "path.h"
 
 void Route_Spawn(Queue *, vec2);
