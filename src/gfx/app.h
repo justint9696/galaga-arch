@@ -9,8 +9,8 @@
 #define APP_TITLE       GAME_TITLE
 
 typedef struct {
-	SDL_Renderer *renderer;
-	SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_Window *window;
 } App;
 
 void initSDL();
