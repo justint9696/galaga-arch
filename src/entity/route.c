@@ -45,7 +45,7 @@ inline void Route_Idle(Queue *q, vec2 org) {
 
     path->type = PATH_LINEAR;
     path->speed = ENEMY_IDLE_VELOCITY;
-    path->orientation = ORIENTATE_UPRIGHT;
+    path->orientation = ORIENT_UPRIGHT;
     enqueue(q, path);
 }
 
