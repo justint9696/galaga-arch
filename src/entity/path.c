@@ -8,6 +8,26 @@
 #include <stdio.h>
 
 /**
+ * Orients an entity based on the direction they are moving.
+ * @param entity    entity to orient
+ * @param path      path of entity
+ * @param dir       direction of movement vector
+ */
+static inline void _orient(Entity *entity, path_s *path, float dir) {
+    switch (path->orientation) {
+    case ORIENT_UPRIGHT:
+        Entity_SetRotation(entity, 0.f);
+        break;
+    case ORIENT_DESTINATION:
+        if (path->angle == dir)
+            return;
+
+        Entity_SetRotation(entity, 90.f - dir);
+        break;
+    }
+}
+
+/**
  * Calculates the midpoint between two coordinates.
  * @param p0    point 1
  * @param p1    point 2
@@ -132,21 +152,8 @@ inline void Path_Linear(Entity *entity, path_s *path) {
     if (!memcmp(&entity->vel, &vel, sizeof(vec2)))
         return;
 
-    float direction;
-    switch (path->orientation) {
-    case ORIENTATE_DESTINATION: 
-        direction = DEG(atan2(vel.y, vel.x));
-        if (direction == path->angle)
-            break;
-        
-        Entity_SetRotation(entity, 90.f - direction);
-        break;
-
-    default:
-        Entity_SetRotation(entity, 0.f);
-        break;
-    }
-
+    float dir = DEG(atan2(vel.y, vel.x));
+    _orient(entity, path, dir);
     Entity_SetVelocity(entity, vel);
 
 }
@@ -190,21 +197,8 @@ inline void Path_Circular(Entity *entity, path_s *path) {
         (pos.y - entity->pos.y)
     };
 
-    float direction;
-    switch (path->orientation) {
-        case ORIENTATE_DESTINATION: 
-            direction = DEG(atan2(vel.y, vel.x));
-            if (direction == path->angle)
-                break;
-
-            Entity_SetRotation(entity, 90.f - direction);
-            break;
-
-        default:
-            Entity_SetRotation(entity, 0.f);
-            break;
-    }
-
+    float dir = DEG(atan2(vel.y, vel.x));
+    _orient(entity, path, dir);
     Entity_SetPosition(entity, pos);
 }
 
@@ -240,20 +234,7 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
         (pos.y - entity->pos.y)
     };
 
-    float direction;
-    switch (path->orientation) {
-    case ORIENTATE_DESTINATION: 
-        direction = DEG(atan2(vel.y, vel.x));
-        if (direction == path->angle)
-            break;
-
-        Entity_SetRotation(entity, 90.f - direction);
-        break;
-
-    default:
-        Entity_SetRotation(entity, 0.f);
-        break;
-    }
-
+    float dir = DEG(atan2(vel.y, vel.x));
+    _orient(entity, path, dir);
     Entity_SetPosition(entity, pos);
 }

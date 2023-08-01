@@ -24,13 +24,13 @@ typedef enum {
 } pstate_t;
 
 typedef enum {
-    ORIENTATE_DESTINATION,
-    ORIENTATE_UPRIGHT,
-} porientate_t;
+    ORIENT_DESTINATION,
+    ORIENT_UPRIGHT,
+} porient_t;
 
 typedef struct {
     pstate_t state;
-    porientate_t orientation;
+    porient_t orientation;
     float angle, time, speed;
     uint64_t tick;
     ptype_t type;
