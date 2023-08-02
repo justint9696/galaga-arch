@@ -1,11 +1,11 @@
-#include "../gfx/hud.h"
-#include "../gfx/renderer.h"
-#include "../gfx/stars.h"
+#include "gfx/hud.h"
+#include "gfx/renderer.h"
+#include "gfx/stars.h"
 
-#include "../common/util.h"
+#include "common/util.h"
 
-#include "../entity/enemy.h"
-#include "../entity/player.h"
+#include "entity/ai/enemy.h"
+#include "entity/player.h"
 
 #include "game.h"
 #include "fps.h"
@@ -47,6 +47,9 @@ void Game_Init() {
 }
 
 void Game_Main() {
+    if (Level_Complete()) 
+        Level_Increment();
+
     // frame start
     frame_start();
 

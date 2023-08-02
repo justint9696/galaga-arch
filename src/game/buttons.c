@@ -1,4 +1,4 @@
-#include "../entity/player.h"
+#include "entity/player.h"
 #include "buttons.h"
 
 int _buttons = 0;
