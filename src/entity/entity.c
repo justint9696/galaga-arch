@@ -1,14 +1,14 @@
-#include "../gfx/app.h"
-#include "../gfx/hud.h"
-#include "../gfx/renderer.h"
-#include "../gfx/window.h"
+#include "gfx/app.h"
+#include "gfx/hud.h"
+#include "gfx/renderer.h"
+#include "gfx/window.h"
 
-#include "../data/linked_list.h"
+#include "data/linked_list.h"
 
-#include "../common/util.h"
+#include "common/util.h"
 
-#include "../game/game.h"
-#include "../game/time.h"
+#include "game/game.h"
+#include "game/time.h"
 
 #include "entity.h"
 

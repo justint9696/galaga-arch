@@ -1,10 +1,10 @@
 #ifndef _ENEMY_H_
 #define _ENEMY_H_
 
-#include "../data/queue.h"
-#include "../gfx/window.h"
+#include "data/queue.h"
+#include "gfx/window.h"
 
-#include "entity.h"
+#include "entity/entity.h"
 #include "path.h"
 
 #include <stdint.h>

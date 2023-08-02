@@ -1,14 +1,15 @@
-#include "../gfx/hud.h"
+#include "gfx/hud.h"
 
-#include "../game/level.h"
-#include "../game/time.h"
+#include "game/level.h"
+#include "game/time.h"
 
-#include "../common/linked_list.h"
-#include "../common/util.h"
+#include "data/linked_list.h"
+
+#include "common/util.h"
+
+#include "entity/player.h"
 
 #include "enemy.h"
-#include "entity.h"
-#include "player.h"
 #include "route.h"
 
 #include <assert.h>
@@ -155,6 +156,13 @@ static void _Enemy_Think(Enemy *self, uint64_t tick) {
             self->state == STATE_SPAWN ? "Spawn" : "Attack");
 }
 
+void Enemy_Free(Enemy *self) {
+    printf("enemy freed\n");
+    Entity_Free(self->entity);
+    LinkedList_Remove(&_enemies, (void *)self);
+    free(self);
+}
+
 void Enemy_InitAll(uint64_t tick) {
     Enemy *enemy;
     int count = Level_EnemyCount();
@@ -179,6 +187,8 @@ void Enemy_UpdateAll(uint64_t tick) {
 
         if (Entity_IsAlive(enemy->entity))
             _Enemy_Think(enemy, tick);
+        else 
+            Enemy_Free(enemy);;
 
         tmp = tmp->next;
     }

@@ -1,4 +1,4 @@
-#include "../game/buttons.h"
+#include "game/buttons.h"
 #include "entity.h"
 #include "player.h"
 

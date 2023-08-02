@@ -1,8 +1,8 @@
 #ifndef _PLAYER_H_
 #define _PLAYER_H_
 
-#include "../common/type.h"
-#include "../gfx/window.h"
+#include "common/type.h"
+#include "gfx/window.h"
 #include "entity.h"
 
 #include <stdbool.h>
