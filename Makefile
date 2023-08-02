@@ -4,10 +4,13 @@ BIN 		= bin/
 OBJ 		= obj/
 SRC 		= src/
 
-SRCS		= $(wildcard $(SRC)*.c $(SRC)*/*.c)
+SRCS		= $(shell find $(SRC) -name '*.c') 
 OBJS 		= $(patsubst $(SRC)%, $(OBJ)%, $(SRCS:.c=.o))
 
+INCLUDES 	= -I$(SRC)
+
 CFLAGS 		= -g -O3 -Wall
+CFLAGS  	+= $(INCLUDES)
 LDFLAGS 	= -L ../ludo -lSDL2 -lSDL2_image -lSDL2_ttf -lm
 
 TARGET 		= $(BIN)galaga
