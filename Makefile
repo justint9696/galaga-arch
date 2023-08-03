@@ -24,7 +24,11 @@ build: $(OBJS)
 run: all
 	$(TARGET)
 
-$(OBJ)%.o: $(SRC)%.c
+$(OBJ)%.o: $(SRC)%.c $(SRC)%.h
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -o $@ -c $< 
+
+$(OBJ)%.o: $(SRC)%.c 
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -o $@ -c $< 
 
