@@ -9,22 +9,22 @@ inline LinkedList *LinkedList_Init() {
 }
 
 void LinkedList_Add(LinkedList *head, void *item) {
-	if (!head->item)
-		head->item = item;
-	else {
-		LinkedList *tmp = head;
-		while (tmp->next) {
-			tmp = tmp->next;
-		}
+    if (!head->item)
+        head->item = item;
+    else {
+        LinkedList *tmp = head;
+        while (tmp->next) {
+            tmp = tmp->next;
+        }
 
-		tmp->next = LinkedList_Init();
-		tmp->next->item = item;
-	}
+        tmp->next = LinkedList_Init();
+        tmp->next->item = item;
+    }
 }
 
 void LinkedList_Remove(LinkedList **head, void *item) {
-	LinkedList *tmp = *head, *prev = NULL;
-	while (tmp) {
+    LinkedList *tmp = *head, *prev = NULL;
+    while (tmp) {
         if (!memcmp(tmp->item, item, sizeof(int *))) {
             if (!prev) 
                 *head = (*head)->next;
@@ -35,7 +35,7 @@ void LinkedList_Remove(LinkedList **head, void *item) {
             break;
         }
 
-		prev = tmp;
-		tmp = tmp->next;
-	}
+        prev = tmp;
+        tmp = tmp->next;
+    }
 }
