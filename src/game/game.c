@@ -9,18 +9,20 @@
 
 #include "game.h"
 #include "fps.h"
-#include "level.h"
+#include "stage.h"
 #include "time.h"
 
 #include <SDL2/SDL.h>
 
-static uint64_t _time, _delta_time;
+static uint64_t _time, _start_time, _delta_time;
 
 static inline void _Game_Tick() {
-    const uint64_t tick = Get_Tick();
+    const uint64_t tick = Time_GetTick();
 
     _delta_time = tick - _time;
     _time += _delta_time;
+
+    Hud_AddText("Level time: %lis", ((Time_Passed(_start_time) / 1000)));
 }
 
 bool Game_IsRunning() {
@@ -29,26 +31,27 @@ bool Game_IsRunning() {
 
 void Game_Init() {
     // prepare time
-    _time = Get_Tick();
+    _time = Time_GetTick();
+    _start_time = _time;
     Time_Init();
     fps_init();
-
-    // prepare level
-    Level_Init();
 
     // prepare entities
     Entity_InitAll();
     Player_Init(_time);
-    Enemy_InitAll(_time);
 
     // prepare gfx
     Hud_Init();
     Stars_Init();
+
+    // prepare stage
+    Stage_Init();
+    Stage_Set();
 }
 
 void Game_Main() {
-    if (Level_Complete()) 
-        Level_Increment();
+    if (Stage_Complete()) 
+        Stage_Set();
 
     // frame start
     frame_start();
