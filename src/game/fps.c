@@ -10,11 +10,11 @@ static inline int _frame_time() {
 }
 
 void frame_start() {
-    _fps.start = Get_Tick();
+    _fps.start = Time_GetTick();
 }
 
 void frame_end() {
-    _fps.end = Get_Tick();
+    _fps.end = Time_GetTick();
     _fps.time = _frame_time();
     _fps.frames++;
 }
@@ -26,7 +26,7 @@ float fps_get() {
 
 void fps_init() {
     memset(&_fps, 0, sizeof(fps_s));
-    _fps.start = Get_Tick();
+    _fps.start = Time_GetTick();
 }
 
 void fps_limit() {
