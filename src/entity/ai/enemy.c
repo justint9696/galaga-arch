@@ -1,6 +1,5 @@
 #include "gfx/hud.h"
 
-#include "game/level.h"
 #include "game/time.h"
 
 #include "data/linked_list.h"
@@ -65,12 +64,12 @@ static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
     }
 
     float distance = distance(self->entity->pos, path->dst);
-    Hud_AddText("Path: %s",
+    /*Hud_AddText("Path: %s",
             path->type == PATH_LINEAR ? "Linear" : 
             path->type == PATH_BEZIER ? "Bezier" : "Circular");
 
     Hud_AddText("Queue: %i", self->path.size);
-    Hud_AddText("Distance: %.2f", distance);
+    Hud_AddText("Distance: %.2f", distance);*/
 
     if (path->complete) {
         Entity_SetPosition(self->entity, path->dst);
@@ -150,23 +149,21 @@ static void _Enemy_Think(Enemy *self, uint64_t tick) {
         break;
     }    
 
-    Hud_AddText("State: %s", 
+    /*Hud_AddText("State: %s", 
             self->state == STATE_IDLE ? "Idle" :
             self->state == STATE_TRAVEL ? "Travel" :
-            self->state == STATE_SPAWN ? "Spawn" : "Attack");
+            self->state == STATE_SPAWN ? "Spawn" : "Attack");*/
 }
 
 void Enemy_Free(Enemy *self) {
-    printf("enemy freed\n");
-    Entity_Free(self->entity);
     LinkedList_Remove(&_enemies, (void *)self);
     free(self);
+
+    _count--;
 }
 
-void Enemy_InitAll(uint64_t tick) {
+void Enemy_InitAll(uint64_t tick, uint32_t count) {
     Enemy *enemy;
-    int count = Level_EnemyCount();
-
     _enemies = LinkedList_Init();
     
     for (int i = 0; i < count; i++) {
@@ -174,6 +171,7 @@ void Enemy_InitAll(uint64_t tick) {
         LinkedList_Add(_enemies, (void *)enemy);
     }
 
+    _count = count;
     printf("Enemies initialized.\n");
 }
 
@@ -185,11 +183,15 @@ void Enemy_UpdateAll(uint64_t tick) {
         enemy = (Enemy *)tmp->item;
         assert(enemy);
 
-        if (Entity_IsAlive(enemy->entity))
+        if (!enemy->entity) {
+            Enemy_Free(enemy);
+            printf("lololol\n");
+        }
+        else if (Entity_IsAlive(enemy->entity))
             _Enemy_Think(enemy, tick);
-        else 
-            Enemy_Free(enemy);;
 
         tmp = tmp->next;
     }
+
+    Hud_AddText("Enemies: %i", _count);
 }

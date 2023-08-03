@@ -33,7 +33,7 @@ typedef struct {
     Entity *entity;
 } Enemy;
 
-void Enemy_InitAll(uint64_t tick);
+void Enemy_InitAll(uint64_t tick, uint32_t count);
 void Enemy_Free(Enemy *self);
 void Enemy_UpdateAll(uint64_t tick);
 
