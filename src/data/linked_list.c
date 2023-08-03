@@ -25,13 +25,17 @@ void LinkedList_Add(LinkedList *head, void *item) {
 void LinkedList_Remove(LinkedList **head, void *item) {
     LinkedList *tmp = *head, *prev = NULL;
     while (tmp) {
-        if (!memcmp(tmp->item, item, sizeof(int *))) {
-            if (!prev) 
-                *head = (*head)->next;
+        if (!memcmp(tmp->item, item, sizeof(void *))) {
+            if (prev)
+                memcpy(&prev->next, &tmp->next, sizeof(LinkedList *));
+            else if (tmp->next)
+                memcpy(head, &tmp->next, sizeof(LinkedList *));
             else
-                prev->next = tmp->next;
+                memset(*head, 0, sizeof(LinkedList));
 
-            free(tmp);
+            if (memcmp(head, &tmp, sizeof(LinkedList *)))
+                free(tmp);
+
             break;
         }
 
