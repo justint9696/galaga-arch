@@ -15,7 +15,7 @@
 #include <assert.h>
 #include <math.h>
 
-static int _num_ent = 0;
+static int _num_ent = 0, _total_ent = 0;
 static LinkedList *_entities;
 
 bool Entity_IsAlive(const Entity *self) {
@@ -28,7 +28,8 @@ static team_t _Entity_GetOtherTeam(const team_t team) {
 
 static inline Entity *_Entity_Alloc() {
     Entity *self = (Entity *)calloc(1, sizeof(Entity));
-    self->id = _num_ent++;
+    self->id = _total_ent++;
+    _num_ent++;
 
     LinkedList_Add(_entities, self);
 
@@ -38,9 +39,7 @@ static inline Entity *_Entity_Alloc() {
 inline void Entity_Free(Entity *self) {
     assert(self);
 
-    const int id = self->id;
-
-    LinkedList_Remove(&_entities, self);
+    LinkedList_Remove(_entities, self);
     free(self);
 
     --_num_ent;
@@ -61,8 +60,8 @@ static inline void _Entity_Render_Texure(const Entity *self) {
 
 static LinkedList *_Entity_FilterByAll(const team_t team, const type_t type) {
     Entity *entity;
-    LinkedList *head = LinkedList_Init(),
-               *tmp = _entities;
+    Node *tmp = _entities->head;
+    LinkedList *head = LinkedList_Init();
 
     while (tmp) {
         entity = (Entity *)tmp->item;
@@ -108,8 +107,8 @@ static void _Entity_Collide(Entity *e1, Entity *e2) {
 
 static inline void _Entity_CollisionHandler(Entity *self) {
     Entity *entity;
-    LinkedList *head = _Entity_FilterByAll(_Entity_GetOtherTeam(self->team), -1);
-    LinkedList *tmp = head;
+    LinkedList *filter = _Entity_FilterByAll(_Entity_GetOtherTeam(self->team), -1);
+    Node *tmp = filter->head;
 
     while (tmp && tmp->item) {
         entity = (Entity *)tmp->item;
@@ -123,7 +122,7 @@ static inline void _Entity_CollisionHandler(Entity *self) {
         tmp = tmp->next;
     }
 
-    free(head);
+    free(filter);
 }
 
 static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
@@ -169,19 +168,22 @@ void Entity_InitAll() {
 
 void Entity_UpdateAll(uint64_t deltaTime) {
     Entity *entity;
-    LinkedList *tmp = _entities;
+    Node *tmp = _entities->head;
 
     while (tmp) {
         entity = (Entity *)tmp->item;
         assert(entity);
+
         tmp = tmp->next;
 
-        if (Entity_IsAlive(entity)) {
+        if (Entity_IsAlive(entity))
             _Entity_Update(entity, deltaTime);
-        }
+        else
+            Entity_Free(entity);
     }
 
     Hud_AddText("Entities: %i", _num_ent);
+    Hud_AddText("Total Entities: %i", _total_ent);
 }
 
 Entity *Entity_Init(type_t type, team_t team, float health, float x, float y, int width, int height, const char *texture) {
