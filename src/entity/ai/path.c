@@ -15,15 +15,13 @@
  */
 static inline void _orient(Entity *entity, path_s *path, float dir) {
     switch (path->orientation) {
-    case ORIENT_UPRIGHT:
-        Entity_SetRotation(entity, 0.f);
-        break;
-    case ORIENT_DESTINATION:
-        if (path->angle == dir)
-            return;
-
-        Entity_SetRotation(entity, 90.f - dir);
-        break;
+        case ORIENT_UPRIGHT:
+            Entity_SetRotation(entity, 0.f);
+            break;
+        case ORIENT_DESTINATION:
+            if (memcmp(&path->angle, &dir, sizeof(float)))
+                Entity_SetRotation(entity, 90.f - dir);
+            break;
     }
 }
 
@@ -137,11 +135,11 @@ inline void Path_Linear(Entity *entity, path_s *path) {
     };
 
     switch (path->state) {
-    case STATE_INACTIVE: 
-        path->state = STATE_ONGOING;
-        break;
-    default:
-        break;
+        case STATE_INACTIVE: 
+            path->state = STATE_ONGOING;
+            break;
+        default:
+            break;
     }
 
     path->complete = closer(entity->pos, pos, dst);
@@ -168,12 +166,12 @@ inline void Path_Circular(Entity *entity, path_s *path) {
     float distance = _arc_length(org, dst);
 
     switch (path->state) {
-    case STATE_INACTIVE:
-        path->angle = _angle(org, midpoint);
-        path->state = STATE_ONGOING;
-        break;
-    default:
-        break;
+        case STATE_INACTIVE:
+            path->angle = _angle(org, midpoint);
+            path->state = STATE_ONGOING;
+            break;
+        default:
+            break;
     }
 
     float circumference = (PI_2 * radius);
@@ -187,7 +185,7 @@ inline void Path_Circular(Entity *entity, path_s *path) {
         (midpoint.y + (radius * sin(RAD(path->angle))))
     };
 
-    path->complete = closer(entity->pos, pos, dst);
+    path->complete = (distance(pos, dst) < radius && closer(entity->pos, pos, dst));
 
     if (path->complete) 
         return;
@@ -217,11 +215,11 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
     path->time += (1.f / (time * (entity->deltaTime ? entity->deltaTime : 1.f)));
 
     switch (path->state) {
-    case STATE_INACTIVE: 
-        path->state = STATE_ONGOING;
-        break;
-    default:
-        break;
+        case STATE_INACTIVE: 
+            path->state = STATE_ONGOING;
+            break;
+        default:
+            break;
     }
 
     path->complete = closer(entity->pos, pos, dst);
