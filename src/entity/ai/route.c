@@ -24,12 +24,32 @@ static inline void _Route_Append(Queue *q, vec2 dst, float speed, ptype_t type) 
     enqueue(q, path);
 }
 
-inline void Route_Spawn(Queue *q, vec2 org) {
+static inline void _Route_SpawnLeft(Queue *q, vec2 org, float speed) {
     float radius = 50.f;
-    float speed = ENEMY_SPAWN_VELOCITY;
-    _Route_Start(q, org, (vec2) { 50, ENEMY_SPAWN_Y - 100.f }, speed, PATH_CIRCULAR);
+    _Route_Start(q, org, (vec2) { radius, ENEMY_SPAWN_Y - 100.f }, speed, PATH_CIRCULAR);
     _Route_Append(q, (vec2) { _rear(q).x, _rear(q).y - radius }, speed, PATH_CIRCULAR);
     _Route_Append(q, (vec2) { ENEMY_SPAWN_X, ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
+}
+
+static inline void _Route_SpawnRight(Queue *q, vec2 org, float speed) {
+    float radius = 50.f;
+    _Route_Start(q, org, (vec2) { org.x - radius - ENEMY_WIDTH, ENEMY_SPAWN_Y - 100.f }, -speed, PATH_CIRCULAR);
+    _Route_Append(q, (vec2) { _rear(q).x, _rear(q).y - radius }, -speed, PATH_CIRCULAR);
+    _Route_Append(q, (vec2) { ENEMY_SPAWN_X, ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
+}
+
+inline void Route_Dev(Queue *q, vec2 org) {
+    float speed = ENEMY_IDLE_VELOCITY;
+    _Route_Start(q, org, (vec2) { org.x - 50.f - ENEMY_WIDTH, org.y - 150.f }, -speed, PATH_CIRCULAR);
+    _Route_Append(q, org, -speed, PATH_CIRCULAR);
+}
+
+inline void Route_Spawn(Queue *q, vec2 org) {
+    float speed = ENEMY_SPAWN_VELOCITY;
+    if (org.x <= 0.f) 
+        _Route_SpawnLeft(q, org, speed);
+    else if (org.x >= WINDOW_WIDTH)
+        _Route_SpawnRight(q, org, speed);
 }
 
 inline void Route_Idle(Queue *q, vec2 org) {

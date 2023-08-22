@@ -7,5 +7,6 @@
 void Route_Spawn(Queue *, vec2);
 void Route_Idle(Queue *, vec2);
 void Route_Swoop(Queue *, vec2);
+void Route_Dev(Queue *, vec2);
 
 #endif
