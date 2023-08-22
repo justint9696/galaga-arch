@@ -38,6 +38,7 @@ void Game_Init() {
 
     // prepare entities
     Entity_InitAll();
+    Enemy_InitAll();
     Player_Init(_time);
 
     // prepare gfx
@@ -45,13 +46,12 @@ void Game_Init() {
     Stars_Init();
 
     // prepare stage
-    Stage_Init();
-    Stage_Set();
+    Stage_Init(_time);
 }
 
 void Game_Main() {
     if (Stage_Complete()) 
-        Stage_Set();
+        Stage_Next(_time);
 
     // frame start
     frame_start();
@@ -59,11 +59,11 @@ void Game_Main() {
     // prepare renderer
     Renderer_Prepare();
 
-    // update enemies
-    Enemy_UpdateAll(_time);
-
     // update gfx
     Stars_Update(_delta_time);
+
+    // update stage
+    Stage_Update(_time);
 
     // update entities
     Player_Update(_time);

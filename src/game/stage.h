@@ -1,35 +1,26 @@
 #ifndef _STAGE_H_
 #define _STAGE_H_
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "data/queue.h"
+#include "entity/ai/enemy.h"
 
 #define MAX_ENEMY       1
-
-typedef enum {
-    FORMATION_SINGLE,
-    FORMATION_DOUBLE,
-} formation_t;
 
 typedef struct {
     uint32_t id;
     float scalar;
-    formation_t formation;
+    eformation_t formation;
+    ewave_t wave;
+    uint64_t tick;
     struct {
         uint32_t total, remaining;
     } enemies;
 } stage_s;
 
-void Stage_Init();
-void Stage_Set();
+void Stage_Init(uint64_t tick);
+void Stage_Update(uint64_t tick);
 void Stage_Clear();
-uint32_t Stage_Next();
+uint32_t Stage_Next(uint64_t tick);
 bool Stage_Complete();
-
-uint32_t Stage_Current();
-uint32_t Stage_Remaining();
-
-float Stage_Scalar();
-formation_t Stage_Formation();
 
 #endif
