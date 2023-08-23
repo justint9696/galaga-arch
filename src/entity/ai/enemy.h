@@ -23,7 +23,7 @@ typedef enum {
     WAVE_ONE,
     WAVE_TWO,
     WAVE_THREE,
-    WAVE_FOUR,
+    // WAVE_FOUR,
     WAVE_COMPLETE,
 } ewave_t;
 

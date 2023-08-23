@@ -22,13 +22,14 @@ static LinkedList *_enemies;
  * wave 3: bottom right
  * wave 4: top center
  */
-static inline vec2 _formation_one(ewave_t wave) {
+static vec2 _formation_one(ewave_t wave) {
     switch (wave) {
         case WAVE_ONE:
             return (vec2) { -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f };
         case WAVE_TWO:
             return (vec2) { WINDOW_WIDTH, ENEMY_SPAWN_Y - 250.f };
-        // case WAVE_THREE:
+        case WAVE_THREE:
+            return (vec2) { WINDOW_WIDTH / 2.f, WINDOW_HEIGHT };
         // case WAVE_FOUR:
         //     break;
         default:
@@ -49,9 +50,7 @@ static inline vec2 _formation_three(ewave_t wave) {}
  * in formation four: same as formation three, and back to formation one
  * where on the next four, there is a speed scalar
  */
-static inline vec2 _Enemy_Spawnpoint(ewave_t wave, eformation_t formation) {
-    vec2 spawnpoint;
-
+static vec2 _Enemy_Spawnpoint(ewave_t wave, eformation_t formation) {
     switch (formation) {
         case FORMATION_ONE:
             return _formation_one(wave);
@@ -63,8 +62,6 @@ static inline vec2 _Enemy_Spawnpoint(ewave_t wave, eformation_t formation) {
         default:
             return _formation_one(wave);
     }
-
-    return spawnpoint;
 }
 
 static inline Enemy *_Enemy_Init(uint64_t tick, ewave_t wave, eformation_t formation) {
