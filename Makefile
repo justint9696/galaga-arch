@@ -3,11 +3,12 @@ CC 			= gcc
 BIN 		= bin/
 OBJ 		= obj/
 SRC 		= src/
+INC 		= src/
 
 SRCS		= $(shell find $(SRC) -name '*.c') 
 OBJS 		= $(patsubst $(SRC)%, $(OBJ)%, $(SRCS:.c=.o))
 
-INCLUDES 	= -I$(SRC)
+INCLUDES 	= -I$(INC)
 
 CFLAGS 		= -g -O3 -Wall
 CFLAGS  	+= $(INCLUDES)
@@ -20,6 +21,9 @@ all: build
 build: $(OBJS)
 	@mkdir -p $(BIN)
 	$(CC) $(LDFLAGS) -o $(TARGET) $^ 
+
+release: build
+	strip -s $(TARGET)
 
 run: all
 	$(TARGET)
