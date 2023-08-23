@@ -13,6 +13,6 @@ typedef struct {
 } wave_s;
 
 void Wave_Init();
-void Wave_Update(uint64_t tick, eformation_t formation);
+ewave_t Wave_Update(uint64_t tick, eformation_t formation);
 
 #endif

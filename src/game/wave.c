@@ -15,22 +15,17 @@ inline void Wave_Init() {
     _wave.current = WAVE_ONE;
 }
 
-void Wave_Update(uint64_t tick, eformation_t formation) {
+ewave_t Wave_Update(uint64_t tick, eformation_t formation) {
     if (!_Wave_Complete())
-        return;
+        return _wave.current;
 
     switch (_wave.current) {
-        case WAVE_ONE:
-            _wave.tail = Enemy_SpawnWave(tick, 1, _wave.current++, formation);
-            break;
-        case WAVE_TWO:
-            _wave.tail = Enemy_SpawnWave(tick, 1, _wave.current++, formation);
-            break;
-        case WAVE_THREE:
-            break;
-        case WAVE_FOUR:
+        case WAVE_COMPLETE:
             break;
         default:
+            _wave.tail = Enemy_SpawnWave(tick, 1, _wave.current, formation);
             break;
     }
+    
+    return ++_wave.current;
 }
