@@ -8,8 +8,8 @@
 
 #include "entity/player.h"
 
-#include "enemy.h"
-#include "route.h"
+#include "entity/ai/enemy.h"
+#include "entity/ai/route.h"
 
 #include <assert.h>
 

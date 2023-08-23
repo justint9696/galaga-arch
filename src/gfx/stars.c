@@ -1,7 +1,7 @@
-#include "../game/time.h"
+#include "game/time.h"
 
-#include "renderer.h"
-#include "stars.h"
+#include "gfx/renderer.h"
+#include "gfx/stars.h"
 
 #include <assert.h>
 #include <math.h>

@@ -1,6 +1,6 @@
 #include "game/buttons.h"
-#include "entity.h"
-#include "player.h"
+#include "entity/entity.h"
+#include "entity/player.h"
 
 static vec2 _vel;
 static Player _self;

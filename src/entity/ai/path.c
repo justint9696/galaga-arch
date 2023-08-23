@@ -3,7 +3,7 @@
 #include "common/util.h"
 
 #include "entity/entity.h"
-#include "path.h"
+#include "entity/ai/path.h"
 
 #include <stdio.h>
 

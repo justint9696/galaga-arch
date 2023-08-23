@@ -2,7 +2,7 @@
 #define _ROUTE_H_
 
 #include "data/queue.h"
-#include "path.h"
+#include "entity/ai/path.h"
 
 void Route_Spawn(Queue *, vec2);
 void Route_Idle(Queue *, vec2);

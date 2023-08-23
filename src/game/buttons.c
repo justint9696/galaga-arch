@@ -1,5 +1,5 @@
 #include "entity/player.h"
-#include "buttons.h"
+#include "game/buttons.h"
 
 int _buttons = 0;
 

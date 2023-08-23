@@ -1,9 +1,9 @@
-#include "../game/fps.h"
+#include "game/fps.h"
 
-#include "app.h"
-#include "hud.h"
-#include "renderer.h"
-#include "window.h"
+#include "gfx/app.h"
+#include "gfx/hud.h"
+#include "gfx/renderer.h"
+#include "gfx/window.h"
 
 #include <assert.h>
 #include <string.h>

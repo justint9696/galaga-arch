@@ -1,7 +1,7 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
-#include "type.h"
+#include "common/type.h"
 
 #include <stdbool.h>
 #include <stdint.h>

@@ -10,7 +10,7 @@
 #include "game/game.h"
 #include "game/time.h"
 
-#include "entity.h"
+#include "entity/entity.h"
 
 #include <assert.h>
 #include <math.h>

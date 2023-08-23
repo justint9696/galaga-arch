@@ -1,7 +1,7 @@
 #ifndef _APP_H_
 #define _APP_H_
 
-#include "../game/game.h"
+#include "game/game.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>

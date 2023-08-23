@@ -1,7 +1,7 @@
-#include "stage.h"
 #include "entity/ai/enemy.h"
-#include "time.h"
-#include "wave.h"
+#include "game/stage.h"
+#include "game/time.h"
+#include "game/wave.h"
 
 #include <string.h>
 

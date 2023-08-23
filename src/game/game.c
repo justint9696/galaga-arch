@@ -7,10 +7,10 @@
 #include "entity/ai/enemy.h"
 #include "entity/player.h"
 
-#include "game.h"
-#include "fps.h"
-#include "stage.h"
-#include "time.h"
+#include "game/game.h"
+#include "game/fps.h"
+#include "game/stage.h"
+#include "game/time.h"
 
 #include <SDL2/SDL.h>
 

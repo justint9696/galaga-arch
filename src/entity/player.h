@@ -3,7 +3,7 @@
 
 #include "common/type.h"
 #include "gfx/window.h"
-#include "entity.h"
+#include "entity/entity.h"
 
 #include <stdbool.h>
 
