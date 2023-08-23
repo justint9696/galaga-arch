@@ -28,7 +28,7 @@ release: build
 run: all
 	$(TARGET)
 
-$(OBJ)%.o: $(SRC)%.c $(SRC)%.h
+$(OBJ)%.o: $(SRC)%.c $(INC)%.h
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -o $@ -c $< 
 
