@@ -23,16 +23,16 @@ static inline eformation_t _Stage_Formation() {
     return _stage.formation;
 }
 
-static void _Stage_Set(uint64_t tick) {
+static void _Stage_Set() {
     uint32_t id = _Stage_Current(); 
     if (id % 4 == 0)
-        _stage.formation = FORMATION_FOUR;
+        _stage.formation = FORMATION_ONE;
     else if (id % 3 == 0)
         _stage.formation = FORMATION_THREE;
     else if (id % 2 == 0)
         _stage.formation = FORMATION_TWO;
     else 
-        _stage.formation = FORMATION_ONE;
+        _stage.formation = FORMATION_FOUR;
 }
 
 void Stage_Init(uint64_t tick) {
@@ -40,10 +40,10 @@ void Stage_Init(uint64_t tick) {
 
     _stage.enemies.total = MAX_ENEMY;
     _stage.enemies.remaining = _stage.enemies.total;
-    _stage.wave = WAVE_ONE;
     _stage.tick = tick;
 
-    _Stage_Set(tick);
+    Wave_Init();
+    _Stage_Set();
 }
 
 void Stage_Update(uint64_t tick) {
@@ -51,7 +51,7 @@ void Stage_Update(uint64_t tick) {
         case WAVE_COMPLETE:
             break;
         default:
-            Wave_Update(tick, _stage.formation);
+            _stage.wave = Wave_Update(tick, _stage.formation);
             break;
     }
 
@@ -67,7 +67,7 @@ uint32_t Stage_Next(uint64_t tick) {
     _stage.id++;
 
     Stage_Clear();
-    _Stage_Set(tick);
+    _Stage_Set();
 
     return _stage.id;
 }
