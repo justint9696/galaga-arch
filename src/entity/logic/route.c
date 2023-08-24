@@ -1,6 +1,6 @@
-#include "entity/ai/enemy.h"
-#include "entity/ai/path.h"
-#include "entity/ai/route.h"
+#include "entity/logic/enemy.h"
+#include "entity/logic/path.h"
+#include "entity/logic/route.h"
 
 static inline vec2 _rear(Queue *q) {
     return (*(path_s *)(queue_rear(q))).dst;

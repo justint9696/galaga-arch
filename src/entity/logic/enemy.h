@@ -5,7 +5,7 @@
 #include "gfx/window.h"
 
 #include "entity/entity.h"
-#include "entity/ai/path.h"
+#include "entity/logic/path.h"
 
 #include <stdint.h>
 

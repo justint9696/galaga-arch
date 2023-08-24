@@ -8,65 +8,18 @@
 
 #include "entity/player.h"
 
-#include "entity/ai/enemy.h"
-#include "entity/ai/route.h"
+#include "entity/logic/enemy.h"
+#include "entity/logic/route.h"
+#include "entity/logic/spawn.h"
 
 #include <assert.h>
 
 static int _count = 0;
 static LinkedList *_enemies;
 
-/**
- * wave 1: top center
- * wave 2: bottom left
- * wave 3: bottom right
- * wave 4: top center
- */
-static vec2 _formation_one(ewave_t wave) {
-    switch (wave) {
-        case WAVE_ONE:
-            return (vec2) { WINDOW_WIDTH / 2.f, WINDOW_HEIGHT };
-        case WAVE_TWO:
-            return (vec2) { -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f };
-        case WAVE_THREE:
-            return (vec2) { WINDOW_WIDTH, ENEMY_SPAWN_Y - 250.f };
-        // case WAVE_FOUR:
-        //     break;
-        default:
-            return (vec2) { -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f };
-    }
-    return (vec2) { 0, 0 };
-}
-
-static inline vec2 _formation_two(ewave_t wave) {}
-
-static inline vec2 _formation_three(ewave_t wave) {}
-
-/**
- * based on formation, enemies should spawn at different points off-screen
- * in formation one: 8 enemies in a line on one side of the screen
- * in formation two: 2 rows of 4 enemies in a line on one side of the screen
- * in formation three: 8 enemies in a line on both sides of the screen
- * in formation four: same as formation three, and back to formation one
- * where on the next four, there is a speed scalar
- */
-static vec2 _Enemy_Spawnpoint(ewave_t wave, eformation_t formation) {
-    switch (formation) {
-        case FORMATION_ONE:
-            return _formation_one(wave);
-        case FORMATION_TWO:
-            return _formation_two(wave);
-        case FORMATION_THREE:
-        case FORMATION_FOUR:
-            return _formation_three(wave);
-        default:
-            return _formation_one(wave);
-    }
-}
-
 static inline Enemy *_Enemy_Init(uint64_t tick, ewave_t wave, eformation_t formation) {
     Enemy *self = (Enemy *)calloc(1, sizeof(Enemy));
-    vec2 spawnpoint = _Enemy_Spawnpoint(wave, formation);
+    vec2 spawnpoint = Spawn_GetPosition(wave, formation);
 
     self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, spawnpoint.x, spawnpoint.y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
     self->entity->tick = tick;
