@@ -25,11 +25,11 @@ static LinkedList *_enemies;
 static vec2 _formation_one(ewave_t wave) {
     switch (wave) {
         case WAVE_ONE:
-            return (vec2) { -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f };
-        case WAVE_TWO:
-            return (vec2) { WINDOW_WIDTH, ENEMY_SPAWN_Y - 250.f };
-        case WAVE_THREE:
             return (vec2) { WINDOW_WIDTH / 2.f, WINDOW_HEIGHT };
+        case WAVE_TWO:
+            return (vec2) { -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f };
+        case WAVE_THREE:
+            return (vec2) { WINDOW_WIDTH, ENEMY_SPAWN_Y - 250.f };
         // case WAVE_FOUR:
         //     break;
         default:
@@ -66,25 +66,13 @@ static vec2 _Enemy_Spawnpoint(ewave_t wave, eformation_t formation) {
 
 static inline Enemy *_Enemy_Init(uint64_t tick, ewave_t wave, eformation_t formation) {
     Enemy *self = (Enemy *)calloc(1, sizeof(Enemy));
-
-    // Spawn Right
-    // self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, WINDOW_WIDTH, ENEMY_SPAWN_Y - 250.f, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
-    // self->state = STATE_SPAWN;
-
-    // Spawn Left
-    // self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
-    // self->state = STATE_SPAWN;
-
-    // Spawn Center
-    // self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, ENEMY_SPAWN_X, ENEMY_SPAWN_Y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
-    // self->state = STATE_IDLE;
-
     vec2 spawnpoint = _Enemy_Spawnpoint(wave, formation);
+
     self->entity = Entity_Init(TYPE_ENEMY, TEAM_ENEMY, ENEMY_SPAWN_HEALTH, spawnpoint.x, spawnpoint.y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
     self->entity->tick = tick;
     self->state = STATE_SPAWN;
 
-    LinkedList_Add(_enemies, (void *)self);
+    LinkedList_Add(_enemies, self);
 
     return self;
 }
@@ -104,7 +92,6 @@ static void _Enemy_ThinkPath(Enemy *self) {
 
     self->state = STATE_TRAVEL;
     // printf("path queued. items remaining in queue: %li.\n", self->path.size);
-
 }
 
 static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
@@ -216,29 +203,27 @@ static void _Enemy_Think(Enemy *self, uint64_t tick) {
 }
 
 void Enemy_InitAll() {
+    _count = 0;
     _enemies = LinkedList_Init();
     printf("Enemies initialized.\n");
 }
 
 void Enemy_Free(Enemy *self) {
-    LinkedList_Remove(_enemies, (void *)self);
+    LinkedList_Remove(_enemies, self);
     free(self);
 
     _count--;
 }
 
 void Enemy_InitCount(uint64_t tick, uint32_t count, ewave_t wave, eformation_t formation) {
-    Enemy *enemy;
-
     for (int i = 0; i < count; i++)
-        enemy = _Enemy_Init(tick, wave, formation);
+        _Enemy_Init(tick, wave, formation);
 
-    _count = count;
+    _count += count;
 }
 
 int Enemy_UpdateAll(uint64_t tick) {
-    int count = 0;
-    Enemy *enemy;
+    Enemy *enemy, *next;
     Node *tmp = _enemies->head;
 
     while (tmp) {
@@ -246,17 +231,22 @@ int Enemy_UpdateAll(uint64_t tick) {
         assert(enemy);
 
         tmp = tmp->next;
-        if (!enemy->entity)
+        if (!enemy->entity || !Entity_IsAlive(enemy->entity)) {
             Enemy_Free(enemy);
-        else if (Entity_IsAlive(enemy->entity)) {
-            count++;
-            _Enemy_Think(enemy, tick);
+            continue;
         }
+
+        if (tmp) {
+            next = (Enemy *)tmp->item;
+            if (enemy->state == STATE_SPAWN && distance(enemy->entity->pos, next->entity->pos) < 100.f) 
+                continue;
+        }
+            _Enemy_Think(enemy, tick);
     }
 
     Hud_AddText("Enemies: %i", _count);
 
-    return count;
+    return _count;
 }
 
 Enemy *Enemy_SpawnWave(uint64_t tick, uint32_t count, ewave_t wave, eformation_t formation) {

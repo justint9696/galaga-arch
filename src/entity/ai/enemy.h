@@ -42,6 +42,7 @@ typedef enum {
 } eformation_t;
 
 typedef struct {
+    ewave_t wave;
     estate_t state;
     int64_t idle_tick;
     Queue path;
