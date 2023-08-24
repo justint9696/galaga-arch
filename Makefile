@@ -36,5 +36,6 @@ $(OBJ)%.o: $(SRC)%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -o $@ -c $< 
 
+.PHONY: clean
 clean:
 	rm -rf $(BIN) $(OBJ)
