@@ -12,7 +12,7 @@ INCLUDES 	= -I$(INC)
 
 CFLAGS 		= -g -O3 -Wall
 CFLAGS  	+= $(INCLUDES)
-LDFLAGS 	= -L ../ludo -lSDL2 -lSDL2_image -lSDL2_ttf -lm
+LDFLAGS 	= -lSDL2 -lSDL2_image -lSDL2_ttf -lm
 
 TARGET 		= $(BIN)galaga
 
