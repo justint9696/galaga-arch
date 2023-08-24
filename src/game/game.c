@@ -4,7 +4,7 @@
 
 #include "common/util.h"
 
-#include "entity/ai/enemy.h"
+#include "entity/logic/enemy.h"
 #include "entity/player.h"
 
 #include "game/game.h"

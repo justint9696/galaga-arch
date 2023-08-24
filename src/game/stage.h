@@ -2,9 +2,7 @@
 #define _STAGE_H_
 
 #include "data/queue.h"
-#include "entity/ai/enemy.h"
-
-#define MAX_ENEMY       1
+#include "entity/logic/enemy.h"
 
 typedef struct {
     uint32_t id;
@@ -12,9 +10,7 @@ typedef struct {
     eformation_t formation;
     ewave_t wave;
     uint64_t tick;
-    struct {
-        uint32_t total, remaining;
-    } enemies;
+    uint32_t enemies;
 } stage_s;
 
 void Stage_Init(uint64_t tick);

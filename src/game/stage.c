@@ -1,4 +1,4 @@
-#include "entity/ai/enemy.h"
+#include "entity/logic/enemy.h"
 #include "game/stage.h"
 #include "game/time.h"
 #include "game/wave.h"
@@ -12,7 +12,7 @@ static inline uint32_t _Stage_Current() {
 }
 
 static inline uint32_t _Stage_Remaining() {
-    return _stage.enemies.remaining;
+    return _stage.enemies;
 }
 
 static inline float _Stage_Scalar() {
@@ -38,8 +38,7 @@ static void _Stage_Set() {
 void Stage_Init(uint64_t tick) {
     memset(&_stage, 0, sizeof(stage_s));
 
-    _stage.enemies.total = MAX_ENEMY;
-    _stage.enemies.remaining = _stage.enemies.total;
+    _stage.enemies = 1;
     _stage.tick = tick;
 
     Wave_Init();
@@ -56,7 +55,7 @@ void Stage_Update(uint64_t tick) {
     }
 
     int count = Enemy_UpdateAll(tick);
-    _stage.enemies.remaining = count;
+    _stage.enemies = count;
 }
 
 void Stage_Clear() {
@@ -73,5 +72,5 @@ uint32_t Stage_Next(uint64_t tick) {
 }
 
 bool Stage_Complete() {
-    return _stage.enemies.remaining == 0;
+    return _stage.enemies == 0;
 }

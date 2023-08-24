@@ -2,7 +2,7 @@
 #define _WAVE_H_
 
 #include "data/linked_list.h"
-#include "entity/ai/enemy.h"
+#include "entity/logic/enemy.h"
 
 #include <stdbool.h>
 #include <stdint.h>
