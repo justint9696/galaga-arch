@@ -16,12 +16,8 @@ static inline void _Route_Start(Queue *q, vec2 org, vec2 dst, float speed, ptype
 }
 
 static inline void _Route_Append(Queue *q, vec2 dst, float speed, ptype_t type) {
-    path_s *path = Path_Init();
-    path->org = _rear(q);
-    path->dst = dst;
-    path->type = type;
-    path->speed = speed;
-    enqueue(q, path);
+    vec2 org = _rear(q);
+    _Route_Start(q, org, dst, speed, type);
 }
 
 static inline void _Route_SpawnLeft(Queue *q, vec2 org, float speed) {
