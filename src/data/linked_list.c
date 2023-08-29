@@ -30,7 +30,7 @@ void LinkedList_Add(LinkedList *list, void *item) {
 }
 
 void LinkedList_Remove(LinkedList *list, void *item) {
-    Node *tmp = list->head, *prev = NULL;
+    Node *tmp = list->head, *prev;
     while (tmp) {
         if (!memcmp(tmp->item, item, sizeof(void *))) {
             if (prev)
@@ -52,5 +52,18 @@ void LinkedList_Remove(LinkedList *list, void *item) {
         prev = tmp;
         tmp = tmp->next;
     }
+}
+
+void LinkedList_Free(LinkedList *list) {
+    assert(list);
+
+    Node *tmp = list->head->next;
+    while (tmp) {
+        tmp = tmp->next;
+        free(tmp);
+    }
+
+    free(list->head);
+    memset(list, 0, sizeof(LinkedList));
 }
 

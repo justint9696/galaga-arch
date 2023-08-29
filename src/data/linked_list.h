@@ -20,5 +20,6 @@ typedef struct LinkedList_s {
 LinkedList *LinkedList_Init();
 void LinkedList_Add(LinkedList *list, void *item);
 void LinkedList_Remove(LinkedList *list, void *item);
+void LinkedList_Free(LinkedList *list);
 
 #endif
