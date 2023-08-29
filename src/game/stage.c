@@ -42,6 +42,7 @@ void Stage_Init(uint64_t tick) {
     _stage.tick = tick;
 
     Wave_Init();
+    Enemy_InitAll();
     _Stage_Set();
 }
 

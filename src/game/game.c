@@ -11,6 +11,7 @@
 #include "game/fps.h"
 #include "game/stage.h"
 #include "game/time.h"
+#include "game/world.h"
 
 #include <SDL2/SDL.h>
 
@@ -37,16 +38,14 @@ void Game_Init() {
     fps_init();
 
     // prepare entities
-    Entity_InitAll();
-    Enemy_InitAll();
-    Player_Init(_time);
+    World_Init(_time);
+
+    // prepare stage
+    Stage_Init(_time);
 
     // prepare gfx
     Hud_Init();
     Stars_Init();
-
-    // prepare stage
-    Stage_Init(_time);
 }
 
 void Game_Main() {
@@ -66,8 +65,7 @@ void Game_Main() {
     Stage_Update(_time);
 
     // update entities
-    Player_Update(_time);
-    Entity_UpdateAll(_delta_time);
+    World_Update(_time, _delta_time);
 
     // draw hud
     Hud_Draw();

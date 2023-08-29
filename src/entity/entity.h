@@ -2,6 +2,7 @@
 #define _ENTITY_H_
 
 #include "common/type.h"
+#include "data/linked_list.h"
 
 #include <SDL2/SDL.h>
 #include <stdbool.h>
@@ -48,19 +49,20 @@ typedef struct {
 } Entity;
 
 bool Entity_IsAlive(const Entity *self);
+team_t Entity_GetOtherTeam(const team_t team);
 
-void Entity_InitAll();
-
-Entity *Entity_Init(type_t type, team_t team, float health, float x, float y, int width, int height, const char *texture);
+bool Entity_Collision(const Entity *, const Entity *);
+void Entity_Collide(Entity *, Entity *);
 
 void Entity_Free(Entity *self);
+Entity *Entity_Init(type_t type, team_t team, float health, float x, float y, int width, int height, const char *texture);
+LinkedList *Entity_InitAll();
 
+void Entity_Update(Entity *self, uint64_t deltaTime);
 void Entity_UpdateAll(uint64_t deltaTime);
 
 void Entity_SetPosition(Entity *self, vec2 pos);
-
 void Entity_SetVelocity(Entity *self, vec2 vel);
-
 void Entity_SetRotation(Entity *self, float angle);
 
 void Entity_Fire(Entity *self, uint64_t tick);

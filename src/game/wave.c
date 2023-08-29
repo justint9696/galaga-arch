@@ -23,7 +23,7 @@ ewave_t Wave_Update(uint64_t tick, eformation_t formation) {
         case WAVE_COMPLETE:
             break;
         default:
-            _wave.tail = Enemy_SpawnWave(tick, 2, _wave.current, formation);
+            _wave.tail = Enemy_SpawnWave(tick, 1, _wave.current, formation);
             break;
     }
     

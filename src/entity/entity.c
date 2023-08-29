@@ -3,8 +3,6 @@
 #include "gfx/renderer.h"
 #include "gfx/window.h"
 
-#include "data/linked_list.h"
-
 #include "common/util.h"
 
 #include "game/game.h"
@@ -22,8 +20,40 @@ bool Entity_IsAlive(const Entity *self) {
     return (self->state != STATE_DEAD && self->health > 0.f);
 }
 
-static team_t _Entity_GetOtherTeam(const team_t team) {
+team_t Entity_GetOtherTeam(const team_t team) {
     return (team == TEAM_ALLY ? TEAM_ENEMY : TEAM_ALLY);
+}
+
+bool Entity_Collision(const Entity *e0, const Entity *e1) {
+    return ((e0->pos.x + e0->width) >= e1->pos.x 
+            && (e0->pos.y + e0->height) >= e1->pos.y)
+            && e0->pos.x <= (e1->pos.x + e1->width)
+            && e0->pos.y <= (e1->pos.y + e1->height);        
+}
+
+static void _Entity_Damage(Entity *self) {
+    if (--self->health <= 0.f)
+        self->state = STATE_DEAD;    
+}
+
+void Entity_Collide(Entity *e0, Entity *e1) {
+    switch (e0->type) {
+        case TYPE_PROJECTILE:
+            Entity_Free(e0);
+            break;
+        default:
+            _Entity_Damage(e0);
+            break;
+    }
+
+    switch (e1->type) {
+        case TYPE_PROJECTILE:
+            Entity_Free(e1);
+            break;
+        default:
+            _Entity_Damage(e1);
+            break;
+    }
 }
 
 static inline Entity *_Entity_Alloc() {
@@ -45,84 +75,12 @@ inline void Entity_Free(Entity *self) {
     --_num_ent;
 }
 
-static void _Entity_Damage(Entity *self) {
-    if (--self->health <= 0.f)
-        self->state = STATE_DEAD;    
-}
-
 static inline void _Entity_Render_Rect(const Entity *self) {
     DrawRect(round(self->pos.x), round(self->pos.y), self->width, self->height, self->color);
 }
 
 static inline void _Entity_Render_Texure(const Entity *self) {
     DrawTexture(self->texture, round(self->pos.x), round(self->pos.y), self->width, self->height, self->rotation);
-}
-
-static LinkedList *_Entity_FilterByAll(const team_t team, const type_t type) {
-    Entity *entity;
-    Node *tmp = _entities->head;
-    LinkedList *head = LinkedList_Init();
-
-    while (tmp) {
-        entity = (Entity *)tmp->item;
-        assert(entity);
-
-        if ((team == -1 && entity->type == type) ||
-                (type == -1 && entity->team == team) ||
-                (entity->team == team && entity->type == type))
-            LinkedList_Add(head, (void *)tmp->item);
-
-        tmp = tmp->next;
-    }
-
-    return head;
-}
-
-static inline bool _Entity_IsColliding(const Entity *e1, const Entity *e2) {
-    return ((e1->pos.x + e1->width) >= e2->pos.x 
-            && (e1->pos.y + e1->height) >= e2->pos.y)
-            && e1->pos.x <= (e2->pos.x + e2->width)
-            && e1->pos.y <= (e2->pos.y + e2->height);        
-}
-
-static void _Entity_Collide(Entity *e1, Entity *e2) {
-    switch (e1->type) {
-    case TYPE_PROJECTILE:
-        Entity_Free(e1);
-        break;
-    default:
-        _Entity_Damage(e1);
-        break;
-    }
-
-    switch (e2->type) {
-    case TYPE_PROJECTILE:
-        Entity_Free(e2);
-        break;
-    default:
-        _Entity_Damage(e2);
-        break;
-    }
-}
-
-static inline void _Entity_CollisionHandler(Entity *self) {
-    Entity *entity;
-    LinkedList *filter = _Entity_FilterByAll(_Entity_GetOtherTeam(self->team), -1);
-    Node *tmp = filter->head;
-
-    while (tmp && tmp->item) {
-        entity = (Entity *)tmp->item;
-        assert(entity);
-
-        if (Entity_IsAlive(entity) && _Entity_IsColliding(self, entity)) {
-             _Entity_Collide(self, entity);
-            break;
-        }
-            
-        tmp = tmp->next;
-    }
-
-    free(filter);
 }
 
 static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
@@ -139,12 +97,12 @@ static inline void _Entity_Update(Entity *self, uint64_t deltaTime) {
     self->deltaTime = deltaTime;
 
     switch (self->type) {
-    case TYPE_PLAYER:
-        self->pos.x = clamp(0, self->pos.x, WINDOW_WIDTH - self->width);
-        self->pos.y = clamp(0, self->pos.y, WINDOW_HEIGHT - self->height);
-        break;
-    default:
-        break;
+        case TYPE_PLAYER:
+            self->pos.x = clamp(0, self->pos.x, WINDOW_WIDTH - self->width);
+            self->pos.y = clamp(0, self->pos.y, WINDOW_HEIGHT - self->height);
+            break;
+        default:
+            break;
     }
 
     // _Entity_CollisionHandler(self);
@@ -158,12 +116,18 @@ static inline vec2 _Entity_Midpoint(const Entity *self) {
     return pos;
 }
 
-void Entity_InitAll() {
+LinkedList *Entity_InitAll() {
     _entities = LinkedList_Init();	
 
     assert(_entities);
 
 	printf("Entity list initialized.\n");
+
+    return _entities;
+}
+
+void Entity_Update(Entity *self, uint64_t deltaTime) {
+    _Entity_Update(self, deltaTime);
 }
 
 void Entity_UpdateAll(uint64_t deltaTime) {
@@ -178,8 +142,6 @@ void Entity_UpdateAll(uint64_t deltaTime) {
 
         if (Entity_IsAlive(entity))
             _Entity_Update(entity, deltaTime);
-        else
-            Entity_Free(entity);
     }
 
     Hud_AddText("Entities: %i", _num_ent);
@@ -204,19 +166,19 @@ Entity *Entity_Init(type_t type, team_t team, float health, float x, float y, in
     self->texture = texture == NULL ? NULL : LoadTexture(texture);
 
     switch (type) {
-    case TYPE_PLAYER:
-        self->color = COLOR_PLAYER;
-        break;
-    case TYPE_ENEMY:
-        self->color = COLOR_ENEMY;
-        break;
-    case TYPE_PROJECTILE:
-        self->color = COLOR_PROJECTILE;
-        break;
-    default:
-        printf("ERROR: Unknown entity type: %i.\n", type);
-        exit(1);
-        break;
+        case TYPE_PLAYER:
+            self->color = COLOR_PLAYER;
+            break;
+        case TYPE_ENEMY:
+            self->color = COLOR_ENEMY;
+            break;
+        case TYPE_PROJECTILE:
+            self->color = COLOR_PROJECTILE;
+            break;
+        default:
+            printf("ERROR: Unknown entity type: %i.\n", type);
+            exit(1);
+            break;
     }
 
     self->render = texture == NULL ? &_Entity_Render_Rect : &_Entity_Render_Texure;
