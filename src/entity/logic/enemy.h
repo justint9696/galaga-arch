@@ -2,7 +2,11 @@
 #define _ENEMY_H_
 
 #include "data/queue.h"
+#include "data/linked_list.h"
+
 #include "gfx/window.h"
+
+#include "game/world.h"
 
 #include "entity/entity.h"
 #include "entity/logic/path.h"
@@ -46,13 +50,12 @@ typedef struct {
     estate_t state;
     int64_t idle_tick;
     Queue path;
-    Entity *entity;
+    Entity entity;
 } Enemy;
 
-void Enemy_InitAll();
-void Enemy_InitCount(uint64_t tick, uint32_t count, ewave_t wave, eformation_t formation);
-void Enemy_Free(Enemy *self);
-int Enemy_UpdateAll(uint64_t tick);
-Enemy *Enemy_SpawnWave(uint64_t tick, uint32_t count, ewave_t wave, eformation_t formation);
+void Enemy_InitCount(LinkedList *enemies, LinkedList *entities, uint64_t tick, uint32_t count, ewave_t wave, eformation_t formation);
+void Enemy_Free(LinkedList *enemies, Enemy *self);
+int Enemy_UpdateAll(LinkedList *enemies, const World *world, uint64_t tick);
+void Enemy_SpawnWave(LinkedList *enemies, LinkedList *entities, uint64_t tick, uint32_t count, ewave_t wave, eformation_t formation);
 
 #endif

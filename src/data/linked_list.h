@@ -10,16 +10,9 @@ typedef struct {
     Node *head, *tail;
 } LinkedList;
 
-/*
-typedef struct LinkedList_s {
-    void *item;
-    struct LinkedList_s *next;
-} LinkedList;
-*/
-
 LinkedList *LinkedList_Init();
-void LinkedList_Add(LinkedList *list, void *item);
-void LinkedList_Remove(LinkedList *list, void *item);
-void LinkedList_Free(LinkedList *list);
+void LinkedList_Add(LinkedList *, void *item);
+void LinkedList_Remove(LinkedList *, void *item);
+void LinkedList_Free(LinkedList *);
 
 #endif

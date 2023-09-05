@@ -2,60 +2,61 @@
 #include "entity/entity.h"
 #include "entity/player.h"
 
-static vec2 _vel;
-static Player _player;
+#include <assert.h>
 
-bool Player_IsAlive() {
-    return Entity_IsAlive(_player.entity);
+bool Player_IsAlive(const Player *self) {
+    return Entity_IsAlive(&self->entity);
 }
 
-bool Player_IsMoving() {
-    vec2 vel = Player_Velocity();
+bool Player_IsMoving(const Player *self) {
+    vec2 vel = Player_Velocity(self);
     return (vel.x > 0 || vel.y > 0);
 }
 
-vec2 Player_Position() {
-    return _player.entity->pos;
+vec2 Player_Position(const Player *self) {
+    return self->entity.pos;
 }
 
-vec2 Player_Velocity() {
-    return _player.entity->vel;
+vec2 Player_Velocity(const Player *self) {
+    return self->entity.vel;
 }
 
-Player *Player_Init(uint64_t tick) {
-    memset(&_player, 0, sizeof(Player));
-    _player.entity = Entity_Init(TYPE_PLAYER, TEAM_ALLY, PLAYER_SPAWN_HEALTH, PLAYER_SPAWN_X, PLAYER_SPAWN_Y, PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_TEXTURE);
-    _player.entity->tick = tick;
+void Player_Init(Player *self, uint64_t tick) {
+    memset(self, 0, sizeof(Player));
+
+    Entity_Init(&self->entity, TYPE_ALLY, TEAM_ALLY, PLAYER_SPAWN_HEALTH, PLAYER_SPAWN_X, PLAYER_SPAWN_Y, PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_TEXTURE);
+    self->entity.tick = tick;
 
     printf("Player initialized.\n");
-
-   return &_player;
 }
 
-void Player_Update(uint64_t tick, uint64_t deltaTime) {
+void Player_Update(Player *self, uint64_t tick, uint64_t deltaTime) {
+    vec2 vel;
     int buttons = Buttons_Get();
-    if (!Player_IsAlive())
+    if (!Player_IsAlive(self))
         return;
 
-    if (buttons & BUTTON_SPACE) 
-        Entity_Fire(_player.entity, tick);
+    // if (buttons & BUTTON_SPACE) 
+    //     Entity_Fire(&self->entity, tick);
     
-    if (buttons == _player.buttons) 
+    if (buttons == self->buttons) 
         return;
 
-    _player.buttons = buttons;
-    memset(&_vel, 0, sizeof(vec2));
+    self->buttons = buttons;
+    memset(&vel, 0, sizeof(vec2));
 
     // if (buttons & BUTTON_UP)
-    //     vy = PLAYER_VEL;
+    //     vy = PLAYERvel;
     // else if (buttons & BUTTON_DOWN)
-    //     vy = -PLAYER_VEL;
+    //     vy = -PLAYERvel;
 
     if (buttons & BUTTON_LEFT)
-        _vel.x = -PLAYER_VELOCITY;
+        vel.x = -PLAYER_VELOCITY;
     else if (buttons & BUTTON_RIGHT)
-        _vel.x = PLAYER_VELOCITY;
+        vel.x = PLAYER_VELOCITY;
+
+    if (!memcmp(&self->entity.vel, &vel, sizeof(vec2)))
+        return;
         
-    Entity_SetVelocity(_player.entity, _vel);
-    Entity_Update(_player.entity, deltaTime);
+    Entity_SetVelocity(&self->entity, vel);
 }

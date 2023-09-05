@@ -8,64 +8,52 @@
 #include "entity/player.h"
 
 #include "game/game.h"
-#include "game/fps.h"
-#include "game/stage.h"
 #include "game/time.h"
-#include "game/world.h"
 
 #include <SDL2/SDL.h>
 
-static uint64_t _time, _start_time, _delta_time;
-
-static inline void _Game_Tick() {
-    const uint64_t tick = Time_GetTick();
-
-    _delta_time = tick - _time;
-    _time += _delta_time;
-
-    Hud_AddText("Level time: %lis", ((Time_Passed(_start_time) / 1000)));
+static inline void _Game_Tick(Game *self) {
+    Hud_AddText("Level time: %lis", ((Time_Passed(self->fps.start) / 1000)));
 }
 
-bool Game_IsRunning() {
-    return (Player_IsAlive());
+bool Game_IsRunning(Game *self) {
+    return (Player_IsAlive(&self->world.player));
 }
 
-void Game_Init() {
+void Game_Init(Game *self) {
     // prepare time
-    _time = Time_GetTick();
-    _start_time = _time;
     Time_Init();
-    fps_init();
+    FPS_Init(&self->fps);
 
     // prepare entities
-    World_Init(_time);
+    World_Init(&self->world, self->fps.start);
 
     // prepare stage
-    Stage_Init(_time);
+    Stage_Init(&self->stage, self->fps.start);
 
     // prepare gfx
     Hud_Init();
     Stars_Init();
 }
 
-void Game_Main() {
-    if (Stage_Complete()) 
-        Stage_Next(_time);
+void Game_Main(Game *self) {
+    // if (Stage_Complete()) 
+    //     Stage_Next(self->fps.ticks);
 
     // frame start
-    frame_start();
+    Frame_Start();
 
     // prepare renderer
     Renderer_Prepare();
 
     // update gfx
-    Stars_Update(_delta_time);
+    Stars_Update(self->fps.delta);
 
     // update stage
-    Stage_Update(_time);
+    Stage_Update(&self->stage, &self->world, self->fps.ticks);
 
     // update entities
-    World_Update(_time, _delta_time);
+    World_Update(&self->world, self->fps.ticks, self->fps.delta);
 
     // draw hud
     Hud_Draw();
@@ -74,11 +62,11 @@ void Game_Main() {
     Renderer_Update();
 
     // game tick
-    _Game_Tick();
-    frame_end();
+    _Game_Tick(self);
+    Frame_End();
     
     // frame delay
-    fps_limit();
+    FPS_Limit();
 
     // draw fps
     Hud_DrawFPS();

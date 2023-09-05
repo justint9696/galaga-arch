@@ -3,13 +3,14 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 static inline Node *_node_init() {
-    return (Node *)calloc(1, sizeof(Node));
+    return calloc(1, sizeof(Node));
 }
 
 inline LinkedList *LinkedList_Init() {
-    return (LinkedList *)calloc(1, sizeof(LinkedList));
+    return calloc(1, sizeof(LinkedList));
 }
 
 void LinkedList_Add(LinkedList *list, void *item) {

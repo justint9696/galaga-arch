@@ -10,9 +10,9 @@
 typedef struct {
     Enemy *tail;
     ewave_t current;
-} wave_s;
+} Wave;
 
-void Wave_Init();
-ewave_t Wave_Update(uint64_t tick, eformation_t formation);
+void Wave_Init(Wave *self);
+void Wave_Update(Wave *self, LinkedList *enemies, LinkedList *entities, uint64_t tick, eformation_t formation);
 
 #endif

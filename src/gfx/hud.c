@@ -40,7 +40,7 @@ void Hud_Draw() {
 }
 
 void Hud_DrawFPS() {
-    Hud_AddText("FPS: %.2f", fps_get());
+    Hud_AddText("FPS: %.2f", FPS_Get());
 }
 
 void Hud_AddText(const char *format, ...) {

@@ -9,18 +9,18 @@
 static vec2 _formation_one(ewave_t wave) {
     switch (wave) {
         case WAVE_ONE:
-            return (vec2) { WINDOW_WIDTH / 2.f, WINDOW_HEIGHT };
+            return (vec2) { .x = WINDOW_WIDTH / 2.f, .y = WINDOW_HEIGHT };
         case WAVE_TWO:
-            return (vec2) { -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f };
+            return (vec2) { .x = -ENEMY_WIDTH, .y = ENEMY_SPAWN_Y - 250.f };
         case WAVE_THREE:
-            return (vec2) { WINDOW_WIDTH, ENEMY_SPAWN_Y - 250.f };
+            return (vec2) { .x = WINDOW_WIDTH, .y =  ENEMY_SPAWN_Y - 250.f };
         // case WAVE_FOUR:
         //     break;
         default:
-            return (vec2) { -ENEMY_WIDTH, ENEMY_SPAWN_Y - 250.f };
+            return (vec2) { .x = -ENEMY_WIDTH, .y =  ENEMY_SPAWN_Y - 250.f };
     }
 
-    return (vec2) { 0, 0 };
+    return (vec2) { .x = 0, .y = 0 };
 }
 
 static inline vec2 _formation_two(ewave_t wave) {}

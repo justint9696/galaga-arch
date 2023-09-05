@@ -2,76 +2,65 @@
 #include "game/stage.h"
 #include "game/time.h"
 #include "game/wave.h"
+#include "gfx/hud.h"
 
 #include <string.h>
 
-static stage_s _stage;
-
-static inline uint32_t _Stage_Current() {
-    return _stage.id;
-}
-
-static inline uint32_t _Stage_Remaining() {
-    return _stage.enemies;
-}
-
-static inline float _Stage_Scalar() {
-    return _stage.scalar;  
+static inline float _Stage_Scalar(Stage *self) {
+    return self->scalar;  
 } 
 
-static inline eformation_t _Stage_Formation() {
-    return _stage.formation;
+static inline eformation_t _Stage_Formation(Stage *self) {
+    return self->formation;
 }
 
-static void _Stage_Set() {
-    uint32_t id = _Stage_Current(); 
+static void _Stage_Set(Stage *self) {
+    uint32_t id = self->id;
     if (id % 4 == 0)
-        _stage.formation = FORMATION_ONE;
+        self->formation = FORMATION_ONE;
     else if (id % 3 == 0)
-        _stage.formation = FORMATION_THREE;
+        self->formation = FORMATION_THREE;
     else if (id % 2 == 0)
-        _stage.formation = FORMATION_TWO;
+        self->formation = FORMATION_TWO;
     else 
-        _stage.formation = FORMATION_FOUR;
+        self->formation = FORMATION_FOUR;
 }
 
-void Stage_Init(uint64_t tick) {
-    memset(&_stage, 0, sizeof(stage_s));
+void Stage_Init(Stage *self, uint64_t tick) {
+    memset(self, 0, sizeof(Stage));
 
-    _stage.enemies = 1;
-    _stage.tick = tick;
+    self->tick = tick;
 
-    Wave_Init();
-    Enemy_InitAll();
-    _Stage_Set();
+    Wave_Init(&self->wave);
+    _Stage_Set(self);
 }
 
-void Stage_Update(uint64_t tick) {
-    switch (_stage.wave) {
+void Stage_Update(Stage *self, World *world, uint64_t tick) {
+    switch (self->wave.current) {
         case WAVE_COMPLETE:
             break;
         default:
-            _stage.wave = Wave_Update(tick, _stage.formation);
+            Wave_Update(&self->wave, &self->enemies, &world->entities, tick, self->formation);
             break;
     }
 
-    int count = Enemy_UpdateAll(tick);
-    _stage.enemies = count;
+    Hud_AddText("Wave: %i", self->wave.current);
+    self->count = Enemy_UpdateAll(&self->enemies, world, tick);
 }
 
-void Stage_Clear() {
+void Stage_Clear(Stage *self) {
     // TODO: clear out enemies and entities (if needed) 
 }
 
-uint32_t Stage_Next(uint64_t tick) {
-    _stage.id++;
+uint32_t Stage_Next(Stage *self, uint64_t tick) {
+    self->id++;
 
-    Stage_Clear();
-    _Stage_Set();
+    Stage_Clear(self);
+    _Stage_Set(self);
 
-    return _stage.id;
+    return self->id;
 }
 
-bool Stage_Complete() {
-    return _stage.enemies == 0;
+bool Stage_Complete(Stage *self) {
+    return self->count == 0;
 }

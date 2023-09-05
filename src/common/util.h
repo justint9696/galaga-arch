@@ -16,11 +16,7 @@
         (c >>  0) & 0xff\
     })
 
-#define distance(a, b) ({ \
-        __typeof__ (a) _a = (a); \
-        __typeof__ (b) _b = (b); \
-        (sqrtf(powf(_a.x - _b.x, 2) + powf(_a.y - _b.y, 2))); \
-    })
+#define distance(a, b) ((sqrtf(powf(a.x - b.x, 2) + powf(a.y - b.y, 2))))
 
 #define closer(a, b, c) (distance(a, c) < distance(b, c))
 

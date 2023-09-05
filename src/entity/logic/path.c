@@ -1,4 +1,3 @@
-#include "gfx/hud.h"
 #include "game/fps.h"
 #include "common/util.h"
 
@@ -31,7 +30,7 @@ static inline void _orient(Entity *entity, path_s *path, float dir) {
  * @param p1    point 2
  */
 static inline vec2 _midpoint(vec2 pt0, vec2 pt1) {
-    return (vec2) { (pt0.x + pt1.x) / 2.f, (pt0.y + pt1.y) / 2.f };
+    return (vec2) { .x = (pt0.x + pt1.x) / 2.f, .y = (pt0.y + pt1.y) / 2.f };
 }
 
 /**
@@ -49,12 +48,13 @@ static inline float _radius(vec2 point, vec2 midpoint) {
  *  @param midpoint     midpoint of a circle
  */
 static inline float _angle(vec2 point, vec2 midpoint) {
-    float 
-        dx = fabs(midpoint.x - point.x),
-        dy = fabs(midpoint.y - point.y);
+    vec2 diff = { 
+        .x = fabs(midpoint.x - point.x),
+        .y = fabs(midpoint.y - point.y)
+    };
 
     // offset based on the quadrant in reference to the midpoint.
-    float angle = DEG(atan2(dy, dx));
+    float angle = DEG(atan2(diff.y, diff.x));
     if (point.x >= midpoint.x && point.y >= midpoint.y)
         return angle; 
     else if (point.x <= midpoint.x && point.y > midpoint.y)
@@ -97,7 +97,7 @@ static inline float _bezier_quad(float p0, float p1, float p2, float t) {
  * @param dst       destination coordinates
  */
 static inline vec2 _bezier_path(vec2 src, vec2 mid, vec2 dst, float time) {
-    return (vec2) { _bezier_quad(src.x, mid.x, dst.x, time), _bezier_quad(src.y, mid.y, dst.y, time) };
+    return (vec2) { .x = _bezier_quad(src.x, mid.x, dst.x, time), .y = _bezier_quad(src.y, mid.y, dst.y, time) };
 }
 
 /**
@@ -106,7 +106,7 @@ static inline vec2 _bezier_path(vec2 src, vec2 mid, vec2 dst, float time) {
  * @param dst       desination coordinates
  */
 static inline vec2 _bezier_midpoint(vec2 org, vec2 dst, float speed) {
-    return (speed > 0.f ? (vec2) { dst.x, org.y } : (vec2) { org.x, dst.y });
+    return (speed > 0.f ? (vec2) { .x = dst.x, .y = org.y } : (vec2) { .x = org.x, .y = dst.y });
 }
 
 inline path_s *Path_Init() {
@@ -125,13 +125,13 @@ inline void Path_Linear(Entity *entity, path_s *path) {
     float angle = atan2(dy, dx);
 
     vec2 vel = {
-        fabs(path->speed) * cos(angle),
-        fabs(path->speed) * sin(angle),
+        .x = fabs(path->speed) * cos(angle),
+        .y = fabs(path->speed) * sin(angle),
     };
 
     vec2 pos = { 
-        entity->pos.x + vel.x, 
-        entity->pos.y + vel.y 
+        .x = entity->pos.x + vel.x, 
+        .y = entity->pos.y + vel.y 
     };
 
     switch (path->state) {
@@ -181,8 +181,8 @@ inline void Path_Circular(Entity *entity, path_s *path) {
     path->angle += speed * (entity->deltaTime ? entity->deltaTime : 1.f);
 
     vec2 pos = {
-        (midpoint.x + (radius * cos(RAD(path->angle)))),
-        (midpoint.y + (radius * sin(RAD(path->angle))))
+        .x = (midpoint.x + (radius * cos(RAD(path->angle)))),
+        .y = (midpoint.y + (radius * sin(RAD(path->angle))))
     };
 
     path->complete = (distance(pos, dst) < radius && closer(entity->pos, pos, dst));
@@ -191,8 +191,8 @@ inline void Path_Circular(Entity *entity, path_s *path) {
         return;
 
     vec2 vel = {
-        (pos.x - entity->pos.x),
-        (pos.y - entity->pos.y)
+        .x = (pos.x - entity->pos.x),
+        .y = (pos.y - entity->pos.y)
     };
 
     float dir = DEG(atan2(vel.y, vel.x));
@@ -228,8 +228,8 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
         return;
 
     vec2 vel = {
-        (pos.x - entity->pos.x),
-        (pos.y - entity->pos.y)
+        .x = (pos.x - entity->pos.x),
+        .y = (pos.y - entity->pos.y)
     };
 
     float dir = DEG(atan2(vel.y, vel.x));

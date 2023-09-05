@@ -32,12 +32,13 @@ void Poll_Events() {
 int main(int argc, char *argv[]) {
     initSDL();
 
-    Game_Init();
+    Game game;
+    Game_Init(&game);
     printf("%s Initialized.\n", GAME_TITLE);
 
-    while (Game_IsRunning()) {
+    while (Game_IsRunning(&game)) {
         Poll_Events();
-        Game_Main();
+        Game_Main(&game);
     }
 
     printf("Game Over.\n");

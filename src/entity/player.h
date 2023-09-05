@@ -18,16 +18,16 @@
 
 typedef struct {
     int buttons;
-    Entity *entity;
+    Entity entity;
 } Player;
 
-bool Player_IsAlive();
-bool Player_IsMoving();
+bool Player_IsAlive(const Player *self);
+bool Player_IsMoving(const Player *self);
 
-vec2 Player_Position();
-vec2 Player_Velocity();
+vec2 Player_Position(const Player *self);
+vec2 Player_Velocity(const Player *self);
 
-Player *Player_Init(uint64_t tick);
-void Player_Update(uint64_t tick, uint64_t deltaTime);
+void Player_Init(Player *self, uint64_t tick);
+void Player_Update(Player *self, uint64_t tick, uint64_t deltaTime);
 
 #endif

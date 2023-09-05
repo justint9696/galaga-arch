@@ -5,17 +5,16 @@
 
 #include "entity/entity.h"
 #include "entity/player.h"
-#include "entity/logic/enemy.h"
 
 #include "gfx/window.h"
 
 typedef struct {
-    Player *player;
-    LinkedList *entities;
-} world_s;
+    Player player;
+    LinkedList entities;
+} World;
 
-void World_Init(uint64_t tick);
-void World_Update(uint64_t tick, uint64_t deltaTime);
-void World_Destroy();
+void World_Init(World *self, uint64_t tick);
+void World_Update(World *self, uint64_t tick, uint64_t deltaTime);
+void World_Destroy(World *self);
 
 #endif
