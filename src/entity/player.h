@@ -6,6 +6,7 @@
 #include "entity/entity.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define PLAYER_TEXTURE	    "assets/images/player.png"	
 #define PLAYER_WIDTH        66.7f
@@ -17,7 +18,7 @@
 #define PLAYER_SPAWN_Y      50.f
 
 typedef struct {
-    int buttons;
+    uint32_t p_buttons, buttons;
     Entity entity;
 } Player;
 

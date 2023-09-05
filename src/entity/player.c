@@ -32,17 +32,16 @@ void Player_Init(Player *self, uint64_t tick) {
 
 void Player_Update(Player *self, uint64_t tick, uint64_t deltaTime) {
     vec2 vel;
-    int buttons = Buttons_Get();
     if (!Player_IsAlive(self))
         return;
 
     // if (buttons & BUTTON_SPACE) 
     //     Entity_Fire(&self->entity, tick);
     
-    if (buttons == self->buttons) 
+    if (self->p_buttons == self->buttons) 
         return;
 
-    self->buttons = buttons;
+    memcpy(&self->p_buttons, &self->buttons, sizeof(uint32_t));
     memset(&vel, 0, sizeof(vec2));
 
     // if (buttons & BUTTON_UP)
@@ -50,9 +49,9 @@ void Player_Update(Player *self, uint64_t tick, uint64_t deltaTime) {
     // else if (buttons & BUTTON_DOWN)
     //     vy = -PLAYERvel;
 
-    if (buttons & BUTTON_LEFT)
+    if (self->buttons & BUTTON_LEFT)
         vel.x = -PLAYER_VELOCITY;
-    else if (buttons & BUTTON_RIGHT)
+    else if (self->buttons & BUTTON_RIGHT)
         vel.x = PLAYER_VELOCITY;
 
     if (!memcmp(&self->entity.vel, &vel, sizeof(vec2)))
