@@ -15,11 +15,10 @@ void World_Init(World *self, uint64_t tick) {
 void World_Update(World *self, uint64_t tick, uint64_t deltaTime) {
     Player_Update(&self->player, tick, deltaTime);
     
+    int count = 0;
     Entity *entity;
     Node *tmp = self->entities.head;
-    int count = 0;
     while (tmp) {
-        count ++;
         entity = (Entity *)tmp->item;
         assert(entity);
 
@@ -29,6 +28,7 @@ void World_Update(World *self, uint64_t tick, uint64_t deltaTime) {
             continue;
         }
 
+        count++;
         Entity_Update(entity, deltaTime);
     }
 

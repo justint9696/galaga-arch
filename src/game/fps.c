@@ -4,39 +4,37 @@
 #include <SDL2/SDL.h>
 #include <assert.h>
 
-static fps_s *_fps;
-
-static inline uint32_t _frame_time() {
-    return (_fps->frame.end - _fps->frame.start);
+static inline uint32_t _frame_time(fps_s *fps) {
+    return (fps->frame.end - fps->frame.start);
 }
 
-void Frame_Start() {
-    _fps->frame.start = Time_GetTick();
+void Frame_Start(fps_s *fps) {
+    fps->frame.start = Time_GetTick();
 }
 
-void Frame_End() {
-    _fps->frame.end = Time_GetTick();
-    _fps->frame.time = _frame_time();
-    _fps->frames++;
-    _fps->delta = (_fps->frame.end - _fps->ticks);
-    _fps->ticks += _fps->delta;
+void Frame_End(fps_s *fps) {
+    fps->frame.end = Time_GetTick();
+    fps->frame.time = _frame_time(fps);
+    fps->frames++;
+    fps->delta = (fps->frame.end - fps->ticks);
+    fps->ticks += fps->delta;
 }
 
-float FPS_Get() {
-    return (_fps->frames / (Time_Ticks() / 1000.f));
+float FPS_Get(fps_s *fps) {
+    return (fps->frames / (Time_Ticks() / 1000.f));
 }
 
 void FPS_Init(fps_s *fps) {
-    assert(!_fps);
+    assert(!fps);
 
-    memcpy(&_fps, &fps, sizeof(fps_s *));
+    memcpy(&fps, &fps, sizeof(fps_s *));
     memset(fps, 0, sizeof(fps_s));
 
     fps->start = Time_GetTick();
-    fps->ticks = _fps->start;
+    fps->ticks = fps->start;
 }
 
-void FPS_Limit() {
-    uint32_t delay = (1000.f / (FPS_TARGET - _fps->frame.time));
+void FPS_Limit(fps_s *fps) {
+    uint32_t delay = (1000.f / (FPS_TARGET - fps->frame.time));
     SDL_Delay(delay ? delay : 0);
 }

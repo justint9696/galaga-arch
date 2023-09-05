@@ -41,7 +41,7 @@ void Game_Main(Game *self) {
     //     Stage_Next(self->fps.ticks);
 
     // frame start
-    Frame_Start();
+    Frame_Start(&self->fps);
 
     // prepare renderer
     Renderer_Prepare();
@@ -63,10 +63,10 @@ void Game_Main(Game *self) {
 
     // game tick
     _Game_Tick(self);
-    Frame_End();
+    Frame_End(&self->fps);
     
     // frame delay
-    FPS_Limit();
+    FPS_Limit(&self->fps);
 
     // draw fps
     Hud_DrawFPS();

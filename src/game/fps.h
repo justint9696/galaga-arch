@@ -13,11 +13,11 @@ typedef struct {
     } frame;
 } fps_s;
 
-void Frame_Start();
-void Frame_End();
+void Frame_Start(fps_s *fps);
+void Frame_End(fps_s *fps);
 
-float FPS_Get();
-void FPS_Init(fps_s *);
-void FPS_Limit();
+float FPS_Get(fps_s *fps);
+void FPS_Init(fps_s *fps);
+void FPS_Limit(fps_s *fps);
 
 #endif
