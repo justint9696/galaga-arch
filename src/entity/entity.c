@@ -1,5 +1,4 @@
 #include "entity/entity.h"
-#include "data/hash_table.h"
 #include "gfx/app.h"
 #include "gfx/renderer.h"
 #include "gfx/window.h"

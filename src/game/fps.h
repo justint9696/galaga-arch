@@ -16,8 +16,8 @@ typedef struct {
 void Frame_Start(fps_s *fps);
 void Frame_End(fps_s *fps);
 
-float FPS_Get(fps_s *fps);
 void FPS_Init(fps_s *fps);
 void FPS_Limit(fps_s *fps);
+float FPS_Get(const fps_s *fps);
 
 #endif

@@ -69,5 +69,5 @@ void Game_Main(Game *self) {
     FPS_Limit(&self->fps);
 
     // draw fps
-    Hud_DrawFPS();
+    Hud_DrawFPS(&self->fps);
 }

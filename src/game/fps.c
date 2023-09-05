@@ -20,14 +20,11 @@ void Frame_End(fps_s *fps) {
     fps->ticks += fps->delta;
 }
 
-float FPS_Get(fps_s *fps) {
+float FPS_Get(const fps_s *fps) {
     return (fps->frames / (Time_Ticks() / 1000.f));
 }
 
 void FPS_Init(fps_s *fps) {
-    assert(!fps);
-
-    memcpy(&fps, &fps, sizeof(fps_s *));
     memset(fps, 0, sizeof(fps_s));
 
     fps->start = Time_GetTick();
