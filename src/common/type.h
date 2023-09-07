@@ -9,15 +9,12 @@
 #define COLOR_GREEN     0x00ff00ff
 #define COLOR_YELLOW    0xffff00ff
 
-typedef union {
-    struct {
-        float x, y;
+typedef struct {
+    union {
+        float x, w, width;
     };
-    struct {
-        float w, h;
-    };
-    struct {
-        float width, height;
+    union {
+        float y, h, height;
     };
 } vec2, v2;
 
