@@ -22,14 +22,14 @@ static inline void _Route_Append(Queue *q, vec2 dst, float speed, ptype_t type) 
 static inline void _Route_SpawnLeft(Queue *q, vec2 org, float speed) {
     float radius = 50.f;
     _Route_Start(q, org, (vec2) { .x = radius, .y = ENEMY_SPAWN_Y - 100.f }, speed, PATH_CIRCULAR);
-    _Route_Append(q, (vec2) { .x = _rear(q).x, _rear(q).y - radius }, speed, PATH_CIRCULAR);
+    _Route_Append(q, (vec2) { .x = _rear(q).x, .y = _rear(q).y - radius }, speed, PATH_CIRCULAR);
     _Route_Append(q, (vec2) { .x = ENEMY_SPAWN_X, .y = ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
 }
 
 static inline void _Route_SpawnRight(Queue *q, vec2 org, float speed) {
     float radius = 50.f;
     _Route_Start(q, org, (vec2) { .x = org.x - radius - ENEMY_WIDTH, .y = ENEMY_SPAWN_Y - 100.f }, -speed, PATH_CIRCULAR);
-    _Route_Append(q, (vec2) { .x = _rear(q).x, _rear(q).y - radius }, -speed, PATH_CIRCULAR);
+    _Route_Append(q, (vec2) { .x = _rear(q).x, .y = _rear(q).y - radius }, -speed, PATH_CIRCULAR);
     _Route_Append(q, (vec2) { .x = ENEMY_SPAWN_X, .y = ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
 }
 
@@ -77,7 +77,7 @@ inline void Route_Idle(Queue *q, vec2 org) {
 inline void Route_Swoop(Queue *q, vec2 org) {
     float speed = ENEMY_SPAWN_VELOCITY;
     float radius = 100.f;
-    _Route_Start(q, org, (vec2) { .x = org.x, org.y + (radius) }, -speed, PATH_CIRCULAR);
+    _Route_Start(q, org, (vec2) { .x = org.x, .y = org.y + (radius) }, -speed, PATH_CIRCULAR);
     _Route_Append(q, org, -speed, PATH_CIRCULAR);
     _Route_Append(q, (vec2) { .x = org.x - (2.f * radius), .y = org.y - (1.5 * radius) }, speed, PATH_BEZIER);
     _Route_Append(q, (vec2) { .x = org.x + (2.f * radius), .y = org.y - (3.0 * radius) }, -speed, PATH_BEZIER);
