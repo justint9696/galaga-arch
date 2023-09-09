@@ -13,38 +13,38 @@ inline LinkedList *LinkedList_Init() {
     return calloc(1, sizeof(LinkedList));
 }
 
-void LinkedList_Add(LinkedList *list, void *item) {
-    if (!list->head) {
-        list->head = _node_init();
-        list->head->item = item;
-        memcpy(&list->tail, &list->head, sizeof(Node *));
+void LinkedList_Add(LinkedList *self, void *item) {
+    if (!self->head) {
+        self->head = _node_init();
+        self->head->item = item;
+        memcpy(&self->tail, &self->head, sizeof(void *));
     } else {
-        Node *tmp = list->head;
+        Node *tmp = self->head;
         while (tmp->next) {
             tmp = tmp->next;
         }
 
         tmp->next = _node_init();
         memcpy(&tmp->next->item, &item, sizeof(void *));
-        memcpy(&list->tail, &tmp->next, sizeof(Node *));
+        memcpy(&self->tail, &tmp->next, sizeof(void *));
     }
 }
 
-void LinkedList_Remove(LinkedList *list, void *item) {
-    Node *tmp = list->head, *prev = NULL;
+void LinkedList_Remove(LinkedList *self, void *item) {
+    Node *tmp = self->head, *prev = NULL;
     while (tmp) {
         if (!memcmp(tmp->item, item, sizeof(void *))) {
             if (prev)
-                memcpy(&prev->next, &tmp->next, sizeof(Node *));
+                memcpy(&prev->next, &tmp->next, sizeof(void *));
             else if (tmp->next)
-                memcpy(list->head->item, &tmp->next, sizeof(Node *));
+                memcpy(self->head->item, &tmp->next, sizeof(void *));
             else
-                memset(list, 0, sizeof(LinkedList));
+                memset(self, 0, sizeof(LinkedList));
 
-            if (!memcmp(&list->tail, &tmp, sizeof(Node *)))
-                memcpy(&list->tail, &prev, sizeof(Node *));
+            if (!memcmp(&self->tail, &tmp, sizeof(void *)))
+                memcpy(&self->tail, &prev, sizeof(void *));
 
-            if (memcmp(&list->head, &tmp, sizeof(Node *)))
+            if (memcmp(&self->head, &tmp, sizeof(void *)))
                 free(tmp);
 
             break;
@@ -55,16 +55,16 @@ void LinkedList_Remove(LinkedList *list, void *item) {
     }
 }
 
-void LinkedList_Free(LinkedList *list) {
-    assert(list);
+void LinkedList_Free(LinkedList *self) {
+    assert(self);
 
-    Node *tmp = list->head->next;
+    Node *tmp = self->head->next;
     while (tmp) {
         tmp = tmp->next;
         free(tmp);
     }
 
-    free(list->head);
-    memset(list, 0, sizeof(LinkedList));
+    free(self->head);
+    memset(self, 0, sizeof(LinkedList));
 }
 
