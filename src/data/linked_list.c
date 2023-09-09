@@ -31,7 +31,7 @@ void LinkedList_Add(LinkedList *list, void *item) {
 }
 
 void LinkedList_Remove(LinkedList *list, void *item) {
-    Node *tmp = list->head, *prev;
+    Node *tmp = list->head, *prev = NULL;
     while (tmp) {
         if (!memcmp(tmp->item, item, sizeof(void *))) {
             if (prev)
