@@ -30,13 +30,17 @@ void Player_Init(Player *self, uint64_t tick) {
     printf("Player initialized.\n");
 }
 
-void Player_Update(Player *self, uint64_t tick, uint64_t deltaTime) {
+void Player_Destroy(Player *self) {
+    memset(self, 0, sizeof(Player));
+}
+
+void Player_Update(Player *self, LinkedList *entities, uint64_t tick, uint64_t deltaTime) {
     vec2 vel;
     if (!Player_IsAlive(self))
         return;
 
-    // if (buttons & BUTTON_SPACE) 
-    //     Entity_Fire(&self->entity, tick);
+    if (self->buttons & BUTTON_SPACE) 
+        Entity_Fire(&self->entity, entities, tick);
     
     if (self->p_buttons == self->buttons) 
         return;
