@@ -1,38 +1,65 @@
+#include "common/util.h"
 #include "entity/logic/enemy.h"
 #include "game/stage.h"
 #include "game/time.h"
 #include "game/wave.h"
 #include "gfx/hud.h"
 
+#include <assert.h>
 #include <string.h>
-
-static inline float _Stage_Scalar(Stage *self) {
-    return self->scalar;  
-} 
-
-static inline eformation_t _Stage_Formation(Stage *self) {
-    return self->formation;
-}
 
 static void _Stage_Set(Stage *self) {
     uint32_t id = self->id;
     if (id % 4 == 0)
-        self->formation = FORMATION_ONE;
+        self->wave.formation = FORMATION_ONE;
     else if (id % 3 == 0)
-        self->formation = FORMATION_THREE;
+        self->wave.formation = FORMATION_THREE;
     else if (id % 2 == 0)
-        self->formation = FORMATION_TWO;
+        self->wave.formation = FORMATION_TWO;
     else 
-        self->formation = FORMATION_FOUR;
+        self->wave.formation = FORMATION_FOUR;
 }
 
 void Stage_Init(Stage *self, uint64_t tick) {
     memset(self, 0, sizeof(Stage));
 
-    self->tick = tick;
-
     Wave_Init(&self->wave);
     _Stage_Set(self);
+}
+
+void Stage_Destroy(Stage *self) {
+    LinkedList_Free(&self->enemies); 
+    memset(self, 0, sizeof(Stage));
+}
+
+static void _Stage_UpdateAxis(Stage *self, World *world, uint64_t tick) {
+    uint32_t count = 0;
+    Enemy *enemy, *next;
+    Node *tmp = self->enemies.head;
+
+    while (tmp) {
+        enemy = (Enemy *)tmp->item;
+        assert(enemy);
+
+        tmp = tmp->next;
+
+        if (!Entity_IsAlive(&enemy->entity)) {
+            LinkedList_Remove(&self->enemies, enemy);
+            free(enemy);
+            continue;
+        }
+
+        count++;
+        if (tmp && enemy->state == STATE_SPAWN) {
+            next = (Enemy *)tmp->item;
+            if (!next || distance(enemy->entity.pos, next->entity.pos) < 100.f) 
+                continue;
+        }
+
+        Enemy_Update(enemy, world, tick);
+    }
+
+    self->count = count;
 }
 
 void Stage_Update(Stage *self, World *world, uint64_t tick) {
@@ -40,12 +67,14 @@ void Stage_Update(Stage *self, World *world, uint64_t tick) {
         case WAVE_COMPLETE:
             break;
         default:
-            Wave_Update(&self->wave, &self->enemies, &world->entities, tick, self->formation);
+            Wave_Update(&self->wave, &world->entities, &self->enemies, tick);
             break;
     }
 
     Hud_AddText("Wave: %i", self->wave.current);
-    self->count = Enemy_UpdateAll(&self->enemies, world, tick);
+    Hud_AddText("Enemies: %i", self->count);
+
+    _Stage_UpdateAxis(self, world, tick);
 }
 
 void Stage_Clear(Stage *self) {

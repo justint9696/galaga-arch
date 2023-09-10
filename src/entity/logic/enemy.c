@@ -2,8 +2,6 @@
 
 #include "game/time.h"
 
-#include "data/linked_list.h"
-
 #include "common/util.h"
 
 #include "entity/player.h"
@@ -13,21 +11,6 @@
 #include "entity/logic/spawn.h"
 
 #include <assert.h>
-
-static int _count = 0;
-
-static inline Enemy *_Enemy_Init(LinkedList *enemies, uint64_t tick, ewave_t wave, eformation_t formation) {
-    Enemy *self = calloc(1, sizeof(Enemy));
-    vec2 spawnpoint = Spawn_GetPosition(wave, formation);
-
-    Entity_Init(&self->entity, TYPE_AXIS, TEAM_AXIS, ENEMY_SPAWN_HEALTH, spawnpoint.x, spawnpoint.y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
-    self->entity.tick = tick;
-    self->state = STATE_SPAWN;
-
-    LinkedList_Add(enemies, self);
-
-    return self;
-}
 
 static void _Enemy_ThinkPath(Enemy *self) {
     switch (self->state) {
@@ -94,7 +77,7 @@ static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
     }
 }
 
-static void _Enemy_ThinkAttack(Enemy *self, const World *world, uint64_t tick) {
+static void _Enemy_ThinkAttack(Enemy *self, World *world, uint64_t tick) {
     const vec2 
         pos = Player_Position(&world->player),
         vel = Player_Velocity(&world->player);
@@ -108,7 +91,7 @@ static void _Enemy_ThinkAttack(Enemy *self, const World *world, uint64_t tick) {
 
     if (!Player_IsMoving(&world->player)) {
         if (fabs(diff.x) < 5.f)
-            Entity_Fire(ent, tick);
+            Entity_Fire(ent, &world->entities, tick);
 
         return;
     }
@@ -123,10 +106,10 @@ static void _Enemy_ThinkAttack(Enemy *self, const World *world, uint64_t tick) {
     };
 
     if (fabs(diff.x) < 30.f || (fabs(time.x - time.y) < 1.f))
-        Entity_Fire(ent, tick);
+        Entity_Fire(ent, &world->entities, tick);
 }
 
-static void _Enemy_Think(Enemy *self, const World *world, uint64_t tick) {
+static void _Enemy_Think(Enemy *self, World *world, uint64_t tick) {
     estate_t p_state = self->state;
     // _Enemy_ThinkAttack(self, world, tick);
 
@@ -154,50 +137,19 @@ static void _Enemy_Think(Enemy *self, const World *world, uint64_t tick) {
       self->state == STATE_SPAWN ? "Spawn" : "Attack");*/
 }
 
-void Enemy_Free(LinkedList *enemies, Enemy *self) {
-    LinkedList_Remove(enemies, self);
-    free(self);
+Enemy *Enemy_Init(ewave_t wave, eformation_t formation, uint64_t tick) {
+    Enemy *self = calloc(1, sizeof(Enemy));
+    vec2 pos = Spawn_GetPosition(wave, formation);
 
-    _count--;
+    Entity_Init(&self->entity, TYPE_AXIS, TEAM_AXIS, ENEMY_SPAWN_HEALTH, pos.x, pos.y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
+
+    self->entity.tick = tick;
+    self->state = STATE_SPAWN;
+
+    return self;
 }
 
-void Enemy_InitCount(LinkedList *enemies, LinkedList *entities, uint64_t tick, uint32_t count, ewave_t wave, eformation_t formation) {
-    Enemy *enemy;
-    for (int i = 0; i < count; i++, _count++) {
-        enemy = _Enemy_Init(enemies, tick, wave, formation);
-        LinkedList_Add(entities, &enemy->entity);
-    }
+void Enemy_Update(Enemy *self, World *world, uint64_t tick) {
+    _Enemy_Think(self, world, tick);
 }
 
-int Enemy_UpdateAll(LinkedList *enemies, const World *world, uint64_t tick) {
-    Enemy *enemy, *next;
-    Node *tmp = enemies->head;
-
-    while (tmp) {
-        enemy = (Enemy *)tmp->item;
-        assert(enemy);
-
-        tmp = tmp->next;
-        if (!Entity_IsAlive(&enemy->entity)) {
-            Enemy_Free(enemies, enemy);
-            continue;
-        }
-
-        if (tmp) {
-            next = (Enemy *)tmp->item;
-            if (enemy->state == STATE_SPAWN && distance(enemy->entity.pos, next->entity.pos) < 100.f) 
-                continue;
-        }
-
-        _Enemy_Think(enemy, world, tick);
-    }
-
-    Hud_AddText("Enemies: %i", _count);
-
-    return _count;
-}
-
-void Enemy_SpawnWave(LinkedList *enemies, LinkedList *entities, uint64_t tick, uint32_t count, ewave_t wave, eformation_t formation) {
-    Enemy_InitCount(enemies, entities, tick, count, wave, formation);
-    printf("Enemy wave %i spawned.\n", wave);
-}

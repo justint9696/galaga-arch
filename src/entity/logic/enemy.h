@@ -53,9 +53,7 @@ typedef struct {
     Entity entity;
 } Enemy;
 
-void Enemy_InitCount(LinkedList *enemies, LinkedList *entities, uint64_t tick, uint32_t count, ewave_t wave, eformation_t formation);
-void Enemy_Free(LinkedList *enemies, Enemy *self);
-int Enemy_UpdateAll(LinkedList *enemies, const World *world, uint64_t tick);
-void Enemy_SpawnWave(LinkedList *enemies, LinkedList *entities, uint64_t tick, uint32_t count, ewave_t wave, eformation_t formation);
+Enemy *Enemy_Init(ewave_t wave, eformation_t formation, uint64_t tick);
+void Enemy_Update(Enemy *self, World *world, uint64_t tick);
 
 #endif
