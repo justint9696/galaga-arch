@@ -71,3 +71,8 @@ void Game_Main(Game *self) {
     // draw fps
     Hud_DrawFPS(&self->fps);
 }
+
+void Game_Destroy(Game *self) {
+    World_Destroy(&self->world);
+    Stage_Destroy(&self->stage);
+}
