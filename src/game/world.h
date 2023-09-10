@@ -8,9 +8,12 @@
 
 #include "gfx/window.h"
 
+#define DATA_SIZE       WINDOW_WIDTH * WINDOW_HEIGHT
+
 typedef struct {
     Player player;
     LinkedList entities;
+    uint64_t *data;
 } World;
 
 void World_Init(World *self, uint64_t tick);

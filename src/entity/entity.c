@@ -45,8 +45,24 @@ bool Entity_Collision(const Entity *e0, const Entity *e1) {
             && e0->pos.y <= (e1->pos.y + e1->dim.height);        
 }
 
+static void _collision_handler(Entity *self) {
+    switch (self->type) {
+        case TYPE_PROJECTILE:
+            self->state = STATE_DEAD;
+            break;
+        default:
+            if (!--self->health)
+                self->state = STATE_DEAD;
+            break;
+    }
+}
+
 void Entity_Collide(Entity *self, Entity *entity) {
-    // TODO
+    if (self->team == entity->team)
+        return;
+
+    _collision_handler(self);
+    _collision_handler(entity);
 }
 
 void Entity_Init(Entity *self, type_t type, team_t team, float health, float x, float y, int width, int height, const char *texture) {
@@ -82,8 +98,7 @@ void Entity_Init(Entity *self, type_t type, team_t team, float health, float x, 
 }
 
 void Entity_Destroy(Entity *self) {
-    assert(self);
-    free(self);
+    memset(self, 0, sizeof(Entity));
 }
 
 void Entity_Update(Entity *self, uint64_t deltaTime) {
@@ -96,7 +111,7 @@ void Entity_Update(Entity *self, uint64_t deltaTime) {
     self->pos.x += (1.f * deltaTime * self->vel.x);
     self->pos.y += (1.f * deltaTime * self->vel.y);
 
-    self->deltaTime = deltaTime;
+    self->delta = deltaTime;
 
     // clamp player within scene
     switch (self->type) {
@@ -111,7 +126,7 @@ void Entity_Update(Entity *self, uint64_t deltaTime) {
     self->render(self);
 }
 
-void Entity_Fire(Entity *self, uint64_t tick) {
+void Entity_Fire(Entity *self, LinkedList *entities, uint64_t tick) {
     const uint64_t time = Time_Passed(self->tick);
     if (time < BULLET_DELAY)
         return;
@@ -130,6 +145,9 @@ void Entity_Fire(Entity *self, uint64_t tick) {
     Entity_SetVelocity(entity, vel);
 
     self->tick = tick;
+    self->child = true;
+
+    LinkedList_Add(entities, entity);
 }
 
 void Entity_SetPosition(Entity *self, vec2 pos) {

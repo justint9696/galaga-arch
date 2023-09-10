@@ -2,6 +2,7 @@
 #define _ENTITY_H_
 
 #include "common/type.h"
+#include "data/linked_list.h"
 
 #include <SDL2/SDL.h>
 #include <stdbool.h>
@@ -35,13 +36,14 @@ typedef enum {
 
 typedef struct Entity_s {
     uint32_t id;
+    bool child;
     float health, rotation;
     type_t type;
     team_t team;
     state_t state;
     vec2 vel, pos, dim;
     uint32_t color;
-    uint64_t tick, deltaTime;
+    uint64_t tick, delta;
     SDL_Texture *texture;
     void(*render)(const struct Entity_s *);
 } Entity;
@@ -55,7 +57,7 @@ void Entity_Init(Entity *self, type_t type, team_t team, float health, float x, 
 void Entity_Destroy(Entity *self);
 
 void Entity_Update(Entity *self, uint64_t deltaTime);
-void Entity_Fire(Entity *self, uint64_t tick);
+void Entity_Fire(Entity *self, LinkedList *entities, uint64_t tick);
 
 void Entity_SetVelocity(Entity *self, vec2 vel);
 void Entity_SetPosition(Entity *self, vec2 pos);
