@@ -178,7 +178,7 @@ inline void Path_Circular(Entity *entity, path_s *path) {
     float period = (distance / (path->speed / radius));
     float speed = DEG(circumference / period);
 
-    path->angle += speed * (entity->deltaTime ? entity->deltaTime : 1.f);
+    path->angle += speed * (entity->delta ? entity->delta : 1.f);
 
     vec2 pos = {
         .x = (midpoint.x + (radius * cos(RAD(path->angle)))),
@@ -212,7 +212,7 @@ inline void Path_Bezier(Entity *entity, path_s *path) {
     vec2 pos = _bezier_path(org, midpoint, dst, path->time);
 
     float time = ((distance / fabs(path->speed)) / 1000.f);
-    path->time += (1.f / (time * (entity->deltaTime ? entity->deltaTime : 1.f)));
+    path->time += (1.f / (time * (entity->delta ? entity->delta : 1.f)));
 
     switch (path->state) {
         case STATE_INACTIVE: 
