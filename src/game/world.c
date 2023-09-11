@@ -90,11 +90,12 @@ void World_Init(World *self, uint64_t tick) {
 }
 
 void World_Update(World *self, uint64_t tick, uint64_t deltaTime) {
-    Player_Update(&self->player, &self->entities, tick, deltaTime);
+    Entity *entity = Player_Update(&self->player, tick, deltaTime);
+
+    if (entity)
+        LinkedList_Add(&self->entities, entity);
     
-    int count = 0;
-    vec2 p_pos;
-    Entity *entity;
+    v2 p_pos;
     Node *tmp = self->entities.head;
     while (tmp) {
         entity = (Entity *)tmp->item;
@@ -103,9 +104,12 @@ void World_Update(World *self, uint64_t tick, uint64_t deltaTime) {
         tmp = tmp->next;
         if (!Entity_IsAlive(entity)) {
             LinkedList_Remove(&self->entities, entity);
+            _World_Clear(self, entity);
 
-            if (entity->child) {
-                _World_Clear(self, entity);
+            if (entity->type == TYPE_PROJECTILE) {
+                // printf("free entity: id: %i pos: (%.2f, %.2f) type: %s team: %s\n", entity->id, entity->pos.x, entity->pos.y, 
+                //         entity->type == TYPE_PROJECTILE ? "PROJECTILE" : entity->type == TYPE_ENEMY ? "ENEMY" : "PLAYER",
+                //         entity->team == TEAM_AXIS ? "AXIS" : "ALLY");
                 free(entity);
             }
 
@@ -118,16 +122,11 @@ void World_Update(World *self, uint64_t tick, uint64_t deltaTime) {
         Entity_Update(entity, deltaTime);
 
         _World_Update(self, p_pos, entity);
-
-        count++;
     }
-
-    Hud_AddText("Entities: %i", count);
 }
 
 void World_Destroy(World *self) {
     free(self->data);
-    Player_Destroy(&self->player);
     LinkedList_Free(&self->entities);
-    memset(self, 0, sizeof(World));
+    Player_Destroy(&self->player);
 }
