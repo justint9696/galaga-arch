@@ -1,5 +1,5 @@
 #include "common/util.h"
-#include "entity/logic/enemy.h"
+#include "data/linked_list.h"
 #include "game/stage.h"
 #include "game/time.h"
 #include "game/wave.h"
@@ -28,35 +28,30 @@ void Stage_Init(Stage *self, uint64_t tick) {
 }
 
 void Stage_Destroy(Stage *self) {
-    LinkedList_Free(&self->enemies); 
     memset(self, 0, sizeof(Stage));
 }
 
 static void _Stage_UpdateAxis(Stage *self, World *world, uint64_t tick) {
-    uint32_t count = 0;
+    Entity *child;
+    uint32_t count;
     Enemy *enemy, *next;
-    Node *tmp = self->enemies.head;
-
-    while (tmp) {
-        enemy = (Enemy *)tmp->item;
-        assert(enemy);
-
-        tmp = tmp->next;
-
-        if (!Entity_IsAlive(&enemy->entity)) {
-            LinkedList_Remove(&self->enemies, enemy);
-            free(enemy);
+    for (int i = 0, count = 0; i < self->wave.count; i++) {
+        enemy = &self->enemies[i];
+        
+        if (!Enemy_IsAlive(enemy))
             continue;
-        }
 
-        count++;
-        if (tmp && enemy->state == STATE_SPAWN) {
-            next = (Enemy *)tmp->item;
-            if (!next || distance(enemy->entity.pos, next->entity.pos) < 100.f) 
+        ++count;
+
+        if (i < MAX_ENEMY - 1 && enemy->state == STATE_SPAWN) {
+            next = &self->enemies[i+1]; 
+            if (distance(enemy->entity.pos, next->entity.pos) < 125.f)
                 continue;
         }
 
-        Enemy_Update(enemy, world, tick);
+        child = Enemy_Update(enemy, &world->player, tick);
+        if (child) 
+            LinkedList_Add(&world->entities, child);
     }
 
     self->count = count;
@@ -64,10 +59,10 @@ static void _Stage_UpdateAxis(Stage *self, World *world, uint64_t tick) {
 
 void Stage_Update(Stage *self, World *world, uint64_t tick) {
     switch (self->wave.current) {
-        case WAVE_COMPLETE:
+        case MAX_WAVE:
             break;
         default:
-            Wave_Update(&self->wave, &world->entities, &self->enemies, tick);
+            Wave_Update(&self->wave, self->enemies, &world->entities, tick);
             break;
     }
 
@@ -77,15 +72,10 @@ void Stage_Update(Stage *self, World *world, uint64_t tick) {
     _Stage_UpdateAxis(self, world, tick);
 }
 
-void Stage_Clear(Stage *self) {
-    // TODO: clear out enemies and entities (if needed) 
-}
-
 uint32_t Stage_Next(Stage *self, uint64_t tick) {
     self->id++;
 
-    Stage_Clear(self);
-    _Stage_Set(self);
+    Stage_Init(self, tick);
 
     return self->id;
 }

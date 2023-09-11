@@ -77,28 +77,28 @@ static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
     }
 }
 
-static void _Enemy_ThinkAttack(Enemy *self, World *world, uint64_t tick) {
-    const vec2 
-        pos = Player_Position(&world->player),
-        vel = Player_Velocity(&world->player);
+static Entity *_Enemy_ThinkAttack(Enemy *self, const Player *player, uint64_t tick) {
+    const v2 
+        pos = Player_Position(player),
+        vel = Player_Velocity(player);
 
-    Entity *ent = &self->entity;
+    Entity *entity = &self->entity;
 
     const vec2 diff = {
-        .x = (pos.x - ent->pos.x),
-        .y = fabs(pos.y - ent->pos.y)
+        .x = (pos.x - entity->pos.x),
+        .y = fabs(pos.y - entity->pos.y)
     };
 
-    if (!Player_IsMoving(&world->player)) {
+    if (!Player_IsMoving(player)) {
         if (fabs(diff.x) < 5.f)
-            Entity_Fire(ent, &world->entities, tick);
-
-        return;
+            return Entity_Fire(entity, tick);
+        
+        return NULL;
     }
 
     // player is moving in the same direction
     if ((diff.x < 0.f && vel.x < 0.f) || (diff.x > 0.f && vel.x > 0.f)) 
-        return;
+        return NULL;
 
     const vec2 time = {
         .x = fabs(diff.x / PLAYER_VELOCITY),
@@ -106,12 +106,14 @@ static void _Enemy_ThinkAttack(Enemy *self, World *world, uint64_t tick) {
     };
 
     if (fabs(diff.x) < 30.f || (fabs(time.x - time.y) < 1.f))
-        Entity_Fire(ent, &world->entities, tick);
+        return Entity_Fire(entity, tick);
+
+    return NULL;
 }
 
-static void _Enemy_Think(Enemy *self, World *world, uint64_t tick) {
+static Entity *_Enemy_Think(Enemy *self, const Player *player, uint64_t tick) {
     estate_t p_state = self->state;
-    // _Enemy_ThinkAttack(self, world, tick);
+    Entity *child = _Enemy_ThinkAttack(self, player, tick);
 
     switch (self->state) {
         case STATE_IDLE:
@@ -135,21 +137,23 @@ static void _Enemy_Think(Enemy *self, World *world, uint64_t tick) {
       self->state == STATE_IDLE ? "Idle" :
       self->state == STATE_TRAVEL ? "Travel" :
       self->state == STATE_SPAWN ? "Spawn" : "Attack");*/
+
+    return child;
 }
 
-Enemy *Enemy_Init(ewave_t wave, eformation_t formation, uint64_t tick) {
-    Enemy *self = calloc(1, sizeof(Enemy));
-    vec2 pos = Spawn_GetPosition(wave, formation);
+bool Enemy_IsAlive(const Enemy *self) {
+    return Entity_IsAlive(&self->entity);
+}
 
-    Entity_Init(&self->entity, TYPE_AXIS, TEAM_AXIS, ENEMY_SPAWN_HEALTH, pos.x, pos.y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
+void Enemy_Init(Enemy *self, ewave_t wave, eformation_t formation, uint64_t tick) {
+    vec2 pos = Spawn_GetPosition(wave, formation);
+    Entity_Init(&self->entity, TYPE_ENEMY, TEAM_AXIS, ENEMY_SPAWN_HEALTH, pos.x, pos.y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
 
     self->entity.tick = tick;
     self->state = STATE_SPAWN;
-
-    return self;
 }
 
-void Enemy_Update(Enemy *self, World *world, uint64_t tick) {
-    _Enemy_Think(self, world, tick);
+Entity *Enemy_Update(Enemy *self, const Player *player, uint64_t tick) {
+    return _Enemy_Think(self, player, tick);
 }
 

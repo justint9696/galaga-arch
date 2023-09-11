@@ -2,7 +2,6 @@
 #define _ENEMY_H_
 
 #include "data/queue.h"
-#include "data/linked_list.h"
 
 #include "gfx/window.h"
 
@@ -22,6 +21,8 @@
 #define ENEMY_IDLE_VELOCITY     0.2f
 #define ENEMY_SPAWN_VELOCITY    0.3f
 #define ENEMY_IDLE_TIME         1500    
+
+#define MAX_ENEMY               32
 
 typedef enum {
     WAVE_ONE,
@@ -53,7 +54,8 @@ typedef struct {
     Entity entity;
 } Enemy;
 
-Enemy *Enemy_Init(ewave_t wave, eformation_t formation, uint64_t tick);
-void Enemy_Update(Enemy *self, World *world, uint64_t tick);
+bool Enemy_IsAlive(const Enemy *self);
+void Enemy_Init(Enemy *self, ewave_t wave, eformation_t formation, uint64_t tick);
+Entity *Enemy_Update(Enemy *self, const Player *player, uint64_t tick);
 
 #endif

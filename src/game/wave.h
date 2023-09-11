@@ -17,6 +17,6 @@ typedef struct {
 } Wave;
 
 void Wave_Init(Wave *self);
-void Wave_Update(Wave *self, LinkedList *entities, LinkedList *enemies, uint64_t tick);
+void Wave_Update(Wave *self, Enemy *enemies, LinkedList *entities, uint64_t tick);
 
 #endif

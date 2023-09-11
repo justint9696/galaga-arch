@@ -10,7 +10,7 @@ typedef struct {
     uint32_t id, count;
     float scalar;
     Wave wave;
-    LinkedList enemies;
+    Enemy enemies[MAX_ENEMY];
 } Stage;
 
 void Stage_Init(Stage *self, uint64_t tick);
