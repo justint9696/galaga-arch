@@ -26,7 +26,7 @@ static inline bool _Entity_OOB(const Entity *self) {
 static inline vec2 _Entity_Midpoint(const Entity *self) {
     return (vec2) {
         .x = self->pos.x + (self->dim.width / 2.f),
-        .y = self->pos.y + (self->type == TYPE_ALLY ? self->dim.height : 0.f)
+        .y = self->pos.y + (self->type == TYPE_PLAYER ? self->dim.height : 0.f)
     };
 }
 
@@ -79,11 +79,11 @@ void Entity_Init(Entity *self, type_t type, team_t team, float health, float x, 
     self->texture = texture == NULL ? NULL : LoadTexture(texture);
 
     switch (type) {
-        case TYPE_ALLY:
-            self->color = COLOR_ALLY;
+        case TYPE_PLAYER:
+            self->color = COLOR_PLAYER;
             break;
-        case TYPE_AXIS:
-            self->color = COLOR_AXIS;
+        case TYPE_ENEMY:
+            self->color = COLOR_ENEMY;
             break;
         case TYPE_PROJECTILE:
             self->color = COLOR_PROJECTILE;
@@ -115,7 +115,7 @@ void Entity_Update(Entity *self, uint64_t deltaTime) {
 
     // clamp player within scene
     switch (self->type) {
-        case TYPE_ALLY:
+        case TYPE_PLAYER:
             self->pos.x = clamp(0, self->pos.x, WINDOW_WIDTH - self->dim.width);
             self->pos.y = clamp(0, self->pos.y, WINDOW_HEIGHT - self->dim.height);
             break;
@@ -126,28 +126,28 @@ void Entity_Update(Entity *self, uint64_t deltaTime) {
     self->render(self);
 }
 
-void Entity_Fire(Entity *self, LinkedList *entities, uint64_t tick) {
+Entity *Entity_Fire(Entity *self, uint64_t tick) {
     const uint64_t time = Time_Passed(self->tick);
     if (time < BULLET_DELAY)
-        return;
+        return NULL;
 
-    vec2 pos, vel;
+    v2 pos = _Entity_Midpoint(self);
 
-    pos = _Entity_Midpoint(self);
-
-    vel.x = 0.f;
-    vel.y = self->team == TEAM_ALLY ? BULLET_VELOCITY : -BULLET_VELOCITY;
+    v2 vel = {
+        .x = 0.f,
+        .y = self->team == TEAM_ALLY ? BULLET_VELOCITY : -BULLET_VELOCITY,
+    };
 
     Entity *entity = calloc(1, sizeof(Entity));
+    assert(entity);
 
     Entity_Init(entity, TYPE_PROJECTILE, self->team, 1.f, pos.x, pos.y, BULLET_WIDTH, BULLET_HEIGHT, BULLET_TEXTURE);
 
     Entity_SetVelocity(entity, vel);
 
     self->tick = tick;
-    self->child = true;
 
-    LinkedList_Add(entities, entity);
+    return entity;
 }
 
 void Entity_SetPosition(Entity *self, vec2 pos) {
