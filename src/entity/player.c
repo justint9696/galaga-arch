@@ -24,7 +24,7 @@ vec2 Player_Velocity(const Player *self) {
 void Player_Init(Player *self, uint64_t tick) {
     memset(self, 0, sizeof(Player));
 
-    Entity_Init(&self->entity, TYPE_ALLY, TEAM_ALLY, PLAYER_SPAWN_HEALTH, PLAYER_SPAWN_X, PLAYER_SPAWN_Y, PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_TEXTURE);
+    Entity_Init(&self->entity, TYPE_PLAYER, TEAM_ALLY, PLAYER_SPAWN_HEALTH, PLAYER_SPAWN_X, PLAYER_SPAWN_Y, PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_TEXTURE);
     self->entity.tick = tick;
 
     printf("Player initialized.\n");
@@ -34,32 +34,34 @@ void Player_Destroy(Player *self) {
     memset(self, 0, sizeof(Player));
 }
 
-void Player_Update(Player *self, LinkedList *entities, uint64_t tick, uint64_t deltaTime) {
-    vec2 vel;
+Entity *Player_Update(Player *self, uint64_t tick, uint64_t deltaTime) {
     if (!Player_IsAlive(self))
-        return;
+        return NULL;
 
+    Entity *child = NULL;
     if (self->buttons & BUTTON_SPACE) 
-        Entity_Fire(&self->entity, entities, tick);
+        child = Entity_Fire(&self->entity, tick);
     
     if (self->p_buttons == self->buttons) 
-        return;
+        return child;
 
     memcpy(&self->p_buttons, &self->buttons, sizeof(uint32_t));
-    memset(&vel, 0, sizeof(vec2));
 
     // if (buttons & BUTTON_UP)
     //     vy = PLAYERvel;
     // else if (buttons & BUTTON_DOWN)
     //     vy = -PLAYERvel;
 
+    v2 vel = { .x = 0.f, .y = 0.f };
     if (self->buttons & BUTTON_LEFT)
         vel.x = -PLAYER_VELOCITY;
     else if (self->buttons & BUTTON_RIGHT)
         vel.x = PLAYER_VELOCITY;
 
     if (!memcmp(&self->entity.vel, &vel, sizeof(vec2)))
-        return;
+        return child;
         
     Entity_SetVelocity(&self->entity, vel);
+
+    return child;
 }
