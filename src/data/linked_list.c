@@ -58,13 +58,13 @@ void LinkedList_Remove(LinkedList *self, void *item) {
 void LinkedList_Free(LinkedList *self) {
     assert(self);
 
-    Node *tmp = self->head->next;
+    Node *tmp = self->head, *current;
     while (tmp) {
+        current = tmp;
         tmp = tmp->next;
-        free(tmp);
+        free(current);
     }
 
-    free(self->head);
     memset(self, 0, sizeof(LinkedList));
 }
 
