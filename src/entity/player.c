@@ -30,10 +30,6 @@ void Player_Init(Player *self, uint64_t tick) {
     printf("Player initialized.\n");
 }
 
-void Player_Destroy(Player *self) {
-    memset(self, 0, sizeof(Player));
-}
-
 Entity *Player_Update(Player *self, uint64_t tick, uint64_t deltaTime) {
     if (!Player_IsAlive(self))
         return NULL;
@@ -52,7 +48,7 @@ Entity *Player_Update(Player *self, uint64_t tick, uint64_t deltaTime) {
     // else if (buttons & BUTTON_DOWN)
     //     vy = -PLAYERvel;
 
-    v2 vel = { .x = 0.f, .y = 0.f };
+    vec2 vel = { .x = 0.f, .y = 0.f };
     if (self->buttons & BUTTON_LEFT)
         vel.x = -PLAYER_VELOCITY;
     else if (self->buttons & BUTTON_RIGHT)

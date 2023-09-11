@@ -97,10 +97,6 @@ void Entity_Init(Entity *self, type_t type, team_t team, float health, float x, 
     self->render = texture == NULL ? _Entity_Render_Rect : _Entity_Render_Texure;
 }
 
-void Entity_Destroy(Entity *self) {
-    memset(self, 0, sizeof(Entity));
-}
-
 void Entity_Update(Entity *self, uint64_t deltaTime) {
     if (_Entity_OOB(self)) {
         self->state = STATE_DEAD;
@@ -131,18 +127,16 @@ Entity *Entity_Fire(Entity *self, uint64_t tick) {
     if (time < BULLET_DELAY)
         return NULL;
 
-    v2 pos = _Entity_Midpoint(self);
+    vec2 pos = _Entity_Midpoint(self);
 
-    v2 vel = {
+    vec2 vel = {
         .x = 0.f,
         .y = self->team == TEAM_ALLY ? BULLET_VELOCITY : -BULLET_VELOCITY,
     };
 
     Entity *entity = calloc(1, sizeof(Entity));
-    assert(entity);
 
     Entity_Init(entity, TYPE_PROJECTILE, self->team, 1.f, pos.x, pos.y, BULLET_WIDTH, BULLET_HEIGHT, BULLET_TEXTURE);
-
     Entity_SetVelocity(entity, vel);
 
     self->tick = tick;

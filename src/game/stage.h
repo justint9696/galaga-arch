@@ -14,10 +14,8 @@ typedef struct {
 } Stage;
 
 void Stage_Init(Stage *self, uint64_t tick);
-void Stage_Destroy(Stage *self);
 void Stage_Update(Stage *self, World *world, uint64_t tick);
-void Stage_Clear(Stage *self);
-uint32_t Stage_Next(Stage *self, uint64_t tick);
+void Stage_Next(Stage *self, uint64_t tick);
 bool Stage_Complete(Stage *self);
 
 #endif

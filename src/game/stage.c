@@ -27,15 +27,11 @@ void Stage_Init(Stage *self, uint64_t tick) {
     _Stage_Set(self);
 }
 
-void Stage_Destroy(Stage *self) {
-    memset(self, 0, sizeof(Stage));
-}
-
-static void _Stage_UpdateAxis(Stage *self, World *world, uint64_t tick) {
+static void _Stage_Update(Stage *self, World *world, uint64_t tick) {
     Entity *child;
-    uint32_t count;
+    uint32_t count = 0;
     Enemy *enemy, *next;
-    for (int i = 0, count = 0; i < self->wave.count; i++) {
+    for (int i = 0; i < self->wave.count; i++) {
         enemy = &self->enemies[i];
         
         if (!Enemy_IsAlive(enemy))
@@ -69,15 +65,12 @@ void Stage_Update(Stage *self, World *world, uint64_t tick) {
     Hud_AddText("Wave: %i", self->wave.current);
     Hud_AddText("Enemies: %i", self->count);
 
-    _Stage_UpdateAxis(self, world, tick);
+    _Stage_Update(self, world, tick);
 }
 
-uint32_t Stage_Next(Stage *self, uint64_t tick) {
-    self->id++;
-
+void Stage_Next(Stage *self, uint64_t tick) {
+    ++self->id;
     Stage_Init(self, tick);
-
-    return self->id;
 }
 
 bool Stage_Complete(Stage *self) {

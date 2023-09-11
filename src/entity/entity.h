@@ -53,7 +53,6 @@ bool Entity_Collision(const Entity *e0, const Entity *e1);
 void Entity_Collide(Entity *self, Entity *entity);
 
 void Entity_Init(Entity *self, type_t type, team_t team, float health, float x, float y, int width, int height, const char *texture);
-void Entity_Destroy(Entity *self);
 
 void Entity_Update(Entity *self, uint64_t deltaTime);
 Entity *Entity_Fire(Entity *self, uint64_t tick);

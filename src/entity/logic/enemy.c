@@ -78,7 +78,7 @@ static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
 }
 
 static Entity *_Enemy_ThinkAttack(Enemy *self, const Player *player, uint64_t tick) {
-    const v2 
+    const vec2 
         pos = Player_Position(player),
         vel = Player_Velocity(player);
 

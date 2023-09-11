@@ -5,54 +5,53 @@
 #include <assert.h>
 #include <stdlib.h>
 
-static int get_offset(int x, int y) {
+static int _get_offset(int x, int y) {
     return x + (y * WINDOW_WIDTH);
 }
 
-static void *get(uint64_t *data, int x, int y) {
-    return (void *)data[get_offset(x, y)]; 
+static void *_get(uint64_t *data, int x, int y) {
+    return (void *)data[_get_offset(x, y)]; 
 }
 
-static void update(World *world, int x, int y, const void *item) {
-    memcpy(&world->data[get_offset(x, y)], &item, sizeof(void *));
+static void _update(World *world, int x, int y, const void *item) {
+    memcpy(&world->data[_get_offset(x, y)], &item, sizeof(void *));
 }
 
-static void clear(World *world, int x, int y) {
-    memset(&world->data[get_offset(x, y)], 0, sizeof(void *));
+static void _clear(World *world, int x, int y) {
+    memset(&world->data[_get_offset(x, y)], 0, sizeof(void *));
 }
 
 static void _World_Clear(World *self, Entity *entity) {
-    v2 pos = entity->pos, dim = entity->dim;
-    v2 size = {
+    vec2 pos = entity->pos, dim = entity->dim;
+    vec2 size = {
         .x = pos.x + dim.w,
         .y = pos.y + dim.h,
     };
     for (int y = pos.y; y < size.y; y++) {
         for (int x = pos.x; x < size.x; x++)
-            clear(self, x, y);
+            _clear(self, x, y);
     }
 }
 
 static void _World_Collision(World *self, Entity *entity) {
     Entity *ent;
-    v2 pos = entity->pos, dim = entity->dim;
-    v2 size = {
+    vec2 pos = entity->pos, dim = entity->dim;
+    vec2 size = {
         .x = pos.x + dim.w,
         .y = pos.y + dim.h,
     };
     for (int y = pos.y; y < size.y; y++) {
         for (int x = pos.x; x < size.x; x++) {
-            ent = (Entity *)get(self->data, x, y);        
-            if (!ent || ent == entity)
-                continue;
-
-            if (ent->team == entity->team)
+            ent = (Entity *)_get(self->data, x, y);        
+            if (!ent || ent == entity || ent->team == entity->team)
                 continue;
 
             if (Entity_Collision(entity, ent)) {
                 Entity_Collide(entity, ent);
+
                 _World_Clear(self, entity);
                 _World_Clear(self, ent);
+
                 return;
             }
         }
@@ -67,7 +66,7 @@ static void _World_Update(World *self, vec2 p_pos, const Entity *entity) {
 
     for (int y = p_pos.y; y < size.y; y++) {
         for (int x = p_pos.x; x < size.x; x++)
-            update(self, x, y, 0);
+            _clear(self, x, y);
     }
 
     size = (vec2) {
@@ -77,7 +76,7 @@ static void _World_Update(World *self, vec2 p_pos, const Entity *entity) {
 
     for (int y = entity->pos.y; y < size.y; y++) {
         for (int x = entity->pos.x; x < size.x; x++) {
-            update(self, x, y, entity);
+            _update(self, x, y, entity);
         }
     }
 }
@@ -95,7 +94,7 @@ void World_Update(World *self, uint64_t tick, uint64_t deltaTime) {
     if (entity)
         LinkedList_Add(&self->entities, entity);
     
-    v2 p_pos;
+    vec2 p_pos;
     Node *tmp = self->entities.head;
     while (tmp) {
         entity = (Entity *)tmp->item;
@@ -103,24 +102,20 @@ void World_Update(World *self, uint64_t tick, uint64_t deltaTime) {
 
         tmp = tmp->next;
         if (!Entity_IsAlive(entity)) {
-            LinkedList_Remove(&self->entities, entity);
             _World_Clear(self, entity);
+            LinkedList_Remove(&self->entities, entity);
 
-            if (entity->type == TYPE_PROJECTILE) {
-                // printf("free entity: id: %i pos: (%.2f, %.2f) type: %s team: %s\n", entity->id, entity->pos.x, entity->pos.y, 
-                //         entity->type == TYPE_PROJECTILE ? "PROJECTILE" : entity->type == TYPE_ENEMY ? "ENEMY" : "PLAYER",
-                //         entity->team == TEAM_AXIS ? "AXIS" : "ALLY");
+            if (entity->type == TYPE_PROJECTILE)
                 free(entity);
-            }
 
             continue;
         }
 
-        _World_Collision(self, entity);
 
         memcpy(&p_pos, &entity->pos, sizeof(vec2));
         Entity_Update(entity, deltaTime);
 
+        _World_Collision(self, entity);
         _World_Update(self, p_pos, entity);
     }
 }
@@ -128,5 +123,4 @@ void World_Update(World *self, uint64_t tick, uint64_t deltaTime) {
 void World_Destroy(World *self) {
     free(self->data);
     LinkedList_Free(&self->entities);
-    Player_Destroy(&self->player);
 }

@@ -30,7 +30,6 @@ vec2 Player_Position(const Player *self);
 vec2 Player_Velocity(const Player *self);
 
 void Player_Init(Player *self, uint64_t tick);
-void Player_Destroy(Player *self);
 Entity *Player_Update(Player *self, uint64_t tick, uint64_t deltaTime);
 
 #endif
