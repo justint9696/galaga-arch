@@ -5,8 +5,10 @@
 #include <string.h>
 #include <stdio.h>
 
-static inline Node *_node_init() {
-    return calloc(1, sizeof(Node));
+static inline Node *_node_init(void *item) {
+    Node *node = calloc(1, sizeof(Node));
+    memcpy(&node->item, &item, sizeof(void *));
+    return node;
 }
 
 inline LinkedList *LinkedList_Init() {
@@ -15,17 +17,14 @@ inline LinkedList *LinkedList_Init() {
 
 void LinkedList_Add(LinkedList *self, void *item) {
     if (!self->head) {
-        self->head = _node_init();
-        self->head->item = item;
+        self->head = _node_init(item);
         memcpy(&self->tail, &self->head, sizeof(void *));
     } else {
         Node *tmp = self->head;
-        while (tmp->next) {
+        while (tmp->next) 
             tmp = tmp->next;
-        }
 
-        tmp->next = _node_init();
-        memcpy(&tmp->next->item, &item, sizeof(void *));
+        tmp->next = _node_init(item);
         memcpy(&self->tail, &tmp->next, sizeof(void *));
     }
 }
