@@ -58,9 +58,6 @@ static void _collision_handler(Entity *self) {
 }
 
 void Entity_Collide(Entity *self, Entity *entity) {
-    if (self->team == entity->team)
-        return;
-
     _collision_handler(self);
     _collision_handler(entity);
 }
@@ -88,8 +85,11 @@ void Entity_Init(Entity *self, type_t type, team_t team, float health, float x, 
         case TYPE_PROJECTILE:
             self->color = COLOR_PROJECTILE;
             break;
+        case TYPE_FORMATION:
+            self->color = COLOR_RED;
+            break;
         default:
-            printf("ERROR: Unknown entity type: %i.\n", type);
+            fprintf(stderr, "ERROR: Unknown entity type: %i.\n", type);
             exit(1);
             break;
     }
@@ -104,8 +104,13 @@ void Entity_Update(Entity *self, uint64_t deltaTime) {
     }
 
     // update entity position
-    self->pos.x += (1.f * deltaTime * self->vel.x);
-    self->pos.y += (1.f * deltaTime * self->vel.y);
+    if (self->parent) {
+        self->pos.x += (1.f * deltaTime * self->parent->vel.x);
+        self->pos.y += (1.f * deltaTime * self->parent->vel.y);
+    } else {
+        self->pos.x += (1.f * deltaTime * self->vel.x);
+        self->pos.y += (1.f * deltaTime * self->vel.y);
+    }
 
     self->delta = deltaTime;
 
@@ -142,6 +147,14 @@ Entity *Entity_Fire(Entity *self, uint64_t tick) {
     self->tick = tick;
 
     return entity;
+}
+
+void Entity_LinkTo(Entity *self, Entity *entity) {
+    self->parent = entity; 
+}
+
+void Entity_Unlink(Entity *self) {
+    self->parent = NULL;
 }
 
 void Entity_SetPosition(Entity *self, vec2 pos) {

@@ -22,6 +22,7 @@ typedef enum {
     TYPE_PLAYER,
     TYPE_ENEMY,
     TYPE_PROJECTILE,
+    TYPE_FORMATION,
 } type_t;
 
 typedef enum {
@@ -44,6 +45,7 @@ typedef struct Entity_s {
     uint32_t color;
     uint64_t tick, delta;
     SDL_Texture *texture;
+    struct Entity_s *parent;
     void(*render)(const struct Entity_s *);
 } Entity;
 
@@ -56,6 +58,9 @@ void Entity_Init(Entity *self, type_t type, team_t team, float health, float x, 
 
 void Entity_Update(Entity *self, uint64_t deltaTime);
 Entity *Entity_Fire(Entity *self, uint64_t tick);
+
+void Entity_LinkTo(Entity *self, Entity *entity);
+void Entity_Unlink(Entity *self);
 
 void Entity_SetVelocity(Entity *self, vec2 vel);
 void Entity_SetPosition(Entity *self, vec2 pos);
