@@ -6,15 +6,18 @@
 #include "entity/entity.h"
 #include "entity/player.h"
 
+#include "entity/logic/formation.h"
+
 #include "gfx/window.h"
 
 #define DATA_SIZE       WINDOW_WIDTH * WINDOW_HEIGHT
 
 typedef struct {
     Player player;
-    uint32_t count;
     LinkedList entities;
+    uint32_t count;
     uint64_t *data;
+    Formation formation;
 } World;
 
 void World_Init(World *self, uint64_t tick);
