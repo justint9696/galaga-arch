@@ -39,6 +39,7 @@ typedef struct {
 } path_s;
 
 path_s *Path_Init();
+float Path_Distance(const path_s *);
 void Path_Linear(Entity *, path_s *);
 void Path_Circular(Entity *, path_s *);
 void Path_Bezier(Entity *, path_s *);

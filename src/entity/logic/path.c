@@ -109,12 +109,38 @@ static inline vec2 _bezier_midpoint(vec2 org, vec2 dst, float speed) {
     return (speed > 0.f ? (vec2) { .x = dst.x, .y = org.y } : (vec2) { .x = org.x, .y = dst.y });
 }
 
-inline path_s *Path_Init() {
-    return (path_s *)calloc(1, sizeof(path_s));
+/**
+ * Returns an approxiated length of a bezier curve.
+ * @param org       starting coordinates
+ * @param mid       midpoint coordinates
+ * @param dst       destination coordinates
+ */
+static inline float _bezier_length(vec2 org, vec2 dst, float speed) {
+    vec2 mid = _bezier_midpoint(org, dst, speed);
+    return (distance(org, mid) + distance(mid, dst));
 }
 
-inline void Path_Linear(Entity *entity, path_s *path) {
-    const vec2 
+inline path_s *Path_Init() {
+    return calloc(1, sizeof(path_s));
+}
+
+float Path_Distance(const path_s *path) {
+    switch (path->type) {
+        case PATH_LINEAR:
+            return distance(path->org, path->dst);
+        case PATH_CIRCULAR:
+            return _arc_length(path->org, path->dst);
+        case PATH_BEZIER:
+            return _bezier_length(path->org, path->dst, path->speed);
+        default:
+            fprintf(stderr, "Unknown path type: %i\n", path->type);
+            exit(1);
+            break;
+    }
+}
+
+void Path_Linear(Entity *entity, path_s *path) {
+    vec2 
         org = path->org,
         dst = path->dst;
 
@@ -156,8 +182,8 @@ inline void Path_Linear(Entity *entity, path_s *path) {
 
 }
 
-inline void Path_Circular(Entity *entity, path_s *path) {
-    const vec2 
+void Path_Circular(Entity *entity, path_s *path) {
+    vec2 
         org = path->org,
         dst = path->dst;
 
@@ -200,18 +226,19 @@ inline void Path_Circular(Entity *entity, path_s *path) {
     Entity_SetPosition(entity, pos);
 }
 
-inline void Path_Bezier(Entity *entity, path_s *path) {
-    const vec2 
+void Path_Bezier(Entity *entity, path_s *path) {
+    vec2 
         org = path->org,
         dst = path->dst;
 
     // TODO: get actual distance and time estimate (if possible) but approximation works
 
     vec2 midpoint = _bezier_midpoint(org, dst, path->speed);
-    float distance = distance(org, midpoint) + distance(midpoint, dst);
     vec2 pos = _bezier_path(org, midpoint, dst, path->time);
 
+    float distance = _bezier_length(org, dst, path->speed);
     float time = ((distance / fabs(path->speed)) / 1000.f);
+
     path->time += (1.f / (time * (entity->delta ? entity->delta : 1.f)));
 
     switch (path->state) {
