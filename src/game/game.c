@@ -29,7 +29,7 @@ void Game_Init(Game *self) {
     World_Init(&self->world, self->fps.start);
 
     // prepare stage
-    Stage_Init(&self->stage, self->fps.start);
+    Stage_Init(&self->stage, 0);
 
     // prepare gfx
     Hud_Init();
@@ -37,9 +37,6 @@ void Game_Init(Game *self) {
 }
 
 void Game_Main(Game *self) {
-    // if (Stage_Complete()) 
-    //     Stage_Next(self->fps.ticks);
-
     // frame start
     Frame_Start(&self->fps);
 
