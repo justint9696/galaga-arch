@@ -1,21 +1,25 @@
 #include "game/wave.h"
-
-#include <assert.h>
+#include "game/time.h"
 
 static inline bool _Wave_Complete(Wave *self) {
     if ((self->current < MAX_WAVE && !self->count) || !self->tail || !self->tail->path.size)
         return true;
 
-    path_s *path = (path_s *)queue_rear(&self->tail->path);
-    return self->current && self->tail->path.size == 1 && path->complete;
+    // if tail not found, spawn after SPAWN_TIME ms
+    Enemy *enemy = self->tail;
+    if (!Enemy_IsAlive(enemy) && Time_Passed(enemy->entity.tick) > SPAWN_TIME)
+        return true;
+
+    path_s *path = (path_s *)queue_rear(&enemy->path);
+    return self->current && enemy->path.size == 1 && path->complete;
 }
 
-static void _Wave_Spawn(Wave *self, Enemy *enemies, LinkedList *entities, uint32_t count, uint64_t tick) {
+static void _Wave_Spawn(Wave *self, World *world, Enemy *enemies, uint32_t count, uint64_t tick) {
     Enemy *enemy;
     for (int i = 0; i < count; i++) {
-        enemy = &enemies[self->count++];
-        Enemy_Init(enemy, self->current, self->formation, tick);
-        LinkedList_Add(entities, &enemy->entity);
+        enemy = &enemies[self->count];
+        Enemy_Init(enemy, self->count++, self->current, tick);
+        LinkedList_Add(&world->entities, &enemy->entity);
     }
 }
 
@@ -23,7 +27,7 @@ inline void Wave_Init(Wave *self) {
     memset(self, 0, sizeof(Wave));
 }
 
-void Wave_Update(Wave *self, Enemy *enemies, LinkedList *entities, uint64_t tick) {
+void Wave_Update(Wave *self, World *world, Enemy *enemies, uint64_t tick) {
     if (!_Wave_Complete(self))
         return;
 
@@ -31,7 +35,7 @@ void Wave_Update(Wave *self, Enemy *enemies, LinkedList *entities, uint64_t tick
         case MAX_WAVE:
             break;
         default:
-            _Wave_Spawn(self, enemies, entities, 1, tick);
+            _Wave_Spawn(self, world, enemies, 2, tick);
             self->tail = &enemies[self->count - 1];
             ++self->current;
             break;

@@ -18,7 +18,7 @@
 #define ENEMY_HEIGHT            101.3f
 #define ENEMY_SPAWN_X           ((WINDOW_WIDTH - ENEMY_WIDTH) / 2)
 #define ENEMY_SPAWN_Y           (WINDOW_HEIGHT - ENEMY_HEIGHT - 50.f)
-#define ENEMY_IDLE_VELOCITY     0.2f
+#define ENEMY_IDLE_VELOCITY     0.025f
 #define ENEMY_SPAWN_VELOCITY    0.3f
 #define ENEMY_IDLE_TIME         1500    
 
@@ -47,6 +47,7 @@ typedef enum {
 } eformation_t;
 
 typedef struct {
+    uint32_t id;
     ewave_t wave;
     estate_t state;
     int64_t idle_tick;
@@ -55,7 +56,7 @@ typedef struct {
 } Enemy;
 
 bool Enemy_IsAlive(const Enemy *self);
-void Enemy_Init(Enemy *self, ewave_t wave, eformation_t formation, uint64_t tick);
-Entity *Enemy_Update(Enemy *self, const Player *player, uint64_t tick);
+void Enemy_Init(Enemy *self, uint32_t id, ewave_t wave, uint64_t tick);
+Entity *Enemy_Update(Enemy *self, World *world, uint64_t tick);
 
 #endif

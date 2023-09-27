@@ -3,20 +3,21 @@
 
 #include "data/linked_list.h"
 #include "entity/logic/enemy.h"
+#include "game/world.h"
 
-#include <stdbool.h>
 #include <stdint.h>
 
 #define MAX_WAVE        WAVE_COMPLETE
+#define SPAWN_TIME      500
 
 typedef struct {
     uint32_t count;
-    eformation_t formation;
     Enemy *tail;
     ewave_t current;
+    eformation_t formation;
 } Wave;
 
 void Wave_Init(Wave *self);
-void Wave_Update(Wave *self, Enemy *enemies, LinkedList *entities, uint64_t tick);
+void Wave_Update(Wave *self, World *world, Enemy *enemies, uint64_t tick);
 
 #endif

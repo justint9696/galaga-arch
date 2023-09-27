@@ -1,3 +1,5 @@
+#include "data/queue.h"
+#include "entity/logic/path.h"
 #include "gfx/hud.h"
 
 #include "game/time.h"
@@ -12,7 +14,7 @@
 
 #include <assert.h>
 
-static void _Enemy_ThinkPath(Enemy *self) {
+static void _Enemy_ThinkPath(Enemy *self, World *world) {
     switch (self->state) {
         case STATE_IDLE:
             Route_Idle(&self->path, self->entity.pos);
@@ -29,7 +31,7 @@ static void _Enemy_ThinkPath(Enemy *self) {
     // printf("path queued. items remaining in queue: %li.\n", self->path.size);
 }
 
-static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
+static void _Enemy_TravelPath(Enemy *self, World *world, uint64_t tick) {
     path_s *path = (path_s *)queue_front(&self->path);
     assert(path);
 
@@ -59,20 +61,32 @@ static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
 
         dequeue(&self->path);
         if (!self->path.size) {
-            self->state = STATE_IDLE;
             self->idle_tick = tick;
+            self->state = STATE_IDLE;
+
+            Entity_LinkTo(&self->entity, &world->formation.entity);
+            Entity_SetRotation(&self->entity, 0.f);
+        } else if (self->path.size == 1) {
+            path = (path_s *)queue_front(&self->path);
+            float d = Path_Distance(path);
+            float time = (d / path->speed);
+
+            path->dst = Formation_ApproxPosition(&world->formation, self->id, time);
         }
 
         // printf("path dequeued. items remaining in queue: %li.\n", self->path.size);
     } 
+}
 
+static void _Enemy_Swoop(Enemy *self, World *world, uint64_t tick) {
     if (self->idle_tick == -1)
         return;
 
     if (Time_Passed(self->idle_tick) > ENEMY_IDLE_TIME) {
         self->idle_tick = -1;
+        self->state = STATE_TRAVEL;
 
-        queue_free(&self->path);
+        Entity_Unlink(&self->entity);
         Route_Swoop(&self->path, self->entity.pos);
     }
 }
@@ -80,7 +94,7 @@ static void _Enemy_TravelPath(Enemy *self, uint64_t tick) {
 static Entity *_Enemy_ThinkAttack(Enemy *self, const Player *player, uint64_t tick) {
     const vec2 
         pos = Player_Position(player),
-        vel = Player_Velocity(player);
+            vel = Player_Velocity(player);
 
     Entity *entity = &self->entity;
 
@@ -92,7 +106,7 @@ static Entity *_Enemy_ThinkAttack(Enemy *self, const Player *player, uint64_t ti
     if (!Player_IsMoving(player)) {
         if (fabs(diff.x) < 5.f)
             return Entity_Fire(entity, tick);
-        
+
         return NULL;
     }
 
@@ -111,14 +125,16 @@ static Entity *_Enemy_ThinkAttack(Enemy *self, const Player *player, uint64_t ti
     return NULL;
 }
 
-static Entity *_Enemy_Think(Enemy *self, const Player *player, uint64_t tick) {
+static Entity *_Enemy_Think(Enemy *self, World *world, uint64_t tick) {
     estate_t p_state = self->state;
-    Entity *child = _Enemy_ThinkAttack(self, player, tick);
+    Entity *child = NULL; // _Enemy_ThinkAttack(self, &world->player, tick);
 
     switch (self->state) {
         case STATE_IDLE:
+            // _Enemy_Swoop(self, world, tick);
+            break;
         case STATE_SPAWN:
-            _Enemy_ThinkPath(self);
+            _Enemy_ThinkPath(self, world);
             break;
         case STATE_ATTACK:
             if (self->state == p_state)
@@ -127,11 +143,11 @@ static Entity *_Enemy_Think(Enemy *self, const Player *player, uint64_t tick) {
                 self->state = p_state;
             break;
         case STATE_TRAVEL:
-            _Enemy_TravelPath(self, tick);
+            _Enemy_TravelPath(self, world, tick);
             break;
         default:
             break;
-    }    
+    } 
 
     /*Hud_AddText("State: %s", 
       self->state == STATE_IDLE ? "Idle" :
@@ -145,15 +161,17 @@ bool Enemy_IsAlive(const Enemy *self) {
     return Entity_IsAlive(&self->entity);
 }
 
-void Enemy_Init(Enemy *self, ewave_t wave, eformation_t formation, uint64_t tick) {
-    vec2 pos = Spawn_GetPosition(wave, formation);
+void Enemy_Init(Enemy *self, uint32_t id, ewave_t wave, uint64_t tick) {
+    vec2 pos = Spawn_GetOrigin(wave);
     Entity_Init(&self->entity, TYPE_ENEMY, TEAM_AXIS, ENEMY_SPAWN_HEALTH, pos.x, pos.y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
 
     self->entity.tick = tick;
     self->state = STATE_SPAWN;
+    self->id = id;
+    printf("enemy %i initialized.\n", id);
 }
 
-Entity *Enemy_Update(Enemy *self, const Player *player, uint64_t tick) {
-    return _Enemy_Think(self, player, tick);
+Entity *Enemy_Update(Enemy *self, World *world, uint64_t tick) {
+    return _Enemy_Think(self, world, tick);
 }
 

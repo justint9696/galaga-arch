@@ -20,8 +20,9 @@ static void _Stage_Set(Stage *self) {
         self->wave.formation = FORMATION_FOUR;
 }
 
-void Stage_Init(Stage *self, uint64_t tick) {
+void Stage_Init(Stage *self, uint32_t id) {
     memset(self, 0, sizeof(Stage));
+    self->id = id;
 
     Wave_Init(&self->wave);
     _Stage_Set(self);
@@ -38,14 +39,13 @@ static void _Stage_Update(Stage *self, World *world, uint64_t tick) {
             continue;
 
         ++count;
-
         if (i < MAX_ENEMY - 1 && enemy->state == STATE_SPAWN) {
             next = &self->enemies[i+1]; 
             if (distance(enemy->entity.pos, next->entity.pos) < 125.f)
                 continue;
         }
 
-        child = Enemy_Update(enemy, &world->player, tick);
+        child = Enemy_Update(enemy, world, tick);
         if (child) 
             LinkedList_Add(&world->entities, child);
     }
@@ -56,21 +56,23 @@ static void _Stage_Update(Stage *self, World *world, uint64_t tick) {
 void Stage_Update(Stage *self, World *world, uint64_t tick) {
     switch (self->wave.current) {
         case MAX_WAVE:
+            if (Stage_Complete(self))
+                Stage_Next(self);
             break;
         default:
-            Wave_Update(&self->wave, self->enemies, &world->entities, tick);
+            Wave_Update(&self->wave, world, self->enemies, tick);
             break;
     }
 
-    Hud_AddText("Wave: %i", self->wave.current);
+    // Hud_AddText("Stage: %i", self->id);
+    // Hud_AddText("Wave: %i", self->wave.current);
     Hud_AddText("Enemies: %i", self->count);
 
     _Stage_Update(self, world, tick);
 }
 
-void Stage_Next(Stage *self, uint64_t tick) {
-    ++self->id;
-    Stage_Init(self, tick);
+void Stage_Next(Stage *self) {
+    Stage_Init(self, ++self->id);
 }
 
 bool Stage_Complete(Stage *self) {
