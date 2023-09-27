@@ -6,12 +6,13 @@
 
 #include "gfx/window.h"
 
+#include <math.h>
 #include <string.h>
 
 #define FORM_CENTER_X       ENEMY_SPAWN_X
 #define FORM_CENTER_Y       ENEMY_SPAWN_Y
 #define FORM_VELOCITY       ENEMY_IDLE_VELOCITY
-#define FORM_DISTANCE       15.f
+#define FORM_DISTANCE       8.f
 
 static inline float _get_x_dist() {
     return (ENEMY_WIDTH + FORM_DISTANCE);
@@ -36,7 +37,7 @@ vec2 Formation_GetPosition(Formation *self, uint32_t id) {
     };
 
     return (vec2) {
-        .x = self->entity.pos.x + (offset.x * _get_x_dist()) - (ENEMY_WIDTH / 2.f),
+        .x = self->entity.pos.x + (offset.x * _get_x_dist()),
         .y = self->entity.pos.y + (offset.y * _get_y_dist()),
     };
 }
@@ -53,20 +54,23 @@ vec2 Formation_ApproxPosition(Formation *self, uint32_t id, float time) {
     };
 
     const uint32_t max_dist = WINDOW_WIDTH - ENEMY_WIDTH;
-    if (pos.x && pos.x < max_dist)
-        return pos;
-
-    float dx = max_dist - self->entity.pos.x;
-    time -= (dx / self->entity.vel.x);
-    
-    pos.x = max_dist + (pos.x ? self->entity.vel.x : -self->entity.vel.x) * time;
+    if (pos.x < 0)
+        return (vec2) {
+            .x = -pos.x,
+            .y = pos.y,
+        };
+    else if (pos.x > max_dist)
+        return (vec2) {
+            .x = max_dist - ((int)pos.x % max_dist),
+            .y = pos.y,
+        }; 
 
     return pos;
 }
 
 void Formation_Update(Formation *self) {
     vec2 pos;
-    int num = ((WAVE_COMPLETE) * 2) - 1;
+    int num = (WAVE_COMPLETE * 2) - 1;
     if (self->entity.vel.x < 0)
         pos = Formation_GetPosition(self, num - 1);
     else
