@@ -6,26 +6,6 @@
  * wave 3: bottom right
  * wave 4: top center
  */
-static vec2 _formation_one(ewave_t wave) {
-    switch (wave) {
-        case WAVE_ONE:
-            return (vec2) { .x = WINDOW_WIDTH / 2.f, .y = WINDOW_HEIGHT };
-        case WAVE_TWO:
-            return (vec2) { .x = -ENEMY_WIDTH, .y = ENEMY_SPAWN_Y - 250.f };
-        case WAVE_THREE:
-            return (vec2) { .x = WINDOW_WIDTH, .y =  ENEMY_SPAWN_Y - 250.f };
-        // case WAVE_FOUR:
-        //     break;
-        default:
-            return (vec2) { .x = -ENEMY_WIDTH, .y =  ENEMY_SPAWN_Y - 250.f };
-    }
-
-    return (vec2) { .x = 0, .y = 0 };
-}
-
-static inline vec2 _formation_two(ewave_t wave) {}
-
-static inline vec2 _formation_three(ewave_t wave) {}
 
 /**
  * based on formation, enemies should spawn at different points off-screen
@@ -35,16 +15,20 @@ static inline vec2 _formation_three(ewave_t wave) {}
  * in formation four: same as formation three, and back to formation one
  * where on the next four, there is a speed scalar
  */
-vec2 Spawn_GetPosition(ewave_t wave, eformation_t formation) {
-    switch (formation) {
-        case FORMATION_ONE:
-            return _formation_one(wave);
-        case FORMATION_TWO:
-            return _formation_two(wave);
-        case FORMATION_THREE:
-        case FORMATION_FOUR:
-            return _formation_three(wave);
+vec2 Spawn_GetOrigin(ewave_t wave) {
+    switch (wave) {
+        case WAVE_ONE:
+        // case WAVE_FOUR:
+            return (vec2) { .x = WINDOW_WIDTH / 2.f, .y = WINDOW_HEIGHT };
+        case WAVE_TWO:
+            return (vec2) { .x = -ENEMY_WIDTH, .y = ENEMY_SPAWN_Y - 250.f };
+        case WAVE_THREE:
+            return (vec2) { .x = WINDOW_WIDTH, .y =  ENEMY_SPAWN_Y - 250.f };
         default:
-            return _formation_one(wave);
+            return (vec2) { .x = -ENEMY_WIDTH, .y =  ENEMY_SPAWN_Y - 250.f };
     }
+}
+
+vec2 Spawn_GetDestination(uint64_t *data) {
+    return (v2) { .x = 0.f, .y = 0.f };
 }

@@ -4,6 +4,7 @@
 #include "common/type.h"
 #include "entity/logic/enemy.h"
 
-vec2 Spawn_GetPosition(ewave_t wave, eformation_t formation);
+vec2 Spawn_GetOrigin(ewave_t wave);
+vec2 Spawn_GetDestination(uint64_t *data);
 
 #endif
