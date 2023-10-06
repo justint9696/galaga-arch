@@ -124,6 +124,20 @@ inline path_s *Path_Init() {
     return calloc(1, sizeof(path_s));
 }
 
+void Path_Update(Entity *entity, path_s *path) {
+    switch (path->type) {
+        case PATH_LINEAR:
+            Path_Linear(entity, path);
+            break;
+        case PATH_CIRCULAR:
+            Path_Circular(entity, path);
+            break;
+        case PATH_BEZIER:
+            Path_Bezier(entity, path);
+            break;
+    }
+}
+
 float Path_Distance(const path_s *path) {
     switch (path->type) {
         case PATH_LINEAR:
@@ -137,6 +151,10 @@ float Path_Distance(const path_s *path) {
             exit(1);
             break;
     }
+}
+
+float Path_Time(const path_s *path) {
+    return (Path_Distance(path) / path->speed);
 }
 
 void Path_Linear(Entity *entity, path_s *path) {
