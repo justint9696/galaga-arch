@@ -1,3 +1,4 @@
+#include "entity/logic/formation.h"
 #include "gfx/hud.h"
 #include "gfx/renderer.h"
 #include "gfx/stars.h"
@@ -72,4 +73,5 @@ void Game_Main(Game *self) {
 void Game_Destroy(Game *self) {
     World_Destroy(&self->world);
     Stage_Destroy(&self->stage);
+    Formation_Destroy(&self->world.formation);
 }

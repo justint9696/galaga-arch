@@ -13,6 +13,7 @@ typedef struct {
 } Formation;
 
 void Formation_Init(Formation *self);
+void Formation_Destroy(Formation *self);
 vec2 Formation_GetPosition(Formation *self, uint32_t id);
 void Formation_Update(Formation *self);
 

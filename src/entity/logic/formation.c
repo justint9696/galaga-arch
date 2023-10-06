@@ -33,6 +33,14 @@ void Formation_Init(Formation *self) {
     Entity_SetVelocity(&self->entity, (vec2) { .x = 0.f, .y = 0.f });
 }
 
+void Formation_Destroy(Formation *self) {
+    Queue *q = &self->path;
+    for (size_t i = 0; i < q->size; i++) {
+        free(queue_front(q));
+        dequeue(q);
+    }
+}
+
 vec2 Formation_GetPosition(Formation *self, uint32_t id) {
     ivec2 offset = {
         .x = id % 2 == 0 ? -ceil(id / 2) : floor(id / 2) + 1,
