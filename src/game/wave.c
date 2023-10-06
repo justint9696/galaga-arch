@@ -35,7 +35,7 @@ void Wave_Update(Wave *self, World *world, Enemy *enemies, uint64_t tick) {
         case MAX_WAVE:
             break;
         default:
-            _Wave_Spawn(self, world, enemies, 2, tick);
+            _Wave_Spawn(self, world, enemies, WAVE_COUNT, tick);
             self->tail = &enemies[self->count - 1];
             ++self->current;
             break;

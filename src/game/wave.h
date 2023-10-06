@@ -8,7 +8,8 @@
 #include <stdint.h>
 
 #define MAX_WAVE        WAVE_COMPLETE
-#define SPAWN_TIME      500
+#define WAVE_COUNT      2
+#define SPAWN_TIME      1000
 
 typedef struct {
     uint32_t count;
