@@ -1,4 +1,5 @@
 #include "data/queue.h"
+#include "entity/logic/formation.h"
 #include "entity/logic/path.h"
 #include "gfx/hud.h"
 
@@ -14,11 +15,8 @@
 
 #include <assert.h>
 
-static void _Enemy_ThinkPath(Enemy *self, World *world) {
+static void _Enemy_ThinkPath(Enemy *self) {
     switch (self->state) {
-        case STATE_IDLE:
-            Route_Idle(&self->path, self->entity.pos);
-            break;
         case STATE_SPAWN:
             self->idle_tick = -1;
             Route_Spawn(&self->path, self->entity.pos);
@@ -35,17 +33,7 @@ static void _Enemy_TravelPath(Enemy *self, World *world, uint64_t tick) {
     path_s *path = (path_s *)queue_front(&self->path);
     assert(path);
 
-    switch (path->type) {
-        case PATH_LINEAR:
-            Path_Linear(&self->entity, path);
-            break;
-        case PATH_CIRCULAR:
-            Path_Circular(&self->entity, path);
-            break;
-        case PATH_BEZIER:
-            Path_Bezier(&self->entity, path);
-            break;
-    }
+    Path_Update(&self->entity, path);
 
     // float distance = distance(self->entity.pos, path->dst);
     // Hud_AddText("Path: %s",
@@ -55,27 +43,26 @@ static void _Enemy_TravelPath(Enemy *self, World *world, uint64_t tick) {
     // Hud_AddText("Queue: %i", self->path.size);
     // Hud_AddText("Distance: %.2f", distance);
 
+    if (self->path.size == 1)
+        path->dst = Formation_GetPosition(&world->formation, self->id);
+
     if (path->complete) {
         Entity_SetPosition(&self->entity, path->dst);
         Entity_SetVelocity(&self->entity, (vec2) { .x = 0.f, .y = 0.f });
 
         dequeue(&self->path);
+        free(path);
+
         if (!self->path.size) {
             self->idle_tick = tick;
             self->state = STATE_IDLE;
 
             Entity_LinkTo(&self->entity, &world->formation.entity);
             Entity_SetRotation(&self->entity, 0.f);
-        } else if (self->path.size == 1) {
-            path = (path_s *)queue_front(&self->path);
-            float d = Path_Distance(path);
-            float time = (d / path->speed);
-
-            path->dst = Formation_ApproxPosition(&world->formation, self->id, time);
-        }
+        } 
 
         // printf("path dequeued. items remaining in queue: %li.\n", self->path.size);
-    } 
+    }
 }
 
 static void _Enemy_Swoop(Enemy *self, World *world, uint64_t tick) {
@@ -94,7 +81,7 @@ static void _Enemy_Swoop(Enemy *self, World *world, uint64_t tick) {
 static Entity *_Enemy_ThinkAttack(Enemy *self, const Player *player, uint64_t tick) {
     const vec2 
         pos = Player_Position(player),
-            vel = Player_Velocity(player);
+        vel = Player_Velocity(player);
 
     Entity *entity = &self->entity;
 
@@ -134,7 +121,7 @@ static Entity *_Enemy_Think(Enemy *self, World *world, uint64_t tick) {
             // _Enemy_Swoop(self, world, tick);
             break;
         case STATE_SPAWN:
-            _Enemy_ThinkPath(self, world);
+            _Enemy_ThinkPath(self);
             break;
         case STATE_ATTACK:
             if (self->state == p_state)
@@ -168,7 +155,6 @@ void Enemy_Init(Enemy *self, uint32_t id, ewave_t wave, uint64_t tick) {
     self->entity.tick = tick;
     self->state = STATE_SPAWN;
     self->id = id;
-    printf("enemy %i initialized.\n", id);
 }
 
 Entity *Enemy_Update(Enemy *self, World *world, uint64_t tick) {
