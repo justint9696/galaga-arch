@@ -71,4 +71,5 @@ void Game_Main(Game *self) {
 
 void Game_Destroy(Game *self) {
     World_Destroy(&self->world);
+    Stage_Destroy(&self->stage);
 }

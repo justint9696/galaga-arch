@@ -28,6 +28,19 @@ void Stage_Init(Stage *self, uint32_t id) {
     _Stage_Set(self);
 }
 
+void Stage_Destroy(Stage *self) {
+    Enemy *enemy;
+    Queue *q;
+    for (size_t i = 0; i < MAX_ENEMY; i++) {
+        enemy = &self->enemies[i]; 
+        q = &enemy->path;
+        for (size_t j = 0; j < enemy->path.size; j++) {
+            free(queue_front(q));
+            dequeue(q);
+        }
+    }
+}
+
 static void _Stage_Update(Stage *self, World *world, uint64_t tick) {
     Entity *child;
     uint32_t count = 0;
