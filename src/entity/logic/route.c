@@ -57,10 +57,10 @@ void Route_Idle(Queue *q, vec2 org) {
     memcpy(&path->org, &org, sizeof(vec2));
     memcpy(&path->dst, &path->org, sizeof(vec2));
 
-    if (org.x < WINDOW_WIDTH - ENEMY_WIDTH) 
-        path->dst.x = WINDOW_WIDTH - ENEMY_WIDTH;
-    else
+    if (WINDOW_WIDTH - ENEMY_WIDTH - org.x < org.x) 
         path->dst.x = 0.f;
+    else
+        path->dst.x = WINDOW_WIDTH - ENEMY_WIDTH;
 
     path->type = PATH_LINEAR;
     path->speed = ENEMY_IDLE_VELOCITY;
