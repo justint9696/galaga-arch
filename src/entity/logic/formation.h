@@ -2,10 +2,13 @@
 #define _FORMATION_H_
 
 #include "common/type.h"
+#include "data/queue.h"
 #include "entity/entity.h"
+#include "entity/logic/path.h"
 
 typedef struct {
     uint32_t id;
+    Queue path;
     Entity entity;
 } Formation;
 

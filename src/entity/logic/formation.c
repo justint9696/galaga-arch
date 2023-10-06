@@ -1,18 +1,23 @@
 #include "entity/entity.h"
 #include "entity/logic/enemy.h"
 #include "entity/logic/formation.h"
+#include "entity/logic/route.h"
 
 #include "common/util.h"
 
+#include "game/wave.h"
 #include "gfx/window.h"
 
+#include <assert.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
 #define FORM_CENTER_X       ENEMY_SPAWN_X
 #define FORM_CENTER_Y       ENEMY_SPAWN_Y
 #define FORM_VELOCITY       ENEMY_IDLE_VELOCITY
-#define FORM_DISTANCE       8.f
+#define FORM_DISTANCE       15.f
+#define MAX_DIST            WINDOW_WIDTH - ENEMY_WIDTH
 
 static inline float _get_x_dist() {
     return (ENEMY_WIDTH + FORM_DISTANCE);
@@ -25,12 +30,10 @@ static inline float _get_y_dist() {
 void Formation_Init(Formation *self) {
     memset(self, 0, sizeof(Formation));
     Entity_Init(&self->entity, TYPE_FORMATION, TEAM_AXIS, 1.f, FORM_CENTER_X, FORM_CENTER_Y, 10, 10, NULL);
-    Entity_SetVelocity(&self->entity, (vec2) { .x = FORM_VELOCITY, .y = 0.f });
+    Entity_SetVelocity(&self->entity, (vec2) { .x = 0.f, .y = 0.f });
 }
 
 vec2 Formation_GetPosition(Formation *self, uint32_t id) {
-    self->id = max(self->id, id);
-
     ivec2 offset = {
         .x = id % 2 == 0 ? -ceil(id / 2) : floor(id / 2) + 1,
         .y = 0,
@@ -42,40 +45,24 @@ vec2 Formation_GetPosition(Formation *self, uint32_t id) {
     };
 }
 
-vec2 Formation_ApproxPosition(Formation *self, uint32_t id, float time) {
-    /*
-     * displacement-time formula:
-     * sf = s0 + v0 * t + (1/2) a * t^2
-     */
-    vec2 pos = Formation_GetPosition(self, id);
-    pos = (vec2) {
-        .x = pos.x + self->entity.vel.x * time,
-        .y = pos.y + self->entity.vel.y * time,
-    };
-
-    const uint32_t max_dist = WINDOW_WIDTH - ENEMY_WIDTH;
-    if (pos.x < 0)
-        return (vec2) {
-            .x = -pos.x,
-            .y = pos.y,
-        };
-    else if (pos.x > max_dist)
-        return (vec2) {
-            .x = max_dist - ((int)pos.x % max_dist),
-            .y = pos.y,
-        }; 
-
-    return pos;
-}
-
 void Formation_Update(Formation *self) {
-    vec2 pos;
-    int num = (WAVE_COMPLETE * 2) - 1;
-    if (self->entity.vel.x < 0)
-        pos = Formation_GetPosition(self, num - 1);
-    else
-        pos = Formation_GetPosition(self, num);
+    path_s *path;
+    if (!self->path.size) {
+        Route_Idle(&self->path, self->entity.pos);
+        path = (path_s *)queue_front(&self->path);
 
-    if (pos.x + ENEMY_WIDTH > WINDOW_WIDTH || pos.x < 0) 
-        Entity_SetVelocity(&self->entity, (vec2) { .x = -self->entity.vel.x, .y = 0.f });
+        if (path->dst.x < MAX_DIST)
+            path->dst.x += (WAVE_COUNT * _get_x_dist());
+        else
+            path->dst.x -= ((WAVE_COUNT + 1) * _get_x_dist());
+    } else
+        path = (path_s *)queue_front(&self->path);
+
+    assert(path);
+
+    Path_Update(&self->entity, path);
+    if (path->complete) {
+        dequeue(&self->path);
+        free(path);
+    }
 }
