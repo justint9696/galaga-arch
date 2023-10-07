@@ -114,7 +114,8 @@ static Entity *_Enemy_ThinkAttack(Enemy *self, const Player *player, uint64_t ti
 
 static Entity *_Enemy_Think(Enemy *self, World *world, uint64_t tick) {
     estate_t p_state = self->state;
-    Entity *child = NULL; // _Enemy_ThinkAttack(self, &world->player, tick);
+    Entity *child = NULL; 
+    // _Enemy_ThinkAttack(self, &world->player, tick);
 
     switch (self->state) {
         case STATE_IDLE:

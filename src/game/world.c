@@ -98,7 +98,7 @@ void World_Init(World *self, uint64_t tick) {
 void World_Update(World *self, uint64_t tick, uint64_t deltaTime) {
     Entity *entity = Player_Update(&self->player, tick, deltaTime);
     Formation_Update(&self->formation);
-    Hud_AddText("Center: (%.2f, %.2f)", self->formation.entity.pos.x, self->formation.entity.pos.y);
+    // Hud_AddText("Center: (%.2f, %.2f)", self->formation.entity.pos.x, self->formation.entity.pos.y);
 
     if (entity)
         LinkedList_Add(&self->entities, entity);

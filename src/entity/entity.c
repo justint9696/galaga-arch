@@ -17,6 +17,9 @@ static inline void _Entity_Render_Texure(const Entity *self) {
     DrawTexture(self->texture, round(self->pos.x), round(self->pos.y), self->dim.width, self->dim.height, self->rotation);
 }
 
+static inline void _Entity_Render_nop(const Entity *self) {
+}
+
 // out of bounds check
 static inline bool _Entity_OOB(const Entity *self) {
     return ((self->pos.x > (WINDOW_WIDTH + WINDOW_BUFFER) || self->pos.x < -WINDOW_BUFFER) || 
@@ -94,7 +97,14 @@ void Entity_Init(Entity *self, type_t type, team_t team, float health, float x, 
             break;
     }
 
-    self->render = texture == NULL ? _Entity_Render_Rect : _Entity_Render_Texure;
+    switch (type) {
+        case TYPE_FORMATION:
+            self->render = _Entity_Render_nop;
+            break;
+        default:
+            self->render = texture == NULL ? _Entity_Render_Rect : _Entity_Render_Texure;
+            break;
+    }
 }
 
 void Entity_Update(Entity *self, uint64_t deltaTime) {
