@@ -1,4 +1,3 @@
-#include "entity/player.h"
 #include "game/buttons.h"
 
 void Buttons_Update(uint32_t *buttons, SDL_Event event) {

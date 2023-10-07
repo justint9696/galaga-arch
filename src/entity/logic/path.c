@@ -1,7 +1,6 @@
 #include "game/fps.h"
 #include "common/util.h"
 
-#include "entity/entity.h"
 #include "entity/logic/path.h"
 
 #include <stdio.h>

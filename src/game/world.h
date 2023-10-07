@@ -2,12 +2,8 @@
 #define _WORLD_H_
 
 #include "data/linked_list.h"
-
-#include "entity/entity.h"
 #include "entity/player.h"
-
 #include "entity/logic/formation.h"
-
 #include "gfx/window.h"
 
 #define DATA_SIZE       WINDOW_WIDTH * WINDOW_HEIGHT

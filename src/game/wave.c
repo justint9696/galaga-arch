@@ -1,6 +1,8 @@
 #include "game/wave.h"
 #include "game/time.h"
 
+#include "entity/logic/path.h"
+
 static inline bool _Wave_Complete(Wave *self) {
     if ((self->current < MAX_WAVE && !self->count) || !self->tail || !self->tail->path.size)
         return true;

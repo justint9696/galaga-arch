@@ -2,6 +2,7 @@
 #include "entity/logic/enemy.h"
 #include "entity/logic/formation.h"
 #include "entity/logic/route.h"
+#include "entity/logic/path.h"
 
 #include "common/util.h"
 

@@ -8,7 +8,6 @@
 #include "game/world.h"
 
 #include "entity/entity.h"
-#include "entity/logic/path.h"
 
 #include <stdint.h>
 

@@ -1,5 +1,4 @@
 #include "game/buttons.h"
-#include "entity/entity.h"
 #include "entity/player.h"
 
 #include <assert.h>
@@ -42,11 +41,6 @@ Entity *Player_Update(Player *self, uint64_t tick, uint64_t deltaTime) {
         return child;
 
     memcpy(&self->p_buttons, &self->buttons, sizeof(uint32_t));
-
-    // if (buttons & BUTTON_UP)
-    //     vy = PLAYERvel;
-    // else if (buttons & BUTTON_DOWN)
-    //     vy = -PLAYERvel;
 
     vec2 vel = { .x = 0.f, .y = 0.f };
     if (self->buttons & BUTTON_LEFT)

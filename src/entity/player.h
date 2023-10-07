@@ -4,7 +4,6 @@
 #include "common/type.h"
 #include "gfx/window.h"
 #include "entity/entity.h"
-#include "data/linked_list.h"
 
 #include <stdbool.h>
 #include <stdint.h>

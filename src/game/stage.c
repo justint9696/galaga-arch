@@ -1,8 +1,6 @@
 #include "common/util.h"
 #include "data/linked_list.h"
 #include "game/stage.h"
-#include "game/time.h"
-#include "game/wave.h"
 #include "gfx/hud.h"
 
 #include <assert.h>

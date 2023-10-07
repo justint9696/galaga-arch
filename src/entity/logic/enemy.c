@@ -1,6 +1,4 @@
 #include "data/queue.h"
-#include "entity/logic/formation.h"
-#include "entity/logic/path.h"
 #include "gfx/hud.h"
 
 #include "game/time.h"
@@ -10,6 +8,8 @@
 #include "entity/player.h"
 
 #include "entity/logic/enemy.h"
+#include "entity/logic/formation.h"
+#include "entity/logic/path.h"
 #include "entity/logic/route.h"
 #include "entity/logic/spawn.h"
 

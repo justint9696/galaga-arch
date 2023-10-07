@@ -1,4 +1,3 @@
-#include "entity/logic/formation.h"
 #include "gfx/hud.h"
 #include "gfx/renderer.h"
 #include "gfx/stars.h"
@@ -6,6 +5,7 @@
 #include "common/util.h"
 
 #include "entity/logic/enemy.h"
+#include "entity/logic/formation.h"
 #include "entity/player.h"
 
 #include "game/game.h"

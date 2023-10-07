@@ -1,7 +1,6 @@
 #ifndef _WAVE_H_
 #define _WAVE_H_
 
-#include "data/linked_list.h"
 #include "entity/logic/enemy.h"
 #include "game/world.h"
 

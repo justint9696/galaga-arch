@@ -1,7 +1,6 @@
 #ifndef _STAGE_H_
 #define _STAGE_H_
 
-#include "data/queue.h"
 #include "entity/logic/enemy.h"
 #include "game/world.h"
 #include "game/wave.h"

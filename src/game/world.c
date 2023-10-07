@@ -1,6 +1,4 @@
 #include "game/world.h"
-#include "entity/entity.h"
-#include "entity/logic/formation.h"
 #include "gfx/hud.h"
 
 #include <assert.h>
