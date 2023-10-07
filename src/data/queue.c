@@ -1,16 +1,17 @@
-#include "queue.h"
+#include "data/queue.h"
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 Queue *queue_init() {
-    return (Queue *)calloc(1, sizeof(Queue));
+    return calloc(1, sizeof(Queue));
 }
 
 void queue_free(Queue *q) {
-    for (int i = q->index; i < q->size; i++) 
-        free(q->queue[i]);
+    size_t size = q->size;
+    for (int i = 0; i < size; i++)
+        dequeue(q);
 
     memset(q, 0, sizeof(Queue));
 }
@@ -30,7 +31,6 @@ void enqueue(Queue *q, void *item) {
 
 void dequeue(Queue *q) {
     assert(q->size > 0);
-    free(queue_front(q));
     q->index = (++q->index % MAX_QUEUE);
     --q->size;
 }

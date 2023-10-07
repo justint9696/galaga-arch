@@ -1,11 +1,11 @@
-#include "time.h"
+#include "game/time.h"
 
 #include <sys/time.h>
 #include <stddef.h>
 
 static uint64_t _start;
 
-inline uint64_t Get_Tick() {
+inline uint64_t Time_GetTick() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     const uint64_t tick = tv.tv_sec * 1000LL + tv.tv_usec / 1000;
@@ -13,14 +13,14 @@ inline uint64_t Get_Tick() {
 }
 
 void Time_Init() {
-    _start = Get_Tick();
+    _start = Time_GetTick();
 }
 
 uint64_t Time_Passed(uint64_t tick) {
-    return (Get_Tick() - tick);
+    return (Time_GetTick() - tick);
 }
 
 uint64_t Time_Ticks() {
-    return (Get_Tick() - _start);
+    return (Time_GetTick() - _start);
 }
 

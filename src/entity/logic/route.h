@@ -1,8 +1,8 @@
 #ifndef _ROUTE_H_
 #define _ROUTE_H_
 
-#include "../common/queue.h"
-#include "path.h"
+#include "data/queue.h"
+#include "entity/logic/path.h"
 
 void Route_Spawn(Queue *, vec2);
 void Route_Idle(Queue *, vec2);

@@ -1,30 +1,24 @@
-#include "../entity/player.h"
-#include "buttons.h"
+#include "entity/player.h"
+#include "game/buttons.h"
 
-int _buttons = 0;
-
-int Buttons_Get() {
-    return _buttons;
-}
-
-void Buttons_Update(SDL_Event event) {
+void Buttons_Update(uint32_t *buttons, SDL_Event event) {
     switch (event.type) {
         case SDL_KEYDOWN:
             switch (event.key.keysym.scancode) {
                 case SDL_SCANCODE_UP:
-                    _buttons |= BUTTON_UP;
+                    *buttons |= BUTTON_UP;
                     break;
                 case SDL_SCANCODE_DOWN:
-                    _buttons |= BUTTON_DOWN;
+                    *buttons |= BUTTON_DOWN;
                     break;
                 case SDL_SCANCODE_LEFT:
-                    _buttons |= BUTTON_LEFT;
+                    *buttons |= BUTTON_LEFT;
                     break;
                 case SDL_SCANCODE_RIGHT:
-                    _buttons |= BUTTON_RIGHT;
+                    *buttons |= BUTTON_RIGHT;
                     break;
                 case SDL_SCANCODE_SPACE:
-                    _buttons |= BUTTON_SPACE;
+                    *buttons |= BUTTON_SPACE;
                     break;
                 default:
                     break;
@@ -34,19 +28,19 @@ void Buttons_Update(SDL_Event event) {
         case SDL_KEYUP:
             switch (event.key.keysym.scancode) {
                 case SDL_SCANCODE_UP:
-                    _buttons &= ~BUTTON_UP;
+                    *buttons &= ~BUTTON_UP;
                     break;
                 case SDL_SCANCODE_DOWN:
-                    _buttons &= ~BUTTON_DOWN;
+                    *buttons &= ~BUTTON_DOWN;
                     break;
                 case SDL_SCANCODE_LEFT:
-                    _buttons &= ~BUTTON_LEFT;
+                    *buttons &= ~BUTTON_LEFT;
                     break;
                 case SDL_SCANCODE_RIGHT:
-                    _buttons &= ~BUTTON_RIGHT;
+                    *buttons &= ~BUTTON_RIGHT;
                     break;
                 case SDL_SCANCODE_SPACE:
-                    _buttons &= ~BUTTON_SPACE;
+                    *buttons &= ~BUTTON_SPACE;
                     break;
                 default:
                     break;

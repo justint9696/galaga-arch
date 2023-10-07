@@ -1,9 +1,9 @@
-#include "../game/fps.h"
+#include "game/fps.h"
 
-#include "app.h"
-#include "hud.h"
-#include "renderer.h"
-#include "window.h"
+#include "gfx/app.h"
+#include "gfx/hud.h"
+#include "gfx/renderer.h"
+#include "gfx/window.h"
 
 #include <assert.h>
 #include <string.h>
@@ -39,8 +39,8 @@ void Hud_Draw() {
     _hud.count = 0;
 }
 
-void Hud_DrawFPS() {
-    Hud_AddText("FPS: %.2f", fps_get());
+void Hud_DrawFPS(const fps_s *fps) {
+    Hud_AddText("FPS: %.2f", FPS_Get(fps));
 }
 
 void Hud_AddText(const char *format, ...) {

@@ -1,67 +1,57 @@
-#include "../gfx/hud.h"
-#include "../gfx/renderer.h"
-#include "../gfx/stars.h"
+#include "entity/logic/formation.h"
+#include "gfx/hud.h"
+#include "gfx/renderer.h"
+#include "gfx/stars.h"
 
-#include "../common/util.h"
+#include "common/util.h"
 
-#include "../entity/enemy.h"
-#include "../entity/player.h"
+#include "entity/logic/enemy.h"
+#include "entity/player.h"
 
-#include "game.h"
-#include "fps.h"
-#include "level.h"
-#include "time.h"
+#include "game/game.h"
+#include "game/time.h"
 
 #include <SDL2/SDL.h>
 
-static uint64_t _time, _delta_time;
-
-static inline void _Game_Tick() {
-    const uint64_t tick = Get_Tick();
-
-    _delta_time = tick - _time;
-    _time += _delta_time;
+static inline void _Game_Tick(Game *self) {
+    Hud_AddText("Level time: %lis", ((Time_Passed(self->fps.start) / 1000)));
 }
 
-bool Game_IsRunning() {
-    return (Player_IsAlive());
+bool Game_IsRunning(Game *self) {
+    return (Player_IsAlive(&self->world.player));
 }
 
-void Game_Init() {
+void Game_Init(Game *self) {
     // prepare time
-    _time = Get_Tick();
     Time_Init();
-    fps_init();
-
-    // prepare level
-    Level_Init();
+    FPS_Init(&self->fps);
 
     // prepare entities
-    Entity_InitAll();
-    Player_Init(_time);
-    Enemy_InitAll(_time);
+    World_Init(&self->world, self->fps.start);
+
+    // prepare stage
+    Stage_Init(&self->stage, 0);
 
     // prepare gfx
     Hud_Init();
     Stars_Init();
 }
 
-void Game_Main() {
+void Game_Main(Game *self) {
     // frame start
-    frame_start();
+    Frame_Start(&self->fps);
 
     // prepare renderer
     Renderer_Prepare();
 
-    // update enemies
-    Enemy_UpdateAll(_time);
-
     // update gfx
-    Stars_Update(_delta_time);
+    Stars_Update(self->fps.delta);
+
+    // update stage
+    Stage_Update(&self->stage, &self->world, self->fps.ticks);
 
     // update entities
-    Player_Update(_time);
-    Entity_UpdateAll(_delta_time);
+    World_Update(&self->world, self->fps.ticks, self->fps.delta);
 
     // draw hud
     Hud_Draw();
@@ -70,12 +60,18 @@ void Game_Main() {
     Renderer_Update();
 
     // game tick
-    _Game_Tick();
-    frame_end();
+    _Game_Tick(self);
+    Frame_End(&self->fps);
     
     // frame delay
-    fps_limit();
+    FPS_Limit(&self->fps);
 
     // draw fps
-    Hud_DrawFPS();
+    Hud_DrawFPS(&self->fps);
+}
+
+void Game_Destroy(Game *self) {
+    World_Destroy(&self->world);
+    Stage_Destroy(&self->stage);
+    Formation_Destroy(&self->world.formation);
 }

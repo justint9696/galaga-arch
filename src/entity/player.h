@@ -1,11 +1,13 @@
 #ifndef _PLAYER_H_
 #define _PLAYER_H_
 
-#include "../common/type.h"
-#include "../game/window.h"
-#include "entity.h"
+#include "common/type.h"
+#include "gfx/window.h"
+#include "entity/entity.h"
+#include "data/linked_list.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define PLAYER_TEXTURE	    "assets/images/player.png"	
 #define PLAYER_WIDTH        66.7f
@@ -17,17 +19,17 @@
 #define PLAYER_SPAWN_Y      50.f
 
 typedef struct {
-    int buttons;
-    Entity *entity;
+    uint32_t p_buttons, buttons;
+    Entity entity;
 } Player;
 
-bool Player_IsAlive();
-bool Player_IsMoving();
+bool Player_IsAlive(const Player *self);
+bool Player_IsMoving(const Player *self);
 
-vec2 Player_Position();
-vec2 Player_Velocity();
+vec2 Player_Position(const Player *self);
+vec2 Player_Velocity(const Player *self);
 
-void Player_Init(uint64_t tick);
-void Player_Update(uint64_t tick);
+void Player_Init(Player *self, uint64_t tick);
+Entity *Player_Update(Player *self, uint64_t tick, uint64_t deltaTime);
 
 #endif
