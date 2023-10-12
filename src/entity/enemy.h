@@ -13,8 +13,8 @@
 
 #define ENEMY_TEXTURE           "assets/images/enemy01.png"
 #define ENEMY_SPAWN_HEALTH      1.f
-#define ENEMY_WIDTH             66.67f
-#define ENEMY_HEIGHT            101.3f
+#define ENEMY_WIDTH             66.67f / WINDOW_SCALAR
+#define ENEMY_HEIGHT            101.3f / WINDOW_SCALAR
 #define ENEMY_SPAWN_X           ((WINDOW_WIDTH - ENEMY_WIDTH) / 2)
 #define ENEMY_SPAWN_Y           (WINDOW_HEIGHT - ENEMY_HEIGHT - 50.f)
 #define ENEMY_IDLE_VELOCITY     0.05f

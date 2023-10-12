@@ -4,13 +4,14 @@
 #include "common/type.h"
 #include "gfx/window.h"
 #include "entity/entity.h"
+#include "game/buttons.h"
 
 #include <stdbool.h>
 #include <stdint.h>
 
 #define PLAYER_TEXTURE	    "assets/images/player.png"	
-#define PLAYER_WIDTH        66.7f
-#define PLAYER_HEIGHT       48.f
+#define PLAYER_WIDTH        66.7f / WINDOW_SCALAR
+#define PLAYER_HEIGHT       48.f / WINDOW_SCALAR
 
 #define PLAYER_VELOCITY     0.35f
 #define PLAYER_SPAWN_HEALTH 1.f
