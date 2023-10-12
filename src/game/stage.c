@@ -27,12 +27,10 @@ void Stage_Init(Stage *self, uint32_t id) {
 }
 
 void Stage_Destroy(Stage *self) {
-    Enemy *enemy;
     Queue *q;
     for (size_t i = 0; i < MAX_ENEMY; i++) {
-        enemy = &self->enemies[i]; 
-        q = &enemy->path;
-        for (size_t j = 0; j < enemy->path.size; j++) {
+        q = &self->enemies[i].path;
+        for (size_t j = 0; j < q->size; j++) {
             free(queue_front(q));
             dequeue(q);
         }
