@@ -1,4 +1,4 @@
-bin/*
-obj/*
-*.o
-compile_flags.txt
+bin/
+obj/
+*.txt
+core*
