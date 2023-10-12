@@ -4,11 +4,15 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#define size_loop(a, b) \
+    for (size_t y = a.y; y < b.y && y < WINDOW_HEIGHT; y++) \
+        for (size_t x = a.x; x < b.x && x < WINDOW_WIDTH; x++)
+
 static inline int _get_offset(int x, int y) {
     return x + (y * WINDOW_WIDTH);
 }
 
-static void *_get(uint64_t *data, int x, int y) {
+static void *_get(const uint64_t *data, int x, int y) {
     return (void *)data[_get_offset(x, y)]; 
 }
 
@@ -26,9 +30,8 @@ static void _World_Clear(World *self, Entity *entity) {
         .x = pos.x + dim.w,
         .y = pos.y + dim.h,
     };
-    for (int y = pos.y; y < size.y; y++) {
-        for (int x = pos.x; x < size.x; x++)
-            _clear(self, x, y);
+    size_loop(pos, size) {
+        _clear(self, x, y);
     }
 }
 
@@ -39,22 +42,20 @@ static void _World_Collision(World *self, Entity *entity) {
         .x = pos.x + dim.w,
         .y = pos.y + dim.h,
     };
-    for (int y = pos.y; y < size.y; y++) {
-        for (int x = pos.x; x < size.x; x++) {
-            ent = (Entity *)_get(self->data, x, y);        
-            if (!ent || ent == entity || 
-                    (ent->type == entity->type && entity->type == TYPE_PROJECTILE) ||
-                    (ent->team == entity->team))
-                continue;
+    size_loop(pos, size) {
+        ent = (Entity *)_get(self->data, x, y);        
+        if (!ent || ent == entity || 
+                (ent->type == entity->type && entity->type == TYPE_PROJECTILE) ||
+                (ent->team == entity->team))
+            continue;
 
-            if (Entity_Collision(entity, ent)) {
-                Entity_Collide(entity, ent);
+        if (Entity_Collision(entity, ent)) {
+            Entity_Collide(entity, ent);
 
-                _World_Clear(self, entity);
-                _World_Clear(self, ent);
+            _World_Clear(self, entity);
+            _World_Clear(self, ent);
 
-                return;
-            }
+            return;
         }
     }
 }
@@ -65,9 +66,8 @@ static void _World_Update(World *self, vec2 p_pos, const Entity *entity) {
         .y = p_pos.y + entity->dim.h
     };
 
-    for (int y = p_pos.y; y < size.y; y++) {
-        for (int x = p_pos.x; x < size.x; x++)
-            _clear(self, x, y);
+    size_loop(p_pos, size) {
+        _clear(self, x, y);
     }
 
     size = (vec2) {
@@ -75,16 +75,15 @@ static void _World_Update(World *self, vec2 p_pos, const Entity *entity) {
         .y = entity->pos.y + entity->dim.h
     };
 
-    for (int y = entity->pos.y; y < size.y; y++) {
-        for (int x = entity->pos.x; x < size.x; x++) {
-            _update(self, x, y, entity);
-        }
+    size_loop(entity->pos, size) {
+        _update(self, x, y, entity);
     }
 }
 
 void World_Init(World *self, uint64_t tick) {
     memset(self, 0, sizeof(World));
     self->data = calloc(1, DATA_SIZE * sizeof(void *));
+    assert(self->data);
 
     Formation_Init(&self->formation);
     LinkedList_Add(&self->entities, &self->formation.entity);
@@ -129,7 +128,7 @@ void World_Update(World *self, Buttons *buttons, uint64_t tick, uint64_t deltaTi
     }
 }
 
-inline void _destroy_projectiles(LinkedList *lst) {
+static inline void _destroy_projectiles(LinkedList *lst) {
     Entity *entity;
     Node *tmp = lst->head; 
 
