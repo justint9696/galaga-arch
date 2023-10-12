@@ -1,7 +1,7 @@
 #ifndef _WAVE_H_
 #define _WAVE_H_
 
-#include "entity/logic/enemy.h"
+#include "entity/enemy.h"
 #include "game/world.h"
 
 #include <stdint.h>
