@@ -6,8 +6,8 @@
 #include "common/util.h"
 
 #include "entity/player.h"
+#include "entity/enemy.h"
 
-#include "entity/logic/enemy.h"
 #include "entity/logic/formation.h"
 #include "entity/logic/path.h"
 #include "entity/logic/route.h"
