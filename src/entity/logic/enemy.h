@@ -17,7 +17,7 @@
 #define ENEMY_HEIGHT            101.3f
 #define ENEMY_SPAWN_X           ((WINDOW_WIDTH - ENEMY_WIDTH) / 2)
 #define ENEMY_SPAWN_Y           (WINDOW_HEIGHT - ENEMY_HEIGHT - 50.f)
-#define ENEMY_IDLE_VELOCITY     0.025f
+#define ENEMY_IDLE_VELOCITY     0.05f
 #define ENEMY_SPAWN_VELOCITY    0.3f
 #define ENEMY_IDLE_TIME         1500    
 
