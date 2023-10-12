@@ -1,6 +1,7 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
+#include "game/buttons.h"
 #include "game/fps.h"
 #include "game/stage.h"
 #include "game/world.h"
@@ -14,6 +15,7 @@ typedef struct {
     fps_s fps;
     Stage stage;
     World world;
+    Buttons buttons;
 } Game;
 
 bool Game_IsRunning(Game *self);

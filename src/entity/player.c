@@ -1,4 +1,3 @@
-#include "game/buttons.h"
 #include "entity/player.h"
 
 #include <assert.h>
@@ -29,23 +28,21 @@ void Player_Init(Player *self, uint64_t tick) {
     printf("Player initialized.\n");
 }
 
-Entity *Player_Update(Player *self, uint64_t tick, uint64_t deltaTime) {
+Entity *Player_Update(Player *self, Buttons *buttons, uint64_t tick, uint64_t deltaTime) {
     if (!Player_IsAlive(self))
         return NULL;
 
     Entity *child = NULL;
-    if (self->buttons & BUTTON_SPACE) 
+    if (buttons->current & BUTTON_SPACE) 
         child = Entity_Fire(&self->entity, tick);
     
-    if (self->p_buttons == self->buttons) 
+    if (buttons->current == buttons->previous) 
         return child;
 
-    memcpy(&self->p_buttons, &self->buttons, sizeof(uint32_t));
-
     vec2 vel = { .x = 0.f, .y = 0.f };
-    if (self->buttons & BUTTON_LEFT)
+    if (buttons->current & BUTTON_LEFT)
         vel.x = -PLAYER_VELOCITY;
-    else if (self->buttons & BUTTON_RIGHT)
+    else if (buttons->current & BUTTON_RIGHT)
         vel.x = PLAYER_VELOCITY;
 
     if (!memcmp(&self->entity.vel, &vel, sizeof(vec2)))

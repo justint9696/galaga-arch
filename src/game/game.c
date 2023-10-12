@@ -51,7 +51,7 @@ void Game_Main(Game *self) {
     Stage_Update(&self->stage, &self->world, self->fps.ticks);
 
     // update entities
-    World_Update(&self->world, self->fps.ticks, self->fps.delta);
+    World_Update(&self->world, &self->buttons, self->fps.ticks, self->fps.delta);
 
     // draw hud
     Hud_Draw();

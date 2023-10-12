@@ -19,7 +19,6 @@
 #define PLAYER_SPAWN_Y      50.f
 
 typedef struct {
-    uint32_t p_buttons, buttons;
     Entity entity;
 } Player;
 
@@ -30,6 +29,6 @@ vec2 Player_Position(const Player *self);
 vec2 Player_Velocity(const Player *self);
 
 void Player_Init(Player *self, uint64_t tick);
-Entity *Player_Update(Player *self, uint64_t tick, uint64_t deltaTime);
+Entity *Player_Update(Player *self, Buttons *buttons, uint64_t tick, uint64_t deltaTime);
 
 #endif

@@ -93,8 +93,8 @@ void World_Init(World *self, uint64_t tick) {
     LinkedList_Add(&self->entities, &self->player.entity);
 }
 
-void World_Update(World *self, uint64_t tick, uint64_t deltaTime) {
-    Entity *entity = Player_Update(&self->player, tick, deltaTime);
+void World_Update(World *self, Buttons *buttons, uint64_t tick, uint64_t deltaTime) {
+    Entity *entity = Player_Update(&self->player, buttons, tick, deltaTime);
     Formation_Update(&self->formation);
     // Hud_AddText("Center: (%.2f, %.2f)", self->formation.entity.pos.x, self->formation.entity.pos.y);
 
@@ -117,7 +117,6 @@ void World_Update(World *self, uint64_t tick, uint64_t deltaTime) {
 
             continue;
         }
-
 
         memcpy(&p_pos, &entity->pos, sizeof(vec2));
         Entity_Update(entity, deltaTime);

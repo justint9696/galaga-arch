@@ -5,6 +5,7 @@
 #include "entity/player.h"
 #include "entity/logic/formation.h"
 #include "gfx/window.h"
+#include "game/buttons.h"
 
 #define DATA_SIZE       WINDOW_WIDTH * WINDOW_HEIGHT
 
@@ -17,7 +18,7 @@ typedef struct {
 } World;
 
 void World_Init(World *self, uint64_t tick);
-void World_Update(World *self, uint64_t tick, uint64_t deltaTime);
+void World_Update(World *self, Buttons *buttons, uint64_t tick, uint64_t deltaTime);
 void World_Destroy(World *self);
 
 #endif

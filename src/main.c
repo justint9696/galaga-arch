@@ -16,7 +16,7 @@ void Poll_Events(Game *game) {
                 break;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
-                Buttons_Update(&game->world.player.buttons, event);
+                Buttons_Update(&game->buttons, event);
                 break;
             default:
                 break;

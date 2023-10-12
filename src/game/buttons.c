@@ -1,6 +1,9 @@
 #include "game/buttons.h"
 
-void Buttons_Update(uint32_t *buttons, SDL_Event event) {
+void Buttons_Update(Buttons *self, SDL_Event event) {
+    uint32_t *buttons = &self->current;
+    memcpy(&self->previous, buttons, sizeof(uint32_t));
+
     switch (event.type) {
         case SDL_KEYDOWN:
             switch (event.key.keysym.scancode) {
@@ -18,6 +21,9 @@ void Buttons_Update(uint32_t *buttons, SDL_Event event) {
                     break;
                 case SDL_SCANCODE_SPACE:
                     *buttons |= BUTTON_SPACE;
+                    break;
+                case SDL_SCANCODE_F12:
+                    *buttons |= BUTTON_F12;
                     break;
                 default:
                     break;
@@ -40,6 +46,9 @@ void Buttons_Update(uint32_t *buttons, SDL_Event event) {
                     break;
                 case SDL_SCANCODE_SPACE:
                     *buttons &= ~BUTTON_SPACE;
+                    break;
+                case SDL_SCANCODE_F12:
+                    *buttons &= ~BUTTON_F12;
                     break;
                 default:
                     break;

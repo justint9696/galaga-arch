@@ -9,7 +9,12 @@
 #define BUTTON_LEFT         (1 << 2)
 #define BUTTON_RIGHT        (1 << 3)
 #define BUTTON_SPACE        (1 << 4)
+#define BUTTON_F12          (1 << 5)
 
-void Buttons_Update(uint32_t *buttons, SDL_Event event);
+typedef struct {
+    uint32_t previous, current;
+} Buttons;
+
+void Buttons_Update(Buttons *self, SDL_Event event);
 
 #endif
