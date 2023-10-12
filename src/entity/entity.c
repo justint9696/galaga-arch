@@ -17,8 +17,7 @@ static inline void _Entity_Render_Texure(const Entity *self) {
     DrawTexture(self->texture, round(self->pos.x), round(self->pos.y), self->dim.width, self->dim.height, self->rotation);
 }
 
-static inline void _Entity_Render_nop(const Entity *self) {
-}
+static inline void _Entity_Render_nop(const Entity *self) {}
 
 // out of bounds check
 static inline bool _Entity_OOB(const Entity *self) {
@@ -115,11 +114,11 @@ void Entity_Update(Entity *self, uint64_t deltaTime) {
 
     // update entity position
     if (self->parent) {
-        self->pos.x += (1.f * deltaTime * self->parent->vel.x);
-        self->pos.y += (1.f * deltaTime * self->parent->vel.y);
+        self->pos.x += round(1.f * deltaTime * self->parent->vel.x);
+        self->pos.y += round(1.f * deltaTime * self->parent->vel.y);
     } else {
-        self->pos.x += (1.f * deltaTime * self->vel.x);
-        self->pos.y += (1.f * deltaTime * self->vel.y);
+        self->pos.x += round(1.f * deltaTime * self->vel.x);
+        self->pos.y += round(1.f * deltaTime * self->vel.y);
     }
 
     self->delta = deltaTime;
@@ -138,8 +137,7 @@ void Entity_Update(Entity *self, uint64_t deltaTime) {
 }
 
 Entity *Entity_Fire(Entity *self, uint64_t tick) {
-    const uint64_t time = Time_Passed(self->tick);
-    if (time < BULLET_DELAY)
+    if (Time_Passed(self->tick) < BULLET_DELAY)
         return NULL;
 
     vec2 pos = _Entity_Midpoint(self);
