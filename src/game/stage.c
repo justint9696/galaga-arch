@@ -1,6 +1,7 @@
 #include "common/util.h"
 #include "data/linked_list.h"
 #include "game/stage.h"
+#include "game/time.h"
 #include "gfx/hud.h"
 
 #include <assert.h>
@@ -41,11 +42,13 @@ static void _Stage_Update(Stage *self, World *world, uint64_t tick) {
     Entity *child;
     uint32_t count = 0;
     Enemy *enemy, *next;
+    bool cooldown = Time_Passed(self->idle_tick) > ENEMY_COOLDOWN;
     for (int i = 0; i < self->wave.count; i++) {
         enemy = &self->enemies[i];
         
         if (!Enemy_IsAlive(enemy))
             continue;
+
 
         ++count;
         if (i < MAX_ENEMY - 1 && enemy->state == STATE_SPAWN) {
@@ -54,9 +57,11 @@ static void _Stage_Update(Stage *self, World *world, uint64_t tick) {
                 continue;
         }
 
-        child = Enemy_Update(enemy, world, tick);
-        if (child) 
+        child = Enemy_Update(enemy, world, cooldown, tick);
+        if (child) {
+            self->idle_tick = tick;
             LinkedList_Add(&world->entities, child);
+        }
     }
 
     self->count = count;
@@ -73,9 +78,9 @@ void Stage_Update(Stage *self, World *world, uint64_t tick) {
             break;
     }
 
-    // Hud_AddText("Stage: %i", self->id);
-    // Hud_AddText("Wave: %i", self->wave.current);
-    Hud_AddText("Enemies: %i", self->count);
+    Hud_AddDebugText("Stage: %i", self->id);
+    Hud_AddDebugText("Wave: %i", self->wave.current);
+    Hud_AddDebugText("Enemies: %i", self->count);
 
     _Stage_Update(self, world, tick);
 }

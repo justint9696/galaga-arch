@@ -6,6 +6,7 @@
 
 typedef struct {
     uint32_t id, count;
+    uint64_t idle_tick;
     float scalar;
     Wave wave;
     Enemy enemies[MAX_ENEMY];
