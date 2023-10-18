@@ -4,6 +4,8 @@
 #include <SDL2/SDL_events.h>
 #include <stdint.h>
 
+#define BUTTON_DELAY        250
+
 #define BUTTON_UP           (1 << 0)
 #define BUTTON_DOWN         (1 << 1)
 #define BUTTON_LEFT         (1 << 2)
