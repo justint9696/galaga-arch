@@ -16,6 +16,11 @@ typedef struct {
     Stage stage;
     World world;
     Buttons buttons;
+
+    uint64_t tick;
+    struct {
+        bool debug;
+    } flags;
 } Game;
 
 bool Game_IsRunning(Game *self);

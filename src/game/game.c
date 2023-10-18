@@ -5,9 +5,11 @@
 #include "common/util.h"
 
 #include "entity/enemy.h"
-#include "entity/logic/formation.h"
 #include "entity/player.h"
 
+#include "entity/logic/formation.h"
+
+#include "game/buttons.h"
 #include "game/game.h"
 #include "game/time.h"
 
@@ -22,6 +24,9 @@ bool Game_IsRunning(Game *self) {
 }
 
 void Game_Init(Game *self) {
+    // prepare game
+    memset(self, 0, sizeof(Game));
+
     // prepare time
     Time_Init();
     FPS_Init(&self->fps);
@@ -53,16 +58,21 @@ void Game_Main(Game *self) {
     // update entities
     World_Update(&self->world, &self->buttons, self->fps.ticks, self->fps.delta);
 
+    // toggle debug info
+    if (self->buttons.current & BUTTON_F12 && Time_Passed(self->tick) > BUTTON_DELAY) {
+        self->tick = self->fps.ticks;
+        self->flags.debug ^= 1;
+    }
+
     // draw hud
-    Hud_Draw();
+    Hud_Draw(self->flags.debug);
 
     // render screen
     Renderer_Update();
 
-    // game tick
-    _Game_Tick(self);
+    // frame end
     Frame_End(&self->fps);
-    
+
     // frame delay
     FPS_Limit(&self->fps);
 
@@ -71,6 +81,7 @@ void Game_Main(Game *self) {
 }
 
 void Game_Destroy(Game *self) {
+    Hud_Destroy();
     World_Destroy(&self->world);
     Stage_Destroy(&self->stage);
     Formation_Destroy(&self->world.formation);
