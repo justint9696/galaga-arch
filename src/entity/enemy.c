@@ -79,13 +79,13 @@ static void _Enemy_Swoop(Enemy *self, World *world, uint64_t tick) {
 }
 
 static Entity *_Enemy_ThinkAttack(Enemy *self, const Player *player, uint64_t tick) {
-    const vec2 
+    vec2 
         pos = Player_Position(player),
         vel = Player_Velocity(player);
 
     Entity *entity = &self->entity;
 
-    const vec2 diff = {
+    vec2 diff = {
         .x = (pos.x - entity->pos.x),
         .y = fabs(pos.y - entity->pos.y)
     };
@@ -101,7 +101,7 @@ static Entity *_Enemy_ThinkAttack(Enemy *self, const Player *player, uint64_t ti
     if ((diff.x < 0.f && vel.x < 0.f) || (diff.x > 0.f && vel.x > 0.f)) 
         return NULL;
 
-    const vec2 time = {
+    vec2 time = {
         .x = fabs(diff.x / PLAYER_VELOCITY),
         .y = fabs(diff.y / BULLET_VELOCITY)
     };
@@ -112,10 +112,9 @@ static Entity *_Enemy_ThinkAttack(Enemy *self, const Player *player, uint64_t ti
     return NULL;
 }
 
-static Entity *_Enemy_Think(Enemy *self, World *world, uint64_t tick) {
+static Entity *_Enemy_Think(Enemy *self, World *world, bool cooldown, uint64_t tick) {
     estate_t p_state = self->state;
-    Entity *child = NULL; 
-    // _Enemy_ThinkAttack(self, &world->player, tick);
+    Entity *child = cooldown ? _Enemy_ThinkAttack(self, &world->player, tick) : NULL;
 
     switch (self->state) {
         case STATE_IDLE:
@@ -158,7 +157,7 @@ void Enemy_Init(Enemy *self, uint32_t id, ewave_t wave, uint64_t tick) {
     self->id = id;
 }
 
-Entity *Enemy_Update(Enemy *self, World *world, uint64_t tick) {
-    return _Enemy_Think(self, world, tick);
+Entity *Enemy_Update(Enemy *self, World *world, bool cooldown, uint64_t tick) {
+    return _Enemy_Think(self, world, cooldown, tick);
 }
 

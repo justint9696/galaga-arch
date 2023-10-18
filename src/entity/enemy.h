@@ -20,6 +20,7 @@
 #define ENEMY_IDLE_VELOCITY     0.05f
 #define ENEMY_SPAWN_VELOCITY    0.3f
 #define ENEMY_IDLE_TIME         1500    
+#define ENEMY_COOLDOWN          600
 
 #define MAX_ENEMY               32
 
@@ -56,6 +57,6 @@ typedef struct {
 
 bool Enemy_IsAlive(const Enemy *self);
 void Enemy_Init(Enemy *self, uint32_t id, ewave_t wave, uint64_t tick);
-Entity *Enemy_Update(Enemy *self, World *world, uint64_t tick);
+Entity *Enemy_Update(Enemy *self, World *world, bool cooldown, uint64_t tick);
 
 #endif
