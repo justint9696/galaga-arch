@@ -55,9 +55,9 @@ TTF_Font *LoadFont(const char *filename, int size) {
     return font; 
 }
 
-int GetFontWidth(TTF_Font *font) {
+int GetFontWidth(TTF_Font *font, const char *text) {
     int width, height;
-    TTF_SizeText(font, "", &width, &height);
+    TTF_SizeText(font, text, &width, &height);
     return width;
 }
 

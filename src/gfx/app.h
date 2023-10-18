@@ -19,7 +19,7 @@ SDL_Texture *LoadTexture(const char *filename);
 
 TTF_Font *LoadFont(const char *filename, int size);
 
-int GetFontWidth(TTF_Font *font);
+int GetFontWidth(TTF_Font *font, const char *text);
 
 int GetFontHeight(TTF_Font *font);
 
