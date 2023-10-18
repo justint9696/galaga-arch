@@ -8,7 +8,7 @@
 
 #define STAR_WIDTH          1.f
 #define STAR_HEIGHT         STAR_WIDTH
-#define STAR_MAX_COUNT      100
+#define STAR_MAX_COUNT      150
 
 #define COLOR_STAR          0xFFFFFF00
 
