@@ -6,6 +6,8 @@
 #include "game/time.h"
 
 #include <assert.h>
+#include <string.h>
+#include <stdio.h>
 
 static size_t _count = 0;
 
