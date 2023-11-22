@@ -22,6 +22,9 @@ bool Game_IsRunning(Game *self) {
 }
 
 void Game_Init(Game *self) {
+    // prepare buttons
+    Buttons_Init(&self->buttons);
+
     // prepare time
     Time_Init();
     FPS_Init(&self->fps);

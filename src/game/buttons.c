@@ -1,5 +1,9 @@
 #include "game/buttons.h"
 
+void Buttons_Init(Buttons *self) {
+    memset(self, 0, sizeof(Buttons));
+}
+
 void Buttons_Update(Buttons *self, SDL_Event event) {
     uint32_t *buttons = &self->current;
     memcpy(&self->previous, buttons, sizeof(uint32_t));
