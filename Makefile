@@ -1,28 +1,35 @@
-CC 			= gcc
+CC = gcc
 
-BIN 		= bin/
-OBJ 		= obj/
-SRC 		= src/
-INC 		= src/
+BIN = bin/
+OBJ = obj/
+SRC = src/
+LIB = lib/
 
-SRCS		= $(shell find $(SRC) -name '*.c') 
-OBJS 		= $(patsubst $(SRC)%, $(OBJ)%, $(SRCS:.c=.o))
+SRCS = $(shell find $(SRC) -name '*.c') 
+OBJS = $(patsubst $(SRC)%, $(OBJ)%, $(SRCS:.c=.o))
 
-INCLUDES 	= -I$(INC)
+INCLUDES = -Iinclude/ -Isrc/
 
-CFLAGS 		= -g -O3 -Wall
-CFLAGS  	+= $(INCLUDES)
-LDFLAGS 	= -lSDL2 -lSDL2_image -lSDL2_ttf -lm
+CFLAGS = -g -O3 -Wall $(INCLUDES)
 
-TARGET 		= $(BIN)galaga
+LDFLAGS = -lm -lSDL2 -lSDL2_image -lSDL2_ttf
+
+TARGET = $(BIN)galaga
+
+.PHONY: all clean
 
 all: build
 
+win32: LDFLAGS = -L$(LIB) -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
+win32: $(OBJS)
+	@mkdir -p $(BIN)
+	$(CC) -o $(TARGET) $^ $(LDFLAGS)
+
 build: $(OBJS)
 	@mkdir -p $(BIN)
-	$(CC) $(LDFLAGS) -o $(TARGET) $^ 
+	$(CC) -o $(TARGET) $^ $(LDFLAGS) 
 
-release: build
+release: all
 	strip -s $(TARGET)
 
 run: all
@@ -30,8 +37,7 @@ run: all
 
 $(OBJ)%.o: $(SRC)%.c 
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -o $@ -c $< 
+	$(CC) -o $@ -c $< $(CFLAGS)
 
-.PHONY: clean
 clean:
-	rm -rf $(BIN) $(OBJ)
+	rm -rf $(TARGET) $(OBJ)

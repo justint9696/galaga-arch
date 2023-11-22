@@ -17,6 +17,7 @@ typedef struct {
     uint32_t previous, current;
 } Buttons;
 
+void Buttons_Init(Buttons *self);
 void Buttons_Update(Buttons *self, SDL_Event event);
 
 #endif

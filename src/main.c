@@ -4,6 +4,7 @@
 #include "game/game.h"
 
 #include <SDL2/SDL_events.h>
+#include <stdio.h>
 
 void Poll_Events(Game *game) {
     SDL_Event event;

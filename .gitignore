@@ -1,4 +1,4 @@
-bin/
+bin/galaga*
 obj/
 *.txt
 core*
