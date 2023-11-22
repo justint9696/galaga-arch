@@ -20,9 +20,10 @@ TARGET = $(BIN)galaga
 
 all: build
 
+win32: LDFLAGS = -L$(LIB) -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
 win32: $(OBJS)
 	@mkdir -p $(BIN)
-	$(CC) -o $(TARGET) $^ $(CFLAGS) -L$(LIB) -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
+	$(CC) -o $(TARGET) $^ $(LDFLAGS)
 
 build: $(OBJS)
 	@mkdir -p $(BIN)
