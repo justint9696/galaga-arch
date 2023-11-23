@@ -18,14 +18,19 @@ TARGET = $(BIN)galaga
 
 .PHONY: all clean
 
-all: build
+all: $(TARGET)
 
-win32: LDFLAGS = -L$(LIB) -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
+win32: LDFLAGS = -L$(LIB)x86 -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
 win32: $(OBJS)
-	@mkdir -p $(BIN)
-	$(CC) -o $(TARGET) $^ $(LDFLAGS)
+	@cp -rf $(LIB)x86/bin .
+	$(CC) -o $@ $^ $(LDFLAGS) 
 
-build: $(OBJS)
+win64: LDFLAGS = -L$(LIB)x64 -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
+win64: $(OBJS)
+	@cp -rf $(LIB)x64/bin .
+	$(CC) -o $(TARGET) $^ $(LDFLAGS) 
+
+$(TARGET): $(OBJS)
 	@mkdir -p $(BIN)
 	$(CC) -o $(TARGET) $^ $(LDFLAGS) 
 
@@ -40,4 +45,4 @@ $(OBJ)%.o: $(SRC)%.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 clean:
-	rm -rf $(TARGET) $(OBJ)
+	rm -rf $(BIN) $(OBJ)
