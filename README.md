@@ -20,11 +20,17 @@ git clone https://github.com/justint9696/galaga-arch.git
 cd galaga-arch
 make all
 ```
-#### Windows
+#### Windows (32-bit)
 ```
 git clone https://github.com/justint9696/galaga-arch.git
 cd galaga-arch
 make win32
+```
+#### Windows (64-bit)
+```
+git clone https://github.com/justint9696/galaga-arch.git
+cd galaga-arch
+make win64
 ```
 
 After a successful build has been made, it can be ran from the **root directory** with ```bin/galaga```.
