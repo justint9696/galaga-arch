@@ -12,8 +12,7 @@
 typedef struct {
     Player player;
     LinkedList entities;
-    uint32_t count;
-    uint64_t *data;
+    uint32_t count, *data;
     Formation formation;
 } World;
 
