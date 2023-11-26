@@ -9,20 +9,18 @@
     for (size_t y = a.y; y < b.y && y < WINDOW_HEIGHT; y++) \
         for (size_t x = a.x; x < b.x && x < WINDOW_WIDTH; x++)
 
-static inline void *get_ptr(const uint32_t *data, int x, int y) {
-    return (void *)(data + (y * WINDOW_WIDTH) + x);
+#define get_offset(x, y) (x + (y * WINDOW_WIDTH))
+
+static void *get_item(const World *world, int x, int y) {
+    return (void *)world->data[get_offset(x, y)]; 
 }
 
-static inline uint32_t get_item(const uint32_t *data, int x, int y) {
-    return *(data + (y * WINDOW_WIDTH) + x);
+static void update(World *world, int x, int y, const void *item) {
+    memcpy(&world->data[get_offset(x, y)], &item, sizeof(void *));
 }
 
-static inline void update(uint32_t *data, int x, int y, const void *item) {
-    memcpy((data + (y + WINDOW_WIDTH) + x), item, sizeof(void *));
-}
-
-static inline void clear(uint32_t *data, int x, int y) {
-    memset((data + (y + WINDOW_WIDTH) + x), 0, sizeof(void *));
+static void clear(World *world, int x, int y) {
+    memset(&world->data[get_offset(x, y)], 0, sizeof(void *));
 }
 
 static void _World_Clear(World *self, Entity *entity) {
@@ -32,7 +30,7 @@ static void _World_Clear(World *self, Entity *entity) {
         .y = pos.y + dim.h,
     };
     data_loop(pos, size)
-        clear(self->data, x, y);
+        clear(self, x, y);
 }
 
 static void _World_Collision(World *self, Entity *entity) {
@@ -43,7 +41,7 @@ static void _World_Collision(World *self, Entity *entity) {
         .y = pos.y + dim.h,
     };
     data_loop(pos, size) {
-        ent = (Entity *)get_item(self->data, x, y);   
+        ent = (Entity *)get_item(self, x, y);   
         if (!ent || ent == entity || 
                 (ent->type == TYPE_PROJECTILE && entity->type == TYPE_PROJECTILE) ||
                 (ent->team == entity->team))
@@ -67,7 +65,7 @@ static void _World_Update(World *self, vec2 p_pos, const Entity *entity) {
     };
 
     data_loop(p_pos, size)
-        clear(self->data, x, y);
+        clear(self, x, y);
 
     size = (vec2) {
         .x = entity->pos.x + entity->dim.w,
@@ -75,12 +73,12 @@ static void _World_Update(World *self, vec2 p_pos, const Entity *entity) {
     };
 
     data_loop(entity->pos, size)
-        update(self->data, x, y, entity);
+        update(self, x, y, entity);
 }
 
 void World_Init(World *self, uint64_t tick) {
     memset(self, 0, sizeof(World));
-    self->data = calloc(1, DATA_SIZE * sizeof(uint32_t));
+    self->data = calloc(1, DATA_SIZE * sizeof(data_t));
     assert(self->data);
 
     Formation_Init(&self->formation);

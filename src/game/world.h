@@ -6,13 +6,22 @@
 #include "entity/logic/formation.h"
 #include "gfx/window.h"
 #include "game/buttons.h"
+#include "common/type.h"
 
 #define DATA_SIZE       WINDOW_WIDTH * WINDOW_HEIGHT
+
+#ifdef ENVIRONMENT64
+    typedef uint64_t data_t;
+#else
+    typedef uint32_t data_t;
+#endif
 
 typedef struct {
     Player player;
     LinkedList entities;
-    uint32_t count, *data;
+    uint32_t count;
+    data_t *data;
+
     Formation formation;
 } World;
 
