@@ -1,4 +1,8 @@
 bin/
+include/
+lib/
 obj/
+share/
+
 *.txt
 core*
