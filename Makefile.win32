@@ -1,0 +1,55 @@
+CC = gcc
+
+BIN = bin/
+LIB = lib/
+OBJ = obj/
+SRC = src/
+
+SRCS = $(shell find $(SRC) -name '*.c') 
+OBJS = $(patsubst $(SRC)%, $(OBJ)%, $(SRCS:.c=.o))
+
+INCLUDES = -Iinclude/ -Isrc/
+
+CFLAGS = -g -O3 -Wall -Wextra
+CFLAGS += -Wno-unused-parameter
+CFLAGS += $(INCLUDES)
+CFLAGS += $(shell sdl2-config --cflags --libs)
+
+LDFLAGS = -L$(LIB)
+LDFLAGS += -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
+
+TARGET = $(BIN)galaga
+
+.PHONY: all clean
+
+all: $(TARGET)
+
+$(BIN):
+	@mkdir -p $@
+
+$(LIB):
+	@mkdir -p $@
+
+libs: $(BIN) $(LIB)
+	@rm -rf $(LIB)*
+	@cd $(LIB) && curl -LO https://github.com/libsdl-org/SDL/releases/download/release-2.28.5/SDL2-devel-2.28.5-mingw.tar.gz && tar -xzvf SDL2*.tar.gz
+	@cd $(LIB) && curl -LO https://github.com/libsdl-org/SDL_image/releases/download/release-2.8.1/SDL2_image-devel-2.8.1-mingw.tar.gz && tar -xzvf SDL2_image*.tar.gz
+	@cd $(LIB) && curl -LO https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.20.2/SDL2_ttf-devel-2.20.2-mingw.tar.gz && tar -xzvf SDL2_ttf*.tar.gz
+	@cp -rf $(LIB)SDL2-*/x86*/* . && cp -rf $(LIB)SDL2_image-*/x86*/* . && cp -rf $(LIB)SDL2_ttf-*/x86*/* .
+
+$(TARGET): $(OBJS)
+	@mkdir -p $(dir $@)
+	$(CC) -o $@ $^ $(LDFLAGS) 
+
+release: all
+	strip -s $(TARGET)
+
+run: all
+	@$(TARGET)
+
+$(OBJ)%.o: $(SRC)%.c 
+	@mkdir -p $(dir $@)
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+clean:
+	rm -rf $(TARGET) $(OBJ)
