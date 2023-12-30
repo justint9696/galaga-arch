@@ -13,9 +13,10 @@ INCLUDES = -Iinclude/ -Isrc/
 CFLAGS = -g -O3 -Wall -Wextra
 CFLAGS += -Wno-unused-parameter
 CFLAGS += $(INCLUDES)
-CFLAGS += $(shell sdl2-config --cflags --libs)
+CFLAGS += $(shell $(BIN)sdl2-config --cflags --libs)
 
-LDFLAGS = -L$(LIB)
+LDFLAGS = -lmingw32
+LDFLAGS += -L$(LIB)
 LDFLAGS += -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
 
 TARGET = $(BIN)galaga
@@ -36,6 +37,7 @@ libs: $(BIN) $(LIB)
 	@cd $(LIB) && curl -LO https://github.com/libsdl-org/SDL_image/releases/download/release-2.8.1/SDL2_image-devel-2.8.1-mingw.tar.gz && tar -xzvf SDL2_image*.tar.gz
 	@cd $(LIB) && curl -LO https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.20.2/SDL2_ttf-devel-2.20.2-mingw.tar.gz && tar -xzvf SDL2_ttf*.tar.gz
 	@cp -rf $(LIB)SDL2-*/i686*/* . && cp -rf $(LIB)SDL2_image-*/i686*/* . && cp -rf $(LIB)SDL2_ttf-*/i686*/* .
+	@cd $(BIN) && chmod +x sdl2-config
 
 $(TARGET): $(OBJS)
 	@mkdir -p $(dir $@)
