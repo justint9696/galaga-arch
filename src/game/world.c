@@ -6,6 +6,7 @@
 #include "entity/star.h"
 
 #include <assert.h>
+#include <string.h>
 
 #define data_loop(_a, _b) \
     for (size_t y = _a.y; y < _b.y && y < SCREEN_HEIGHT; y++) \

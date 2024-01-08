@@ -5,6 +5,7 @@
 #include "game/world.h"
 
 #include <assert.h>
+#include <string.h>
 
 static vec2 get_spawnpoint(wave_t wave) {
     switch (wave) {

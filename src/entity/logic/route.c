@@ -6,6 +6,8 @@
 
 #include "entity/enemy.h"
 
+#include <string.h>
+
 static inline vec2 rear(Queue *q) {
     return (*(Path *)(queue_rear(q))).dst;
 }

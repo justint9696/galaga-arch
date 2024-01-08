@@ -4,6 +4,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 /*!
  * Orients an entity based on the direction they are moving.

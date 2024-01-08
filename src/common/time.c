@@ -3,6 +3,8 @@
 
 #include <SDL2/SDL_timer.h>
 
+#include <string.h>
+
 static Time t;
 
 void time_init() {
@@ -37,10 +39,10 @@ void time_update() {
 }
 
 void time_limit() {
-    float delay = t.tick.next - t.tick.total; 
+    int32_t delay = t.tick.next - t.tick.total; 
     t.tick.next += FPS_DELAY; 
 
-    SDL_Delay(delay ? delay : 0);
+    SDL_Delay(delay > 0 ? delay : 0);
 }
 
 uint32_t time_delta() {

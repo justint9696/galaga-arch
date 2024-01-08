@@ -1,6 +1,8 @@
 #include "game/buttons.h"
 #include "common/time.h"
 
+#include <string.h>
+
 static Buttons buttons;
 
 void buttons_init() {

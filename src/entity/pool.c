@@ -1,6 +1,7 @@
 #include "entity/pool.h"
 
 #include <assert.h>
+#include <string.h>
 
 static EntityList entities; 
 

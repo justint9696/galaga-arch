@@ -4,6 +4,8 @@
 
 #include <SDL2/SDL_events.h>
 
+#include <stdio.h>
+
 void poll_events(Game *game) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {

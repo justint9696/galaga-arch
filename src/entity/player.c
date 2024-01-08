@@ -6,6 +6,8 @@
 #include "game/buttons.h"
 #include "game/world.h"
 
+#include <string.h>
+
 void player_init(Entity *self, World *world) {
     self->pos = (vec2) {
         .x = PLAYER_SPAWN_X,
