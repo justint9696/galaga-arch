@@ -1,32 +1,32 @@
 #ifndef _WORLD_H_
 #define _WORLD_H_
 
-#include "data/linked_list.h"
-#include "entity/player.h"
-#include "entity/logic/formation.h"
-#include "gfx/window.h"
-#include "game/buttons.h"
 #include "common/type.h"
+#include "data/linked_list.h"
+#include "entity/entity.h"
+#include "gfx/window.h"
 
-#define DATA_SIZE       WINDOW_WIDTH * WINDOW_HEIGHT
+#define DATA_SIZE SCREEN_WIDTH * SCREEN_HEIGHT
 
-#ifdef ENVIRONMENT64
-    typedef uint64_t data_t;
-#else
-    typedef uint32_t data_t;
-#endif
-
-typedef struct {
-    Player player;
-    LinkedList entities;
-    uint32_t count;
+typedef struct World {
+    // contains the addresses of each entity that occupies a space within the world
     data_t *data;
 
-    Formation formation;
+    Entity *player;
+    Entity *formation;
+
+    // contains all the entities in the world
+    LinkedList entities;
+
+    // contains all the enemies in the world
+    LinkedList enemies;
 } World;
 
-void World_Init(World *self, uint64_t tick);
-void World_Update(World *self, Buttons *buttons, uint64_t tick, uint64_t deltaTime);
-void World_Destroy(World *self);
+void world_init(World *);
+void world_destroy(World *);
+void world_update(World *);
+
+void world_add_entity(World *, Entity *);
+void world_remove_entity(World *, Entity *);
 
 #endif

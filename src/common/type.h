@@ -25,6 +25,13 @@
 #endif
 #endif
 
+#ifdef ENVIRONMENT64
+typedef uint64_t data_t;
+#else
+typedef uint32_t data_t;
+#endif
+
+
 typedef struct {
     union {
         float x, w, width;

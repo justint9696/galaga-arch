@@ -1,150 +1,167 @@
 #include "game/world.h"
-#include "gfx/hud.h"
+
+#include "entity/formation.h"
+#include "entity/player.h"
+#include "entity/pool.h"
+#include "entity/star.h"
 
 #include <assert.h>
-#include <stdlib.h>
-#include <string.h>
 
-#define data_loop(a, b) \
-    for (size_t y = a.y; y < b.y && y < WINDOW_HEIGHT; y++) \
-        for (size_t x = a.x; x < b.x && x < WINDOW_WIDTH; x++)
+#define data_loop(_a, _b) \
+    for (size_t y = _a.y; y < _b.y && y < SCREEN_HEIGHT; y++) \
+        for (size_t x = _a.x; x < _b.x && x < SCREEN_WIDTH; x++)
 
-#define get_offset(x, y) (x + (y * WINDOW_WIDTH))
-
-static void *get_item(const World *world, int x, int y) {
-    return (void *)world->data[get_offset(x, y)]; 
-}
-
-static void update(World *world, int x, int y, const void *item) {
-    memcpy(&world->data[get_offset(x, y)], &item, sizeof(void *));
-}
+#define get_offset(x, y) (x + (y * SCREEN_WIDTH))
 
 static void clear(World *world, int x, int y) {
     memset(&world->data[get_offset(x, y)], 0, sizeof(void *));
 }
 
-static void _World_Clear(World *self, Entity *entity) {
-    vec2 pos = entity->pos, dim = entity->dim;
+static void update(World *world, int x, int y, void *value) {
+    memcpy(&world->data[get_offset(x, y)], &value, sizeof(void *));
+}
+
+static void *get_item(World *world, int x, int y) {
+    return (void *)world->data[get_offset(x, y)]; 
+}
+
+static void world_clear_previous(World *self, Entity *entity, vec2 prev_pos) {
     vec2 size = {
-        .x = pos.x + dim.w,
-        .y = pos.y + dim.h,
+        .x = prev_pos.x + entity->dim.width,
+        .y = prev_pos.y + entity->dim.height,
     };
-    data_loop(pos, size)
+
+    data_loop(prev_pos, size)
         clear(self, x, y);
 }
 
-static void _World_Collision(World *self, Entity *entity) {
-    Entity *ent;
-    vec2 pos = entity->pos, dim = entity->dim;
-    vec2 size = {
-        .x = pos.x + dim.w,
-        .y = pos.y + dim.h,
-    };
-    data_loop(pos, size) {
-        ent = (Entity *)get_item(self, x, y);   
-        if (!ent || ent == entity || 
-                (ent->type == TYPE_PROJECTILE && entity->type == TYPE_PROJECTILE) ||
-                (ent->team == entity->team))
-            continue;
+static void world_update_data(World *self, Entity *entity, vec2 prev_pos) {
+    // clear the entity's previous position
+    world_clear_previous(self, entity, prev_pos);
 
-        if (Entity_Collision(entity, ent)) {
-            Entity_Collide(entity, ent);
-
-            _World_Clear(self, entity);
-            _World_Clear(self, ent);
-
-            return;
-        }
-    }
-}
-
-static void _World_Update(World *self, vec2 p_pos, const Entity *entity) {
-    vec2 size = {
-        .x = p_pos.x + entity->dim.w,
-        .y = p_pos.y + entity->dim.h
-    };
-
-    data_loop(p_pos, size)
-        clear(self, x, y);
-
-    size = (vec2) {
-        .x = entity->pos.x + entity->dim.w,
-        .y = entity->pos.y + entity->dim.h
+    // update the current position
+    vec2 size = (vec2) {
+        .x = entity->pos.x + entity->dim.width,
+        .y = entity->pos.y + entity->dim.height,
     };
 
     data_loop(entity->pos, size)
         update(self, x, y, entity);
 }
 
-void World_Init(World *self, uint64_t tick) {
+static void world_clear(World *self, Entity *entity) {
+    vec2 size = {
+        .x = entity->pos.x + entity->dim.width,
+        .y = entity->pos.y + entity->dim.height,
+    };
+
+    data_loop(entity->pos, size)
+        clear(self, x, y);
+}
+
+static void world_check_collision(World *self, Entity *entity) {
+    Entity *e;
+    vec2 size = {
+        .x = entity->pos.x + entity->dim.width,
+        .y = entity->pos.y + entity->dim.height,
+    };
+
+    data_loop(entity->pos, size) {
+        e = (Entity *)get_item(self, x, y);
+        if (!e || e == entity ||
+                (e->type == E_PROJECTILE && entity->type == E_PROJECTILE) || 
+                (e->team == entity->team))
+            continue;
+
+        if (entity_collision(entity, e)) {
+            // do not clear primary entity position here
+            // the previous position also needs to be cleared
+            entity_damage(entity);
+
+            entity_damage(e);
+            if (!entity_is_alive(e)) 
+                world_clear(self, e);
+
+            return;
+        }
+    }
+}
+
+void world_init(World *self) {
     memset(self, 0, sizeof(World));
-    self->data = calloc(1, DATA_SIZE * sizeof(data_t));
-    assert(self->data);
+    self->data = calloc(DATA_SIZE, sizeof(data_t));
 
-    Formation_Init(&self->formation);
-    LinkedList_Add(&self->entities, &self->formation.entity);
+    // prepare entity pool
+    entity_prepare_all();
 
-    Player_Init(&self->player, tick);
-    LinkedList_Add(&self->entities, &self->player.entity);
-}
-
-void World_Update(World *self, Buttons *buttons, uint64_t tick, uint64_t deltaTime) {
-    Entity *entity = Player_Update(&self->player, buttons, tick, deltaTime);
-    Formation_Update(&self->formation);
-    // Hud_AddText("Center: (%.2f, %.2f)", self->formation.entity.pos.x, self->formation.entity.pos.y);
-
-    if (entity)
-        LinkedList_Add(&self->entities, entity);
-    
-    vec2 p_pos;
-    Node *tmp = self->entities.head;
-    while (tmp) {
-        entity = (Entity *)tmp->item;
-        assert(entity);
-
-        tmp = tmp->next;
-        if (!Entity_IsAlive(entity)) {
-            LinkedList_Remove(&self->entities, entity);
-            _World_Clear(self, entity);
-
-            if (entity->type == TYPE_PROJECTILE)
-                free(entity);
-
-            continue;
-        }
-
-        memcpy(&p_pos, &entity->pos, sizeof(vec2));
-        Entity_Update(entity, deltaTime);
-
-        if (entity->type == TYPE_FORMATION)
-            continue;
-
-        _World_Collision(self, entity);
-        _World_Update(self, p_pos, entity);
+    Entity *e;
+    for (size_t i = 0; i < STAR_MAX; i++) {
+        e = entity_init(E_STAR, star_init, NULL, star_update, self); 
+        world_add_entity(self, e);
     }
+
+    self->player = entity_init(E_PLAYER, player_init, NULL, player_update, self);
+    world_add_entity(self, self->player);
+
+    self->formation = entity_init(E_FORMATION, formation_init, NULL, formation_update, self);
+    world_add_entity(self, self->formation);
 }
 
-static inline void _destroy_projectiles(LinkedList *lst) {
-    Entity *entity;
-    Node *tmp = lst->head; 
-
-    while (tmp) {
-        entity = (Entity *)tmp->item;
-        assert(entity);
-
-        tmp = tmp->next;
-        switch (entity->type) {
-            case TYPE_PROJECTILE:
-                free(entity);
-                break;
-            default:
-                break;
-        }
-    }
-}
-
-void World_Destroy(World *self) {
+void world_destroy(World *self) {
     free(self->data);
-    _destroy_projectiles(&self->entities);
-    LinkedList_Free(&self->entities);
+    list_clear(&self->entities);
+    list_clear(&self->enemies);
+    entity_release_all();
+}
+
+void world_update(World *self) {
+    vec2 pos;
+    Entity *e;
+    Node *tmp = self->entities.head;
+    while (tmp != NULL) {
+        e = (Entity *)tmp->item;
+        assert(e);
+
+        tmp = tmp->next;
+        if (!entity_is_alive(e)) {
+            world_remove_entity(self, e);
+            entity_destroy(e, self);
+            continue;
+        }
+
+        // store entity position before update
+        pos = e->pos;
+        entity_update(e, self);
+
+        // does entity have collision flag
+        if (e->flags & FLAG_COLLISION) {
+            world_check_collision(self, e);
+            if (entity_is_alive(e))
+                world_update_data(self, e, pos);
+            else
+                world_clear_previous(self, e, pos);
+        }
+    }
+}
+
+void world_add_entity(World *self, Entity *e) {
+    list_add(&self->entities, e);
+    switch (e->type) {
+        case E_ENEMY:
+            list_add(&self->enemies, e);
+            break;
+        default:
+            break;
+    }
+}
+
+void world_remove_entity(World *self, Entity *e) {
+    list_remove(&self->entities, e);
+    switch (e->type) {
+        case E_ENEMY:
+            list_remove(&self->enemies, e);
+            break;
+        default:
+            break;
+    }
 }

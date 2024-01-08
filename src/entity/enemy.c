@@ -1,163 +1,138 @@
-#include "data/queue.h"
-#include "gfx/hud.h"
-
-#include "game/time.h"
-
 #include "common/util.h"
 
-#include "entity/player.h"
-#include "entity/enemy.h"
-
-#include "entity/logic/formation.h"
 #include "entity/logic/path.h"
 #include "entity/logic/route.h"
-#include "entity/logic/spawn.h"
+
+#include "entity/enemy.h"
+#include "entity/formation.h"
+#include "entity/player.h"
+#include "entity/projectile.h"
+
+#include "game/world.h"
 
 #include <assert.h>
+#include <math.h>
 
-static void _Enemy_ThinkPath(Enemy *self) {
-    switch (self->state) {
-        case STATE_SPAWN:
-            self->idle_tick = -1;
-            Route_Spawn(&self->path, self->entity.pos);
-            break;
-        default:
-            break;
-    }
-
+static void enemy_spawn(Entity *self) {
+    route_spawn(self, ENEMY_SPAWN_VELOCITY); 
     self->state = STATE_TRAVEL;
-    // printf("path queued. items remaining in queue: %li.\n", self->path.size);
+    // LOG("path queued. items remaining: %li\n", self->path.size);
 }
 
-static void _Enemy_TravelPath(Enemy *self, World *world, uint64_t tick) {
-    path_s *path = (path_s *)queue_front(&self->path);
+static void enemy_attack(Entity *self, World *world) {
+    const Entity *player = world->player;
+
+    vec2 diff = {
+        .x = (player->pos.x - self->pos.x),
+        .y = fabs(player->pos.y - self->pos.y)
+    };
+
+    if (!entity_is_moving(player)) {
+        if (fabs(diff.x) < 5.f)
+            entity_fire(self, world, PROJECTILE_COOLDOWN);
+
+        return;
+    }
+
+    // player is moving in the same direction
+    if ((diff.x < 0.f && player->vel.x < 0.f) || (diff.x > 0.f && player->vel.x > 0.f)) 
+        return;
+
+    vec2 time = {
+        .x = fabs(diff.x / PLAYER_VELOCITY),
+        .y = fabs(diff.y / PROJECTILE_VELOCITY)
+    };
+
+    if (fabs(diff.x) < 30.f || (fabs(time.x - time.y) < 1.f))
+        entity_fire(self, world, PROJECTILE_COOLDOWN);
+}
+
+static void enemy_travel(Entity *self, World *world) {
+    Path *path = (Path *)queue_front(&self->path);
     assert(path);
 
-    Path_Update(&self->entity, path);
+    if (self->path.size == 1) {
+        if (!self->parent) {
+            // link entity to formation as reference
+            entity_link(self, world->formation);
+            self->flags |= FLAG_PARENT_REF;
+        } else {
+            // return to proper place in formation
+            path->dst = entity_tag(self->parent, TAG_TOP_LEFT);
+            path->dst.x += ((int)fmod(self->id, FORMATION_ROW_MAX) * (self->dim.width + FORMATION_DISTANCE)) + (self->dim.width / 2.f);
+            path->dst.y -= ((int)(self->id / FORMATION_ROW_MAX) * (self->dim.height + FORMATION_DISTANCE)) + (self->dim.height / 2.f);
+        }
+    }
 
-    // float distance = distance(self->entity.pos, path->dst);
-    // Hud_AddText("Path: %s",
-    //   path->type == PATH_LINEAR ? "Linear" : 
-    //   path->type == PATH_BEZIER ? "Bezier" : "Circular");
-
-    // Hud_AddText("Queue: %i", self->path.size);
-    // Hud_AddText("Distance: %.2f", distance);
-
-    if (self->path.size == 1)
-        path->dst = Formation_GetPosition(&world->formation, self->id);
+    path_update(path, self);
 
     if (path->complete) {
-        Entity_SetPosition(&self->entity, path->dst);
-        Entity_SetVelocity(&self->entity, (vec2) { .x = 0.f, .y = 0.f });
+        // LOG("path dequeued. items remaining: %li\n", self->path.size);
+        entity_set_position(self, path->destintation);
+        entity_set_velocity(self, (vec2) { .x = 0.f, .y = 0.f });
 
         dequeue(&self->path);
         free(path);
 
         if (!self->path.size) {
-            self->idle_tick = tick;
+            queue_clear(&self->path);
+
             self->state = STATE_IDLE;
 
-            Entity_LinkTo(&self->entity, &world->formation.entity);
-            Entity_SetRotation(&self->entity, 0.f);
-        } 
+            assert(self->parent);
+            entity_set_rotation(self, self->parent->angle);
 
-        // printf("path dequeued. items remaining in queue: %li.\n", self->path.size);
+            // clear parent reference flag
+            self->flags &= ~FLAG_PARENT_REF;
+        }
     }
 }
 
-static void _Enemy_Swoop(Enemy *self, World *world, uint64_t tick) {
-    if (self->idle_tick == -1)
-        return;
+static void enemy_swoop(Entity *self);
 
-    if (Time_Passed(self->idle_tick) > ENEMY_IDLE_TIME) {
-        self->idle_tick = -1;
-        self->state = STATE_TRAVEL;
-
-        Entity_Unlink(&self->entity);
-        Route_Swoop(&self->path, self->entity.pos);
-    }
-}
-
-static Entity *_Enemy_ThinkAttack(Enemy *self, const Player *player, uint64_t tick) {
-    vec2 
-        pos = Player_Position(player),
-        vel = Player_Velocity(player);
-
-    Entity *entity = &self->entity;
-
-    vec2 diff = {
-        .x = (pos.x - entity->pos.x),
-        .y = fabs(pos.y - entity->pos.y)
+void enemy_init(Entity *self, World *world) {
+    self->dim = (vec2) {
+        .width = ENEMY_WIDTH,
+        .height = ENEMY_HEIGHT,
     };
+    self->team = TEAM_AXIS;
+    self->texture = load_texture(ENEMY_TEXTURE);
+    self->health = 1.f;
+    self->state = STATE_SPAWN;
+    self->flags = FLAG_COLLISION;
 
-    if (!Player_IsMoving(player)) {
-        if (fabs(diff.x) < 5.f)
-            return Entity_Fire(entity, tick);
-
-        return NULL;
-    }
-
-    // player is moving in the same direction
-    if ((diff.x < 0.f && vel.x < 0.f) || (diff.x > 0.f && vel.x > 0.f)) 
-        return NULL;
-
-    vec2 time = {
-        .x = fabs(diff.x / PLAYER_VELOCITY),
-        .y = fabs(diff.y / BULLET_VELOCITY)
-    };
-
-    if (fabs(diff.x) < 30.f || (fabs(time.x - time.y) < 1.f))
-        return Entity_Fire(entity, tick);
-
-    return NULL;
+    LOG("enemy initialized\n");
 }
 
-static Entity *_Enemy_Think(Enemy *self, World *world, bool cooldown, uint64_t tick) {
-    estate_t p_state = self->state;
-    Entity *child = cooldown ? _Enemy_ThinkAttack(self, &world->player, tick) : NULL;
+static void destroy_queue(Queue *q) {
+    Path *p;
+    size_t size = q->size;
+    for (size_t i = 0; i < size; i++) {
+        p = (Path *)queue_front(q);
+        dequeue(q);
+        free(p);
+    }
+}
+
+void enemy_destroy(Entity *self, World *world) {
+    destroy_queue(&self->path);
+}
+
+void enemy_update(Entity *self, World *world) {
+    state_t prev_state = self->state;
+    // enemy_attack(self);
 
     switch (self->state) {
-        case STATE_IDLE:
-            // _Enemy_Swoop(self, world, tick);
-            break;
         case STATE_SPAWN:
-            _Enemy_ThinkPath(self);
+            enemy_spawn(self);
             break;
         case STATE_ATTACK:
-            if (self->state == p_state)
-                self->state = STATE_IDLE;
-            else
-                self->state = p_state;
+            self->state = prev_state;
             break;
         case STATE_TRAVEL:
-            _Enemy_TravelPath(self, world, tick);
+            enemy_travel(self, world);
             break;
         default:
             break;
-    } 
-
-    /*Hud_AddText("State: %s", 
-      self->state == STATE_IDLE ? "Idle" :
-      self->state == STATE_TRAVEL ? "Travel" :
-      self->state == STATE_SPAWN ? "Spawn" : "Attack");*/
-
-    return child;
+    }
 }
-
-bool Enemy_IsAlive(const Enemy *self) {
-    return Entity_IsAlive(&self->entity);
-}
-
-void Enemy_Init(Enemy *self, uint32_t id, ewave_t wave, uint64_t tick) {
-    vec2 pos = Spawn_GetOrigin(wave);
-    Entity_Init(&self->entity, TYPE_ENEMY, TEAM_AXIS, ENEMY_SPAWN_HEALTH, pos.x, pos.y, ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_TEXTURE);
-
-    self->entity.tick = tick;
-    self->state = STATE_SPAWN;
-    self->id = id;
-}
-
-Entity *Enemy_Update(Enemy *self, World *world, bool cooldown, uint64_t tick) {
-    return _Enemy_Think(self, world, cooldown, tick);
-}
-

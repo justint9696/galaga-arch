@@ -1,31 +1,30 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#include "game/buttons.h"
-#include "game/fps.h"
 #include "game/stage.h"
 #include "game/world.h"
 
-#include <stdint.h>
 #include <stdbool.h>
 
-#define GAME_TITLE          "GALAGA"
+#define GAME_TITLE "GALAGA"
+
+typedef enum {
+    G_QUIT = 0,
+    G_IDLE,
+    G_PAUSED,
+    G_PLAYING,
+} game_state_t;
 
 typedef struct {
-    fps_s fps;
-    Stage stage;
-    World world;
-    Buttons buttons;
+    game_state_t state;
 
-    uint64_t tick;
-    struct {
-        bool debug;
-    } flags;
+    World world;
+    Stage stage;
 } Game;
 
-bool Game_IsRunning(Game *self);
-void Game_Init(Game *self);
-void Game_Destroy(Game *self);
-void Game_Main(Game *self);
+void game_init(Game *);
+void game_update(Game *);
+void game_destroy(Game *);
+void game_main(Game *);
 
 #endif

@@ -2,17 +2,18 @@
 #define _QUEUE_H_
 
 #include <stddef.h>
+#include <stdint.h>
 
-#define MAX_QUEUE       8
+#define QUEUE_MAX 32
 
 typedef struct {
-    int index;
+    uint32_t index;
     size_t size;
-    void *queue[MAX_QUEUE];
+    void *queue[QUEUE_MAX];
 } Queue;
 
 Queue *queue_init();
-void queue_free(Queue *);
+void queue_clear(Queue *);
 
 void *queue_front(const Queue *);
 void *queue_rear(const Queue *);

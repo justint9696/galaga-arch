@@ -1,61 +1,33 @@
 #include "game/buttons.h"
+#include "common/time.h"
 
-void Buttons_Init(Buttons *self) {
-    memset(self, 0, sizeof(Buttons));
+static Buttons buttons;
+
+void buttons_init() {
+    memset(&buttons, 0, sizeof(Buttons));
 }
 
-void Buttons_Update(Buttons *self, SDL_Event event) {
-    uint32_t *buttons = &self->current;
-    memcpy(&self->previous, buttons, sizeof(uint32_t));
-
+void buttons_update(SDL_Event event) {
+    button_t *key;
     switch (event.type) {
         case SDL_KEYDOWN:
-            switch (event.key.keysym.scancode) {
-                case SDL_SCANCODE_UP:
-                    *buttons |= BUTTON_UP;
-                    break;
-                case SDL_SCANCODE_DOWN:
-                    *buttons |= BUTTON_DOWN;
-                    break;
-                case SDL_SCANCODE_LEFT:
-                    *buttons |= BUTTON_LEFT;
-                    break;
-                case SDL_SCANCODE_RIGHT:
-                    *buttons |= BUTTON_RIGHT;
-                    break;
-                case SDL_SCANCODE_SPACE:
-                    *buttons |= BUTTON_SPACE;
-                    break;
-                case SDL_SCANCODE_F12:
-                    *buttons |= BUTTON_F12;
-                    break;
-                default:
-                    break;
-            }
+            key = &buttons.keys[event.key.keysym.scancode];
+            key->is_pressed = true;
             break;
-
         case SDL_KEYUP:
-            switch (event.key.keysym.scancode) {
-                case SDL_SCANCODE_UP:
-                    *buttons &= ~BUTTON_UP;
-                    break;
-                case SDL_SCANCODE_DOWN:
-                    *buttons &= ~BUTTON_DOWN;
-                    break;
-                case SDL_SCANCODE_LEFT:
-                    *buttons &= ~BUTTON_LEFT;
-                    break;
-                case SDL_SCANCODE_RIGHT:
-                    *buttons &= ~BUTTON_RIGHT;
-                    break;
-                case SDL_SCANCODE_SPACE:
-                    *buttons &= ~BUTTON_SPACE;
-                    break;
-                case SDL_SCANCODE_F12:
-                    *buttons &= ~BUTTON_F12;
-                    break;
-                default:
-                    break;
-            }
+            key = &buttons.keys[event.key.keysym.scancode];
+            key->is_pressed = false;
+            break;
+        default:
+            break;
     }
+}
+
+bool button_pressed(SDL_Scancode button, bool cooldown) {
+    uint32_t now = NOW();
+    button_t *key = &buttons.keys[button];
+    if (!key->is_pressed || (cooldown && (now - key->tick < BUTTON_COOLDOWN)))
+        return false;
+    key->tick = now;
+    return true;
 }

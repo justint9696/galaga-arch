@@ -2,28 +2,25 @@
 #define _ENTITY_H_
 
 #include "common/type.h"
-#include "data/linked_list.h"
+#include "data/queue.h"
 
-#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+
 #include <stdbool.h>
+#include <stdint.h>
 
-#define BULLET_DELAY        250
-#define BULLET_DISTANCE     50.f
-#define BULLET_TEXTURE      NULL
-#define BULLET_VELOCITY     1.f
-#define BULLET_WIDTH        5.f
-#define BULLET_HEIGHT       15.f
-
-#define COLOR_PLAYER        COLOR_WHITE
-#define COLOR_ENEMY         COLOR_BLUE
-#define COLOR_PROJECTILE    COLOR_GREEN
+struct World;
 
 typedef enum {
-    TYPE_PLAYER,
-    TYPE_ENEMY,
-    TYPE_PROJECTILE,
-    TYPE_FORMATION,
-} type_t;
+    E_PLAYER,
+    E_ENEMY,
+    E_PROJECTILE,
+    E_STAR,
+    E_FORMATION,
+    E_MAX,
+} entity_t;
+
+#define ENTITY_MAX 640
 
 typedef enum {
     TEAM_ALLY,
@@ -33,37 +30,75 @@ typedef enum {
 typedef enum {
     STATE_DEAD,
     STATE_ALIVE,
+    STATE_FADE_IN,
+    STATE_FADE_OUT,
+    STATE_IDLE,
+    STATE_SPAWN,
+    STATE_TRAVEL,
+    STATE_ATTACK,
 } state_t;
 
-typedef struct Entity_s {
+typedef enum {
+    TAG_CENTER,
+    TAG_TOP_LEFT,
+    TAG_TOP_RIGHT,
+    TAG_TOP_MIDDLE,
+    TAG_BOTTOM_LEFT,
+    TAG_BOTTOM_RIGHT,
+    TAG_BOTTOM_MIDDLE,
+    TAG_MIDDLE_LEFT,
+    TAG_MIDDLE_RIGHT,
+} tag_t;
+
+struct Entity;
+typedef void(*entity_f)(struct Entity *, struct World *);
+
+typedef enum {
+    FLAG_COLLISION = 1 << 0,
+    FLAG_PARENT_REF = 1 << 1,
+} flag_t;
+
+typedef struct Entity {
+    // arbitrary id used to determine enemy location on formation
     uint32_t id;
-    float health, rotation;
-    type_t type;
-    team_t team;
+
+    // index of entity within the entity pool
+    uint32_t index;
+
+    entity_t type;
     state_t state;
-    vec2 vel, pos, dim;
+    team_t team;
+    vec2 dim, pos, vel;
+    float health, angle;
+    const struct Entity *parent;
+    struct Entity *child;
     uint32_t color;
-    uint64_t tick, delta;
     SDL_Texture *texture;
-    struct Entity_s *parent;
-    void(*render)(const struct Entity_s *);
+    Queue path;
+    uint32_t flags;
+    uint32_t tick;
+
+    entity_f init, destroy, render, update;
 } Entity;
 
-team_t Entity_GetOtherTeam(const team_t);
-bool Entity_IsAlive(const Entity *self);
-bool Entity_Collision(const Entity *e0, const Entity *e1);
-void Entity_Collide(Entity *self, Entity *entity);
+Entity *entity_init(entity_t, entity_f init, entity_f destroy, entity_f update, struct World *);
+void entity_destroy(Entity *, struct World *);
+void entity_update(Entity *, struct World *);
 
-void Entity_Init(Entity *self, type_t type, team_t team, float health, float x, float y, int width, int height, const char *texture);
+bool entity_is_alive(const Entity *);
+bool entity_is_moving(const Entity *);
+bool entity_collision(const Entity *, const Entity *);
 
-void Entity_Update(Entity *self, uint64_t deltaTime);
-Entity *Entity_Fire(Entity *self, uint64_t tick);
+vec2 entity_tag(const Entity *, tag_t);
 
-void Entity_LinkTo(Entity *self, Entity *entity);
-void Entity_Unlink(Entity *self);
+void entity_link(Entity *, Entity *);
+void entity_unlink(Entity *);
 
-void Entity_SetVelocity(Entity *self, vec2 vel);
-void Entity_SetPosition(Entity *self, vec2 pos);
-void Entity_SetRotation(Entity *self, float angle);
+void entity_damage(Entity *);
+void entity_fire(Entity *, struct World *, uint32_t delay);
+
+void entity_set_position(Entity *, vec2);
+void entity_set_velocity(Entity *, vec2);
+void entity_set_rotation(Entity *, float);
 
 #endif

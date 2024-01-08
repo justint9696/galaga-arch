@@ -1,54 +1,40 @@
+#include "common/util.h"
+
 #include "entity/player.h"
+#include "entity/projectile.h"
 
-#include <assert.h>
+#include "game/buttons.h"
+#include "game/world.h"
 
-bool Player_IsAlive(const Player *self) {
-    return Entity_IsAlive(&self->entity);
+void player_init(Entity *self, World *world) {
+    self->pos = (vec2) {
+        .x = PLAYER_SPAWN_X,
+        .y = PLAYER_SPAWN_Y,
+    };
+    self->dim = (vec2) {
+        .width = PLAYER_WIDTH,
+        .height = PLAYER_HEIGHT,
+    };
+    self->team = TEAM_ALLY;
+    self->texture = load_texture(PLAYER_TEXTURE);
+    self->health = 1.f;
+    self->flags = FLAG_COLLISION;
+    self->state = STATE_ALIVE;
+
+    LOG("Player initialized.\n");
 }
 
-bool Player_IsMoving(const Player *self) {
-    vec2 vel = Player_Velocity(self);
-    return (vel.x > 0 || vel.y > 0);
-}
-
-vec2 Player_Position(const Player *self) {
-    return self->entity.pos;
-}
-
-vec2 Player_Velocity(const Player *self) {
-    return self->entity.vel;
-}
-
-void Player_Init(Player *self, uint64_t tick) {
-    memset(self, 0, sizeof(Player));
-
-    Entity_Init(&self->entity, TYPE_PLAYER, TEAM_ALLY, PLAYER_SPAWN_HEALTH, PLAYER_SPAWN_X, PLAYER_SPAWN_Y, PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_TEXTURE);
-    self->entity.tick = tick;
-
-    printf("Player initialized.\n");
-}
-
-Entity *Player_Update(Player *self, Buttons *buttons, uint64_t tick, uint64_t deltaTime) {
-    if (!Player_IsAlive(self))
-        return NULL;
-
-    Entity *child = NULL;
-    if (buttons->current & BUTTON_SPACE) 
-        child = Entity_Fire(&self->entity, tick);
-    
-    if (buttons->current == buttons->previous) 
-        return child;
-
-    vec2 vel = { .x = 0.f, .y = 0.f };
-    if (buttons->current & BUTTON_LEFT)
+void player_update(Entity *self, World *world) {
+    vec2 vel = { 0 };
+    if (button_pressed(SDL_SCANCODE_LEFT, false))
         vel.x = -PLAYER_VELOCITY;
-    else if (buttons->current & BUTTON_RIGHT)
+    else if (button_pressed(SDL_SCANCODE_RIGHT, false))
         vel.x = PLAYER_VELOCITY;
+    if (button_pressed(SDL_SCANCODE_SPACE, true))
+        entity_fire(self, world, PROJECTILE_COOLDOWN);
 
-    if (!memcmp(&self->entity.vel, &vel, sizeof(vec2)))
-        return child;
-        
-    Entity_SetVelocity(&self->entity, vel);
+    if (!memcmp(&self->vel, &vel, sizeof(vec2)))
+        return;
 
-    return child;
+    entity_set_velocity(self, vel);
 }

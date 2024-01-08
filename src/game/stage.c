@@ -1,94 +1,119 @@
 #include "common/util.h"
-#include "data/linked_list.h"
+#include "entity/enemy.h"
+
 #include "game/stage.h"
-#include "game/time.h"
-#include "gfx/hud.h"
+#include "game/world.h"
 
 #include <assert.h>
-#include <string.h>
 
-static void _Stage_Set(Stage *self) {
-    uint32_t id = self->id;
-    if (id % 4 == 0)
-        self->wave.formation = FORMATION_ONE;
-    else if (id % 3 == 0)
-        self->wave.formation = FORMATION_THREE;
-    else if (id % 2 == 0)
-        self->wave.formation = FORMATION_TWO;
-    else 
-        self->wave.formation = FORMATION_FOUR;
-}
-
-void Stage_Init(Stage *self, uint32_t id) {
-    memset(self, 0, sizeof(Stage));
-    self->id = id;
-
-    Wave_Init(&self->wave);
-    _Stage_Set(self);
-}
-
-void Stage_Destroy(Stage *self) {
-    Queue *q;
-    for (size_t i = 0; i < MAX_ENEMY; i++) {
-        q = &self->enemies[i].path;
-        for (size_t j = 0; j < q->size; j++) {
-            free(queue_front(q));
-            dequeue(q);
-        }
-    }
-}
-
-static void _Stage_Update(Stage *self, World *world, uint64_t tick) {
-    Entity *child;
-    uint32_t count = 0;
-    Enemy *enemy, *next;
-    bool cooldown = Time_Passed(self->idle_tick) > ENEMY_COOLDOWN;
-    for (int i = 0; i < self->wave.count; i++) {
-        enemy = &self->enemies[i];
-        
-        if (!Enemy_IsAlive(enemy))
-            continue;
-
-
-        ++count;
-        if (i < MAX_ENEMY - 1 && enemy->state == STATE_SPAWN) {
-            next = &self->enemies[i+1]; 
-            if (distance(enemy->entity.pos, next->entity.pos) < 125.f)
-                continue;
-        }
-
-        child = Enemy_Update(enemy, world, cooldown, tick);
-        if (child) {
-            self->idle_tick = tick;
-            LinkedList_Add(&world->entities, child);
-        }
-    }
-
-    self->count = count;
-}
-
-void Stage_Update(Stage *self, World *world, uint64_t tick) {
-    switch (self->wave.current) {
-        case MAX_WAVE:
-            if (Stage_Complete(self))
-                Stage_Next(self);
-            break;
+static vec2 get_spawnpoint(wave_t wave) {
+    switch (wave) {
+        case WAVE_ONE:
+        // case WAVE_FOUR:
+            return (vec2) { .x = SCREEN_WIDTH / 2.f, .y = SCREEN_HEIGHT };
+        case WAVE_TWO:
+            return (vec2) { .x = -ENEMY_WIDTH, .y = ENEMY_SPAWN_Y - 250.f };
+        case WAVE_THREE:
+            return (vec2) { .x = SCREEN_WIDTH, .y =  ENEMY_SPAWN_Y - 250.f };
         default:
-            Wave_Update(&self->wave, world, self->enemies, tick);
-            break;
+            return (vec2) { .x = -ENEMY_WIDTH, .y =  ENEMY_SPAWN_Y - 250.f };
+    }
+}
+
+void stage_init(Stage *self) {
+    memset(self, 0, sizeof(Stage));
+}
+
+static void destroy_queue(Queue *q) {
+    Entity *e;
+    size_t size = q->size;
+    for (size_t i = 0; i < size; i++) {
+        e = (Entity *)queue_front(q);
+        assert(e);
+        dequeue(q);
+    }
+}
+
+void stage_destroy(Stage *self) {
+    destroy_queue(&self->queue);
+}
+
+static bool wave_complete(Stage *self, World *world) {
+    // all waves have been spawned
+    if (self->wave >= WAVE_MAX)
+        return false;
+
+    // no waves spawned
+    if (!self->wave)
+        return true;
+
+    // no enemies in the stage
+    if (!world->enemies.size)
+        return true;
+
+    // the last entity's path is done or the entity is undefined
+    Entity *e = (Entity *)world->enemies.tail->item;
+    return (!e || (e && !self->queue.size && !e->path.size));
+}
+
+static bool stage_complete(Stage *self, World *world) {
+    return self->wave >= WAVE_MAX && !world->enemies.size;
+}
+
+static void monitor_queue(Stage *self, World *world) {
+    if (!self->queue.size)
+        return;
+
+    Entity *e = (Entity *)queue_front(&self->queue);
+    assert(e);
+
+    // ensure front entity is alive and has traveled far enough from spawn
+    vec2 spawn = get_spawnpoint(self->wave - 1);
+    if (entity_is_alive(e) && distance(e->pos, spawn) < 150.f)
+        return;
+
+    // dequeue entity & add new front to world entities
+    dequeue(&self->queue);
+
+    if (self->queue.size) {
+        e = (Entity *)queue_front(&self->queue);
+        world_add_entity(world, e);
+    }
+}
+
+static void stage_next(Stage *self) {
+    self->current++;
+    self->id = 0;
+    self->wave = 0;
+}
+
+void stage_update(Stage *self, World *world) {
+    // check if stage is complete
+    if (stage_complete(self, world))
+        stage_next(self);
+
+    // check if wave is complete
+    if (!wave_complete(self, world)) {
+        monitor_queue(self, world);
+        return;
     }
 
-    Hud_AddDebugText("Stage: %i", self->id);
-    Hud_AddDebugText("Wave: %i", self->wave.current);
-    Hud_AddDebugText("Enemies: %i", self->count);
+    // otherwise, clear queue, spawn next wave of enemies, & increment wave number
+    queue_clear(&self->queue);
 
-    _Stage_Update(self, world, tick);
-}
+    Entity *e;
+    vec2 spawn = get_spawnpoint(self->wave);
+    for (size_t i = 0; i < WAVE_COUNT; i++) {
+        e = entity_init(E_ENEMY, enemy_init, enemy_destroy, enemy_update, world); 
+        e->pos = spawn;
+        e->id = self->id++;
+        enqueue(&self->queue, e);
+    }
 
-void Stage_Next(Stage *self) {
-    Stage_Init(self, ++self->id);
-}
+    // add front entity to world entities
+    e = (Entity *)queue_front(&self->queue);
+    world_add_entity(world, e);
 
-bool Stage_Complete(Stage *self) {
-    return self->count == 0;
+    self->wave++;
+    LOG("stage wave updated: %i\n", self->wave);
 }

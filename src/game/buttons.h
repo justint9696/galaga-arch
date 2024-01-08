@@ -2,22 +2,24 @@
 #define _BUTTONS_H_
 
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_scancode.h>
+
+#include <stdbool.h>
 #include <stdint.h>
 
-#define BUTTON_DELAY        250
-
-#define BUTTON_UP           (1 << 0)
-#define BUTTON_DOWN         (1 << 1)
-#define BUTTON_LEFT         (1 << 2)
-#define BUTTON_RIGHT        (1 << 3)
-#define BUTTON_SPACE        (1 << 4)
-#define BUTTON_F12          (1 << 5)
+#define BUTTON_COOLDOWN     250
 
 typedef struct {
-    uint32_t previous, current;
+    bool is_pressed;
+    uint32_t tick;
+} button_t;
+
+typedef struct {
+    button_t keys[SDL_NUM_SCANCODES];
 } Buttons;
 
-void Buttons_Init(Buttons *self);
-void Buttons_Update(Buttons *self, SDL_Event event);
+void buttons_init();
+void buttons_update(SDL_Event event);
+bool button_pressed(SDL_Scancode button, bool cooldown);
 
 #endif

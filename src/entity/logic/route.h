@@ -1,11 +1,10 @@
 #ifndef _ROUTE_H_
 #define _ROUTE_H_
 
-#include "common/type.h"
-#include "data/queue.h"
+#include "entity/entity.h"
 
-void Route_Spawn(Queue *q, vec2 org);
-void Route_Idle(Queue *q, vec2 org);
-void Route_Swoop(Queue *q, vec2 org);
+void route_idle(Entity *, float speed);
+void route_spawn(Entity *, float speed);
+void route_swoop(Entity *, float speed);
 
 #endif

@@ -1,22 +1,28 @@
 #ifndef _RENDERER_H_
 #define _RENDERER_H_
 
-#include <SDL2/SDL.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_ttf.h>
 
-void Renderer_Init(SDL_Renderer *renderer);
+#define RENDERER_FLAGS (SDL_RENDERER_ACCELERATED)
 
-void Renderer_SetFont(TTF_Font *font);
+typedef struct {
+    SDL_Renderer *handle;
+    TTF_Font *font;
+} Renderer;
 
-void Renderer_Prepare();
+Renderer *renderer_init(SDL_Window *);
+void renderer_destroy();
 
-void Renderer_Update();
+void renderer_prepare();
+void renderer_present();
+void renderer_set_font(TTF_Font *);
 
-void DrawRect(int x, int y, int width, int height, uint32_t color);
+void draw_text();
+void draw_rect(int x, int y, int w, int h, uint32_t color);
+void draw_texture(SDL_Texture *, int x, int y, int w, int h, float angle);
 
-void DrawTexture(SDL_Texture *texture, int x, int y, int width, int height, float angle);
-
-void DrawText(const char *text, int x, int y, uint32_t color);
+SDL_Texture *load_texture(const char *path);
+TTF_Font *load_font(const char *path, uint32_t sizefont);
 
 #endif

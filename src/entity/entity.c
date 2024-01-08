@@ -1,180 +1,209 @@
-#include "entity/entity.h"
-#include "gfx/app.h"
-#include "gfx/renderer.h"
-#include "gfx/window.h"
 #include "common/util.h"
-#include "game/time.h"
+#include "common/time.h"
+
+#include "game/world.h"
+#include "gfx/window.h"
+
+#include "entity/entity.h"
+#include "entity/pool.h"
+#include "entity/projectile.h"
 
 #include <assert.h>
+#include <math.h>
+#include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
-static size_t _count = 0;
-
-static inline void _Entity_Render_Rect(const Entity *self) {
-    DrawRect(round(self->pos.x), round(self->pos.y), self->dim.width, self->dim.height, self->color);
+static void entity_render_rect(Entity *self, World *world) {
+    draw_rect(round(self->pos.x), round(self->pos.y), self->dim.width, self->dim.height, self->color);
 }
 
-static inline void _Entity_Render_Texure(const Entity *self) {
-    DrawTexture(self->texture, round(self->pos.x), round(self->pos.y), self->dim.width, self->dim.height, self->rotation);
+static void entity_render_texture(Entity *self, World *world) {
+    draw_texture(self->texture, round(self->pos.x), round(self->pos.y), self->dim.width, self->dim.height, self->angle);
 }
 
-static inline void _Entity_Render_nop(const Entity *self) {}
+Entity *entity_init(entity_t type, entity_f init, entity_f destroy, entity_f update, World *world) {
+    Entity *self = entity_request();
+    assert(self);
+
+    self->init = init;
+    self->init(self, world);
+
+    self->destroy = destroy;
+    self->update = update;
+
+    if (self->texture != NULL)
+        self->render = entity_render_texture;
+    else if (self->color)
+        self->render = entity_render_rect;
+    else 
+        self->render = NULL;
+
+    self->type = type;
+
+    return self;
+}
+
+void entity_destroy(Entity *self, World *world) {
+    if (self->destroy != NULL)
+        self->destroy(self, world);
+
+    entity_release(self);
+}
 
 // out of bounds check
-static inline bool _Entity_OOB(const Entity *self) {
-    return ((self->pos.x > (WINDOW_WIDTH + WINDOW_BUFFER) || self->pos.x < -WINDOW_BUFFER) || 
-            (self->pos.y > (WINDOW_HEIGHT + WINDOW_BUFFER) || self->pos.y < -WINDOW_BUFFER));
+bool entity_oob(Entity *self) {
+    return ((self->pos.x > (SCREEN_WIDTH + SCREEN_BUFFER) || self->pos.x < -SCREEN_BUFFER) || 
+            (self->pos.y > (SCREEN_HEIGHT + SCREEN_BUFFER) || self->pos.y < -SCREEN_BUFFER));
 }
 
-static inline vec2 _Entity_Midpoint(const Entity *self) {
-    return (vec2) {
-        .x = self->pos.x + (self->dim.width / 2.f),
-        .y = self->pos.y + (self->type == TYPE_PLAYER ? self->dim.height : 0.f)
-    };
+void entity_update(Entity *self, World *world) {
+    uint32_t delta = time_delta();
+    if (self->update != NULL)
+        self->update(self, world);
+
+    // update entity position
+    // if entity parent defined && parent reference flag not set
+    if (self->parent && ~self->flags & FLAG_PARENT_REF) {
+        self->pos.x += round(1.f * delta * self->parent->vel.x);
+        self->pos.y += round(1.f * delta * self->parent->vel.y);
+    } else {
+        self->pos.x += round(1.f * delta * self->vel.x);
+        self->pos.y += round(1.f * delta * self->vel.y);
+    }
+
+    // clamp player within scene
+    switch (self->type) {
+        case E_PLAYER:
+            self->pos.x = clamp(0, self->pos.x, SCREEN_WIDTH - self->dim.w);
+            self->pos.y = clamp(0, self->pos.y, SCREEN_HEIGHT - self->dim.h);
+            break;
+        default: 
+            break;
+    } 
+
+    // if entity is outside of the scene
+    if (entity_oob(self)) {
+        self->state = STATE_DEAD;
+    }
+
+    if (self->render != NULL)
+        self->render(self, world);
 }
 
-team_t Entity_GetOtherTeam(const team_t team) {
-    return (team == TEAM_ALLY ? TEAM_AXIS : TEAM_ALLY);
+bool entity_is_alive(const Entity *self) {
+    return (self->health && self->state != STATE_DEAD);
 }
 
-bool Entity_IsAlive(const Entity *self) {
-    return (self->state == STATE_ALIVE && self->health);
+bool entity_is_moving(const Entity *self) {
+    vec2 zero = { 0 };
+    return memcmp(&self->vel, &zero, sizeof(vec2));
 }
 
-bool Entity_Collision(const Entity *e0, const Entity *e1) {
+bool entity_collision(const Entity *e0, const Entity *e1) {
     return ((e0->pos.x + e0->dim.width) >= e1->pos.x 
             && (e0->pos.y + e0->dim.height) >= e1->pos.y)
             && e0->pos.x <= (e1->pos.x + e1->dim.width)
-            && e0->pos.y <= (e1->pos.y + e1->dim.height);        
+            && e0->pos.y <= (e1->pos.y + e1->dim.height);
 }
 
-static void _collision_handler(Entity *self) {
+vec2 entity_tag(const Entity *self, tag_t tag) {
+    switch (tag) {
+        case TAG_CENTER:
+            return (vec2) {
+                .x = self->pos.x + (self->dim.width / 2.f),
+                .y = self->pos.y + (self->dim.height / 2.f),
+            };
+        case TAG_TOP_LEFT:
+            return (vec2) {
+                .x = self->pos.x,
+                .y = self->pos.y + self->dim.height,
+            };
+        case TAG_TOP_RIGHT:
+            return (vec2) {
+                .x = self->pos.x + self->dim.width,
+                .y = self->pos.y + self->dim.height,
+            };
+        case TAG_TOP_MIDDLE:
+            return (vec2) {
+                .x = self->pos.x + (self->dim.width / 2.f),
+                .y = self->pos.y + self->dim.height,
+            };
+        case TAG_BOTTOM_LEFT:
+            return (vec2) {
+                .x = self->pos.x,
+                .y = self->pos.y,
+            };
+        case TAG_BOTTOM_RIGHT:
+            return (vec2) {
+                .x = self->pos.x + self->dim.width,
+                .y = self->pos.y,
+            };
+        case TAG_BOTTOM_MIDDLE:
+            return (vec2) {
+                .x = self->pos.x + (self->dim.width / 2.f),
+                .y = self->pos.y,
+            };
+        case TAG_MIDDLE_LEFT:
+            return (vec2) {
+                .x = self->pos.x,
+                .y = self->pos.y + (self->dim.height / 2.f),
+            };
+        case TAG_MIDDLE_RIGHT:
+            return (vec2) {
+                .x = self->pos.x + self->dim.width,
+                .y = self->pos.y + (self->dim.height / 2.f),
+            };
+        default:
+            return self->pos;
+    }
+}
+
+void entity_link(Entity *self, Entity *parent) {
+    self->parent = parent;
+}
+
+void entity_unlink(Entity *self) {
+    self->parent = NULL;
+}
+
+void entity_damage(Entity *self) {
     switch (self->type) {
-        case TYPE_PROJECTILE:
+        case E_PROJECTILE:
             self->state = STATE_DEAD;
             break;
         default:
-            if (!--self->health)
+            if (--self->health <= 0.f)
                 self->state = STATE_DEAD;
             break;
     }
 }
 
-void Entity_Collide(Entity *self, Entity *entity) {
-    _collision_handler(self);
-    _collision_handler(entity);
-}
-
-void Entity_Init(Entity *self, type_t type, team_t team, float health, float x, float y, int width, int height, const char *texture) {
-    self->id = _count++;
-    self->health = health;
-
-    self->type = type;
-    self->team = team;
-    self->state = STATE_ALIVE;
-
-    self->pos = (vec2) { .x = x, .y = y };
-    self->dim = (vec2) { .width = width, .height = height };
-
-    self->texture = texture == NULL ? NULL : LoadTexture(texture);
-
-    switch (type) {
-        case TYPE_PLAYER:
-            self->color = COLOR_PLAYER;
-            break;
-        case TYPE_ENEMY:
-            self->color = COLOR_ENEMY;
-            break;
-        case TYPE_PROJECTILE:
-            self->color = COLOR_PROJECTILE;
-            break;
-        case TYPE_FORMATION:
-            self->color = COLOR_RED;
-            break;
-        default:
-            fprintf(stderr, "ERROR: Unknown entity type: %i.\n", type);
-            exit(1);
-            break;
-    }
-
-    switch (type) {
-        case TYPE_FORMATION:
-            self->render = _Entity_Render_nop;
-            break;
-        default:
-            self->render = texture == NULL ? _Entity_Render_Rect : _Entity_Render_Texure;
-            break;
-    }
-}
-
-void Entity_Update(Entity *self, uint64_t deltaTime) {
-    if (_Entity_OOB(self)) {
-        self->state = STATE_DEAD;
+void entity_fire(Entity *self, World *world, uint32_t delay) {
+    uint32_t now = NOW();
+    if (now - self->tick < delay)
         return;
-    }
 
-    // update entity position
-    if (self->parent) {
-        self->pos.x += round(1.f * deltaTime * self->parent->vel.x);
-        self->pos.y += round(1.f * deltaTime * self->parent->vel.y);
-    } else {
-        self->pos.x += round(1.f * deltaTime * self->vel.x);
-        self->pos.y += round(1.f * deltaTime * self->vel.y);
-    }
+    self->tick = now;
 
-    self->delta = deltaTime;
-
-    // clamp player within scene
-    switch (self->type) {
-        case TYPE_PLAYER:
-            self->pos.x = clamp(0, self->pos.x, WINDOW_WIDTH - self->dim.width);
-            self->pos.y = clamp(0, self->pos.y, WINDOW_HEIGHT - self->dim.height);
-            break;
-        default:
-            break;
-    }
-
-    self->render(self);
-}
-
-Entity *Entity_Fire(Entity *self, uint64_t tick) {
-    if (Time_Passed(self->tick) < BULLET_DELAY)
-        return NULL;
-
-    vec2 pos = _Entity_Midpoint(self);
-
-    vec2 vel = {
+    Entity *e = entity_init(E_PROJECTILE, projectile_init, NULL, NULL, world);
+    e->team = self->team;
+    e->pos = entity_tag(self, self->type == E_PLAYER ? TAG_TOP_MIDDLE : TAG_BOTTOM_MIDDLE);
+    e->vel = (vec2) {
         .x = 0.f,
-        .y = self->team == TEAM_ALLY ? BULLET_VELOCITY : -BULLET_VELOCITY,
+        .y = self->team == TEAM_ALLY ? PROJECTILE_VELOCITY : -PROJECTILE_VELOCITY,
     };
 
-    Entity *entity = calloc(1, sizeof(Entity));
-
-    Entity_Init(entity, TYPE_PROJECTILE, self->team, 1.f, pos.x, pos.y, BULLET_WIDTH, BULLET_HEIGHT, BULLET_TEXTURE);
-    Entity_SetVelocity(entity, vel);
-
-    self->tick = tick;
-
-    return entity;
+    world_add_entity(world, e);
 }
 
-void Entity_LinkTo(Entity *self, Entity *entity) {
-    self->parent = entity; 
-}
-
-void Entity_Unlink(Entity *self) {
-    self->parent = NULL;
-}
-
-void Entity_SetPosition(Entity *self, vec2 pos) {
+void entity_set_position(Entity *self, vec2 pos) {
     memcpy(&self->pos, &pos, sizeof(vec2));
 }
 
-void Entity_SetVelocity(Entity *self, vec2 vel) {
+void entity_set_velocity(Entity *self, vec2 vel) {
     memcpy(&self->vel, &vel, sizeof(vec2));
 }
 
-void Entity_SetRotation(Entity *self, float angle) {
-    memcpy(&self->rotation, &angle, sizeof(float)); 
+void entity_set_rotation(Entity *self, float angle) {
+    memcpy(&self->angle, &angle, sizeof(float));
 }

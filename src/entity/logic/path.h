@@ -4,12 +4,13 @@
 #include "common/type.h"
 #include "entity/entity.h"
 
+#include <stdbool.h>
 #include <math.h>
-
-#define PI_2        (M_PI * 2)
 
 #define DEG(rad)    (rad * (180.f / M_PI)) 
 #define RAD(deg)    (deg * (M_PI / 180.f))
+
+#define PI_2        (M_PI * 2)
 
 typedef enum {
     PATH_LINEAR,
@@ -29,22 +30,23 @@ typedef enum {
 } porient_t;
 
 typedef struct {
+    ptype_t type;
     pstate_t state;
     porient_t orientation;
-    float angle, time, speed;
-    uint64_t tick;
-    ptype_t type;
-    vec2 org, dst;
+    float angle, speed;
+    uint32_t time;
+    union {
+        vec2 org, origin;
+    };
+    union {
+        vec2 dst, destintation;
+    };
     bool complete;
-} path_s;
+} Path;
 
-path_s *Path_Init();
-void Path_Update(Entity *, path_s *);
-float Path_Distance(const path_s *);
-float Path_Time(const path_s *);
-
-void Path_Linear(Entity *, path_s *);
-void Path_Circular(Entity *, path_s *);
-void Path_Bezier(Entity *, path_s *);
+Path *path_init();
+void path_update(Path *, Entity *);
+float path_distance(const Path *);
+float path_time(const Path *);
 
 #endif

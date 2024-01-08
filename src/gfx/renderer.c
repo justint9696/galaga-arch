@@ -1,78 +1,77 @@
-#include "common/type.h"
 #include "common/util.h"
-
 #include "gfx/renderer.h"
 #include "gfx/window.h"
 
-#include <assert.h>
-#include <math.h>
-#include <SDL2/SDL_render.h>
+#include <stdbool.h>
 
-static color_s _color;
-static SDL_Renderer *_renderer;
-static TTF_Font *_font;
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
-void Renderer_Init(SDL_Renderer *renderer) {
-    _renderer = renderer;
+static Renderer renderer;
 
-    assert(_renderer);
+Renderer *renderer_init(SDL_Window *window) {
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    renderer.handle = SDL_CreateRenderer(window, -1, RENDERER_FLAGS);
+    ASSERT(renderer.handle, "Failed to create renderer: %s\n", SDL_GetError());
+    SDL_SetRenderDrawBlendMode(renderer.handle, SDL_BLENDMODE_BLEND);
 
-    SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
+    return &renderer;
 }
 
-void Renderer_SetFont(TTF_Font *font) {
-    _font = font;
+void renderer_destroy() {
+    SDL_DestroyRenderer(renderer.handle);
 }
 
-void Renderer_Prepare() {
-    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
-    SDL_RenderClear(_renderer);
+void renderer_prepare() {
+    SDL_SetRenderDrawColor(renderer.handle, 0, 0, 0, 255);
+    SDL_RenderClear(renderer.handle);
 }
 
-void Renderer_Update() {
-    SDL_RenderPresent(_renderer);
+void renderer_present() {
+    SDL_RenderPresent(renderer.handle);
 }
 
-void DrawRect(int x, int y, int width, int height, uint32_t color) {
-    _color = RGBA(color);
+void draw_rect(int x, int y, int w, int h, uint32_t color) {
+    color_s c = RGBA(color);
 
     // make origin at bottom of the screen
-    y = WINDOW_HEIGHT - y - height;
+    y = SCREEN_HEIGHT - y - h;
 
     SDL_Rect rect;
     rect.x = x;
     rect.y = y;
-    rect.w = width;
-    rect.h = height;
+    rect.w = w;
+    rect.h = h;
 
-    SDL_SetRenderDrawColor(_renderer, _color.r, _color.g, _color.b, _color.a);
-    SDL_RenderFillRect(_renderer, &rect);
+    SDL_SetRenderDrawColor(renderer.handle, c.r, c.g, c.b, c.a);
+    SDL_RenderFillRect(renderer.handle, &rect);
 }
 
-void DrawTexture(SDL_Texture *texture, int x, int y, int width, int height, float angle) {
+void draw_texture(SDL_Texture *texture, int x, int y, int w, int h, float angle) {
     // make origin at bottom of screen
-    y = WINDOW_HEIGHT - y - height;
+    y = SCREEN_HEIGHT - y - h;
 
     SDL_Rect dst;
     dst.x = x;
     dst.y = y;
-    dst.w = width;
-    dst.h = height;
+    dst.w = w;
+    dst.h = h;
 
     // SDL_QueryTexture(texture, NULL, NULL, &dst.w, &dst.h);
     // SDL_RenderCopy(_renderer, texture, NULL, &dst);
-    SDL_RenderCopyEx(_renderer, texture, NULL, &dst, angle, NULL, false);
+    SDL_RenderCopyEx(renderer.handle, texture, NULL, &dst, angle, NULL, false);
 }
 
-void DrawText(const char *text, int x, int y, uint32_t color) {
-    SDL_Color textColor;
-    memcpy(&textColor, &RGBA(color), sizeof(uint8_t) * 4);
-    SDL_Surface *surface = TTF_RenderText_Solid(_font, text, textColor);
+SDL_Texture *load_texture(const char *path) {
+    // SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Loading %s", path);
 
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(_renderer, surface);
+    SDL_Texture *texture = IMG_LoadTexture(renderer.handle, path);
+    ASSERT(texture, "Could not load texture: %s\n", path);
 
-    const int width = surface->w, height = surface->h;
-    SDL_FreeSurface(surface);
-
-    DrawTexture(texture, x, y, width, height, 0.f);
+    return texture;
 }
+
+TTF_Font *load_font(const char *path, uint32_t sizefont) {
+    return NULL;
+}
+
