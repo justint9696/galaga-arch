@@ -218,9 +218,11 @@ static void path_bezier(Path *self, Entity *entity) {
     float time = (distance / fabs(self->speed)) / 2.f;
 
     vec2 mid = bezier_midpoint(org, dst, self->speed);
-    vec2 pos = bezier_path(org, mid, dst, (now - self->time) / time);
 
-    self->complete = closer(entity->pos, pos, dst);
+    float t = ((now - self->time) / time);
+    vec2 pos = bezier_path(org, mid, dst, t);
+
+    self->complete = (t >= 1.f);
     if (self->complete) 
         return;
 
