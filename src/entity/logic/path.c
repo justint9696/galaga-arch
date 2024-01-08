@@ -216,16 +216,14 @@ static void path_bezier(Path *self, Entity *entity) {
 
     float distance = bezier_length(org, dst, self->speed);
     float time = (distance / fabs(self->speed)) / 2.f;
-
-    vec2 mid = bezier_midpoint(org, dst, self->speed);
-
     float t = ((now - self->time) / time);
-    vec2 pos = bezier_path(org, mid, dst, t);
 
     self->complete = (t >= 1.f);
     if (self->complete) 
         return;
 
+    vec2 mid = bezier_midpoint(org, dst, self->speed);
+    vec2 pos = bezier_path(org, mid, dst, t);
     vec2 vel = {
         .x = (pos.x - entity->pos.x),
         .y = (pos.y - entity->pos.y)
