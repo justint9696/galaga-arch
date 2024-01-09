@@ -6,12 +6,14 @@
 
 static inline Node *node_init(void *item) {
     Node *node = calloc(1, sizeof(Node));
+    assert(node);
     node->item = item;
     return node;
 }
 
 inline LinkedList *list_init() {
     LinkedList *lst = calloc(1, sizeof(LinkedList));
+    assert(lst);
     return lst;
 }
 

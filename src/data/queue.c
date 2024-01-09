@@ -6,6 +6,7 @@
 
 Queue *queue_init() {
     Queue *q = calloc(1, sizeof(Queue));
+    assert(q);
     return q;
 }
 

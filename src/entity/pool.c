@@ -8,6 +8,7 @@ static Pool entities;
 void entity_prepare_all() {
     memset(&entities, 0, sizeof(Pool));
     entities.items = calloc(ENTITY_MAX, sizeof(Entity));
+    assert(entities.items);
 }
 
 void entity_release_all() {
