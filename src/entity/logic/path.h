@@ -34,7 +34,7 @@ typedef struct {
     pstate_t state;
     porient_t orientation;
     float angle, speed;
-    uint32_t time;
+    uint32_t tick;
     union {
         vec2 org, origin;
     };

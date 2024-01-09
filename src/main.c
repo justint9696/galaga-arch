@@ -3,7 +3,6 @@
 #include "gfx/window.h"
 
 #include <SDL2/SDL_events.h>
-
 #include <stdio.h>
 
 void poll_events(Game *game) {

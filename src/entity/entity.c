@@ -63,7 +63,7 @@ void entity_update(Entity *self, World *world) {
 
     // update entity position
     // if entity parent defined && parent reference flag not set
-    if (self->parent && ~self->flags & FLAG_PARENT_REF) {
+    if (self->parent && !entity_has_flag(self, FLAG_PARENT_REF)) {
         self->pos.x += round(1.f * delta * self->parent->vel.x);
         self->pos.y += round(1.f * delta * self->parent->vel.y);
     } else {
@@ -166,6 +166,18 @@ void entity_unlink(Entity *self) {
     self->parent = NULL;
 }
 
+void entity_set_flag(Entity *self, flag_t flag) {
+    self->flags |= flag;
+}
+
+void entity_clear_flag(Entity *self, flag_t flag) {
+    self->flags &= ~flag;
+}
+
+bool entity_has_flag(Entity *self, flag_t flag) {
+    return self->flags & flag;
+}
+
 void entity_damage(Entity *self) {
     switch (self->type) {
         case E_PROJECTILE:
@@ -179,11 +191,10 @@ void entity_damage(Entity *self) {
 }
 
 void entity_fire(Entity *self, World *world, uint32_t delay) {
-    uint32_t now = NOW();
-    if (now - self->tick < delay)
+    if (time_since(self->tick) < PROJECTILE_COOLDOWN)
         return;
 
-    self->tick = now;
+    self->tick = NOW();
 
     Entity *e = entity_init(E_PROJECTILE, projectile_init, NULL, NULL, world);
     e->team = self->team;

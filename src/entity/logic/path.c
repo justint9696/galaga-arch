@@ -202,10 +202,10 @@ static void path_circular(Path *self, Entity *entity) {
 static void path_bezier(Path *self, Entity *entity) {
     vec2 org = self->org, dst = self->dst;
 
-    uint32_t now = NOW();
+    const uint32_t now = NOW();
     switch (self->state) {
         case STATE_INACTIVE: 
-            self->time = now;
+            self->tick = now;
             self->state = STATE_ONGOING;
             break;
         default:
@@ -216,7 +216,7 @@ static void path_bezier(Path *self, Entity *entity) {
 
     float distance = bezier_length(org, dst, self->speed);
     float time = (distance / fabs(self->speed)) / 2.f;
-    float t = ((now - self->time) / time);
+    float t = (time_since(self->tick) / time);
 
     self->complete = (t >= 1.f);
     if (self->complete) 

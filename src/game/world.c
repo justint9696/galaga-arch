@@ -1,5 +1,6 @@
 #include "game/world.h"
 
+#include "entity/entity.h"
 #include "entity/formation.h"
 #include "entity/player.h"
 #include "entity/pool.h"
@@ -76,7 +77,7 @@ static void world_check_collision(World *self, Entity *entity) {
 
         if (entity_collision(entity, e)) {
             // do not clear primary entity position here
-            // the previous position also needs to be cleared
+            // only the previous position needs to be cleared
             entity_damage(entity);
 
             entity_damage(e);
@@ -135,7 +136,7 @@ void world_update(World *self) {
         entity_update(e, self);
 
         // does entity have collision flag
-        if (e->flags & FLAG_COLLISION) {
+        if (entity_has_flag(e, FLAG_COLLISION)) {
             world_check_collision(self, e);
             if (entity_is_alive(e))
                 world_update_data(self, e, pos);

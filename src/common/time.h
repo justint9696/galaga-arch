@@ -26,6 +26,7 @@ void time_init();
 void time_update();
 void time_limit();
 
+uint32_t time_since(uint32_t tick);
 uint32_t time_delta();
 float time_fps();
 

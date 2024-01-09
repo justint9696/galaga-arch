@@ -6,7 +6,7 @@
 struct World; 
 
 // number of enemies per wave
-#define WAVE_COUNT 5
+#define WAVE_COUNT 6
 
 typedef enum {
     WAVE_ONE = 0,

@@ -71,7 +71,6 @@ typedef struct Entity {
     vec2 dim, pos, vel;
     float health, angle;
     const struct Entity *parent;
-    struct Entity *child;
     uint32_t color;
     SDL_Texture *texture;
     Queue path;
@@ -93,6 +92,10 @@ vec2 entity_tag(const Entity *, tag_t);
 
 void entity_link(Entity *, Entity *);
 void entity_unlink(Entity *);
+
+void entity_set_flag(Entity *, flag_t);
+void entity_clear_flag(Entity *, flag_t);
+bool entity_has_flag(Entity *, flag_t);
 
 void entity_damage(Entity *);
 void entity_fire(Entity *, struct World *, uint32_t delay);

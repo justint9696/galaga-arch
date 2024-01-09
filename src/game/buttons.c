@@ -26,10 +26,10 @@ void buttons_update(SDL_Event event) {
 }
 
 bool button_pressed(SDL_Scancode button, bool cooldown) {
-    uint32_t now = NOW();
     button_t *key = &buttons.keys[button];
-    if (!key->is_pressed || (cooldown && (now - key->tick < BUTTON_COOLDOWN)))
+    if (!key->is_pressed || (cooldown && (time_since(key->tick) < BUTTON_COOLDOWN)))
         return false;
-    key->tick = now;
+
+    key->tick = NOW();
     return true;
 }

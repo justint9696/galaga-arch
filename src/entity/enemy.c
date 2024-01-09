@@ -55,7 +55,7 @@ static void enemy_travel(Entity *self, World *world) {
         if (!self->parent) {
             // link entity to formation as reference
             entity_link(self, world->formation);
-            self->flags |= FLAG_PARENT_REF;
+            entity_set_flag(self, FLAG_PARENT_REF);
         } else {
             // return to proper place in formation
             path->dst = entity_tag(self->parent, TAG_TOP_LEFT);
@@ -83,7 +83,7 @@ static void enemy_travel(Entity *self, World *world) {
             entity_set_rotation(self, self->parent->angle);
 
             // clear parent reference flag
-            self->flags &= ~FLAG_PARENT_REF;
+            entity_clear_flag(self, FLAG_PARENT_REF);
         }
     }
 }
