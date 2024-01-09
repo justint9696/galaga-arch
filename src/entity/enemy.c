@@ -1,5 +1,6 @@
 #include "common/util.h"
 
+#include "entity/entity.h"
 #include "entity/logic/path.h"
 #include "entity/logic/route.h"
 
@@ -99,7 +100,7 @@ void enemy_init(Entity *self, World *world) {
     self->texture = load_texture(ENEMY_TEXTURE);
     self->health = 1.f;
     self->state = STATE_SPAWN;
-    self->flags = FLAG_COLLISION;
+    entity_set_flag(self, FLAG_COLLISION);
 
     LOG("enemy initialized\n");
 }

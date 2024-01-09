@@ -3,11 +3,11 @@
 #include <assert.h>
 #include <string.h>
 
-static EntityList entities; 
+static Pool entities;
 
 void entity_prepare_all() {
-    memset(&entities, 0, sizeof(EntityList));
-    entities.items = calloc(ENTITY_MAX, sizeof(item_s));
+    memset(&entities, 0, sizeof(Pool));
+    entities.items = calloc(ENTITY_MAX, sizeof(Entity));
 }
 
 void entity_release_all() {
@@ -19,17 +19,14 @@ Entity *entity_request() {
 
     size_t i;
     Entity *e;
-    item_s *item;
     for (i = 0; i < ENTITY_MAX; i++) {
-        item = &entities.items[i];
-        if (item->slot == S_FREE)
+        e = &entities.items[i];
+        if (!entity_has_flag(e, FLAG_ACTIVE))
             break;
     }
 
-    e = &item->data;
     e->index = i;
-
-    item->slot = S_USED;
+    entity_set_flag(e, FLAG_ACTIVE);
     entities.size++;
 
     return e;
@@ -39,9 +36,9 @@ void entity_release(Entity *self) {
     assert(self->index < ENTITY_MAX);
 
     uint32_t index = self->index;
-    item_s *item = &entities.items[index];
-    memset(&item->data, 0, sizeof(Entity));
+    Entity *e = &entities.items[index];
+    memset(e, 0, sizeof(Entity));
 
-    item->slot = S_FREE;
+    entity_clear_flag(e, FLAG_ACTIVE);
     entities.size--;
 }

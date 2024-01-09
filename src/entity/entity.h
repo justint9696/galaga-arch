@@ -9,6 +9,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define ENTITY_MAX 640
+
 struct World;
 
 typedef enum {
@@ -19,8 +21,6 @@ typedef enum {
     E_FORMATION,
     E_MAX,
 } entity_t;
-
-#define ENTITY_MAX 640
 
 typedef enum {
     TEAM_ALLY,
@@ -54,8 +54,9 @@ struct Entity;
 typedef void(*entity_f)(struct Entity *, struct World *);
 
 typedef enum {
-    FLAG_COLLISION = 1 << 0,
-    FLAG_PARENT_REF = 1 << 1,
+    FLAG_ACTIVE         = 1 << 0,
+    FLAG_COLLISION      = 1 << 1,
+    FLAG_PARENT_REF     = 1 << 2,
 } flag_t;
 
 typedef struct Entity {

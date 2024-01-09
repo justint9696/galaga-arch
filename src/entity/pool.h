@@ -5,20 +5,10 @@
 
 #include <stddef.h>
 
-typedef enum {
-    S_FREE = 0,
-    S_USED = 1,
-} slot_t;
-
-typedef struct {
-    slot_t slot;
-    Entity data;
-} item_s;
-
 typedef struct {
     size_t size;
-    item_s *items;
-} EntityList;
+    Entity *items;
+} Pool;
 
 void entity_prepare_all();
 void entity_release_all();

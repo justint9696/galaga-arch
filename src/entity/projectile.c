@@ -9,5 +9,5 @@ void projectile_init(Entity *self, World *world) {
     self->color = COLOR_GREEN;
     self->health = 1.f;
     self->state = STATE_ALIVE;
-    self->flags = FLAG_COLLISION;
+    entity_set_flag(self, FLAG_COLLISION);
 }

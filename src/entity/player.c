@@ -20,8 +20,8 @@ void player_init(Entity *self, World *world) {
     self->team = TEAM_ALLY;
     self->texture = load_texture(PLAYER_TEXTURE);
     self->health = 1.f;
-    self->flags = FLAG_COLLISION;
     self->state = STATE_ALIVE;
+    entity_set_flag(self, FLAG_COLLISION);
 
     LOG("Player initialized.\n");
 }
