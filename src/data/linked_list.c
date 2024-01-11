@@ -82,3 +82,6 @@ void list_join(LinkedList *dst, LinkedList *src) {
     }
 }
 
+bool list_is_empty(const LinkedList *self) {
+    return !self->size;
+}

@@ -37,3 +37,6 @@ void dequeue(Queue *q) {
     --q->size;
 }
 
+bool queue_is_empty(const Queue *q) {
+    return !q->size;
+}

@@ -1,6 +1,7 @@
 #ifndef _QUEUE_H_
 #define _QUEUE_H_
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -20,5 +21,7 @@ void *queue_rear(const Queue *);
 
 void enqueue(Queue *, void *);
 void dequeue(Queue *);
+
+bool queue_is_empty(const Queue *);
 
 #endif

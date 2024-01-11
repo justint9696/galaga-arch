@@ -1,6 +1,7 @@
 #ifndef _LINKED_LIST_H_
 #define _LINKED_LIST_H_
 
+#include <stdbool.h>
 #include <stddef.h>
 
 typedef struct Node_s {
@@ -23,5 +24,7 @@ void list_clear(LinkedList *);
 void list_add(LinkedList *, void *item);
 void list_remove(LinkedList *, void *item);
 void list_join(LinkedList *dst, LinkedList *src);
+
+bool list_is_empty(const LinkedList *);
 
 #endif
