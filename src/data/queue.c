@@ -26,6 +26,13 @@ void *queue_rear(const Queue *q) {
     return q->queue[(q->index + q->size - 1) % QUEUE_MAX];
 }
 
+void *queue_pop(Queue *q) {
+    assert(q->size);
+    void *item = queue_front(q);
+    dequeue(q);
+    return item;
+}
+
 void enqueue(Queue *q, void *item) {
     assert(q->size < QUEUE_MAX);
     q->queue[(q->index + q->size++) % QUEUE_MAX] = item;

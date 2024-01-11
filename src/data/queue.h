@@ -18,6 +18,7 @@ void queue_clear(Queue *);
 
 void *queue_front(const Queue *);
 void *queue_rear(const Queue *);
+void *queue_pop(Queue *);
 
 void enqueue(Queue *, void *);
 void dequeue(Queue *);
