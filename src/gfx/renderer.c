@@ -9,11 +9,43 @@
 
 static Renderer renderer;
 
+static SDL_Texture *load_texture(const char *path) {
+    SDL_Texture *texture = IMG_LoadTexture(renderer.handle, path);
+    ASSERT(texture, "Could not load texture: %s\n", path);
+
+    return texture;
+}
+
+static TTF_Font *load_font(const char *path, uint32_t size) {
+    TTF_Font *font = TTF_OpenFont(path, size);
+    ASSERT(font, "Could not load font: %s\n", path);
+
+    return font;
+}
+
+static void load_fonts() {
+    renderer.fonts[0] = load_font(FONT_ONE, 14);
+    renderer.fonts[1] = load_font(FONT_ONE, 12);
+    renderer.fonts[2] = load_font(FONT_ONE, 16);
+}
+
+static void load_textures() {
+    renderer.textures[0] = load_texture(TEX_ONE);
+    renderer.textures[1] = load_texture(TEX_TWO);
+    renderer.textures[2] = load_texture(TEX_THREE);
+}
+
 Renderer *renderer_init(SDL_Window *window) {
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
     renderer.handle = SDL_CreateRenderer(window, -1, RENDERER_FLAGS);
     ASSERT(renderer.handle, "Failed to create renderer: %s\n", SDL_GetError());
     SDL_SetRenderDrawBlendMode(renderer.handle, SDL_BLENDMODE_BLEND);
+
+    TTF_Init();
+    load_fonts();
+
+    IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
+    load_textures();
 
     return &renderer;
 }
@@ -31,8 +63,26 @@ void renderer_present() {
     SDL_RenderPresent(renderer.handle);
 }
 
+TTF_Font *renderer_font(font_t font) {
+    return renderer.fonts[font];
+}
+
+SDL_Texture *renderer_texture(texture_t texture) {
+    return renderer.textures[texture];
+}
+
+void draw_text(const char *text, int x, int y, uint32_t color, TTF_Font *font) {
+    SDL_Surface *surface = TTF_RenderText_Solid(font, text, RGBA(color));
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer.handle, surface);
+
+    const int width = surface->w, height = surface->h;
+    SDL_FreeSurface(surface);
+
+    draw_texture(texture, x, y, width, height, 0.f); 
+}
+
 void draw_rect(int x, int y, int w, int h, uint32_t color) {
-    color_s c = RGBA(color);
+    SDL_Color c = RGBA(color);
 
     // make origin at bottom of the screen
     y = SCREEN_HEIGHT - y - h;
@@ -57,21 +107,19 @@ void draw_texture(SDL_Texture *texture, int x, int y, int w, int h, float angle)
     dst.w = w;
     dst.h = h;
 
-    // SDL_QueryTexture(texture, NULL, NULL, &dst.w, &dst.h);
-    // SDL_RenderCopy(_renderer, texture, NULL, &dst);
     SDL_RenderCopyEx(renderer.handle, texture, NULL, &dst, angle, NULL, false);
 }
 
-SDL_Texture *load_texture(const char *path) {
-    // SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Loading %s", path);
-
-    SDL_Texture *texture = IMG_LoadTexture(renderer.handle, path);
-    ASSERT(texture, "Could not load texture: %s\n", path);
-
-    return texture;
+uint32_t font_width(const char *text, font_t font) {
+    int width, height;
+    TTF_Font *handle = renderer_font(font);
+    TTF_SizeText(handle, text, &width, &height);
+    return width;
 }
 
-TTF_Font *load_font(const char *path, uint32_t sizefont) {
-    return NULL;
+uint32_t font_height(font_t font) {
+    int width, height;
+    TTF_Font *handle = renderer_font(font);
+    TTF_SizeText(handle, "", &width, &height);
+    return height;
 }
-
