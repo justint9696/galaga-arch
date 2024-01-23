@@ -2,7 +2,6 @@
 #include "common/time.h"
 
 #include <SDL2/SDL_timer.h>
-
 #include <string.h>
 
 static Time t;
@@ -45,13 +44,19 @@ void time_limit() {
     SDL_Delay(delay > 0 ? delay : 0);
 }
 
+void time_set_paused(bool paused) {
+    t.paused = paused;
+}
+
 uint32_t time_since(uint32_t tick) {
     const uint32_t now = NOW();
     return (now - tick);
 }
 
 uint32_t time_delta() {
-    return t.delta;
+    if (t.paused)
+        return 0.f;
+    return t.delta > 0 ? t.delta : 1.f;
 }
 
 float time_fps() {
