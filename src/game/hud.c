@@ -7,16 +7,13 @@
 #define CENTER_X(_width) ((SCREEN_WIDTH - _width) / 2.f)
 #define CENTER_Y(_height) ((SCREEN_HEIGHT - _height) / 2.f)
 
-#define HUD_Y SCREEN_HEIGHT - 80
-#define HUD_DIST 18
-
-static void build_idle(Game *self) {
+static void prepare_idle_options(Game *self) {
     ui_init(&self->ui);
     ui_add(&self->ui, "Start Game", game_resume);
     ui_add(&self->ui, "Quit Game", game_quit);
 }
 
-static void build_paused(Game *self) {
+static void prepare_paused_options(Game *self) {
     ui_init(&self->ui);
     ui_add(&self->ui, "Resume Game", game_resume);
     ui_add(&self->ui, "Reset Game", game_reset);
@@ -33,7 +30,7 @@ static void update_text(Game *self) {
     for (size_t i = 0; i < size; i++) {
         item = &self->ui.items[i]; 
         width = font_width(item->title, FONT_SMALL);
-        if ((int32_t)i == self->ui.pos)
+        if (ui_item_selected(&self->ui, item))
             hud_add_text(item->title, CENTER_X(width), HUD_Y - (HUD_DIST * i), COLOR_RED, FONT_SMALL);
         else
             hud_add_text(item->title, CENTER_X(width), HUD_Y - (HUD_DIST * i), COLOR_WHITE, FONT_SMALL);
@@ -75,10 +72,10 @@ void game_hud_update(Game *self) {
 void game_hud_reset(Game *self) {
     switch (self->state) {
         case G_IDLE:
-            build_idle(self);
+            prepare_idle_options(self);
             break;
         case G_PAUSED:
-            build_paused(self);
+            prepare_paused_options(self);
             break;
         default:
             break;

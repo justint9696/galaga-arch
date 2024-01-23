@@ -2,6 +2,7 @@
 #include "common/util.h"
 
 #include "entity/logic/enemy.h"
+
 #include "entity/abductor.h"
 #include "entity/invader.h"
 
@@ -134,5 +135,5 @@ void stage_update(Stage *self, World *world) {
     world_add_entity(world, e);
 
     self->wave++;
-    LOG("stage wave updated: %i\n", self->wave);
+    LOG("Stage wave updated: %i\n", self->wave);
 }

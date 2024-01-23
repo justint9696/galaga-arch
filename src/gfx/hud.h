@@ -33,7 +33,6 @@ void hud_add_text(const char *text, int x, int y, uint32_t color, font_t);
 void hud_add_texture(int x, int y, int width, int height, texture_t);
 
 void hud_init();
-void hud_destroy();
 void hud_update();
 
 #endif

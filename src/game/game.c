@@ -5,11 +5,13 @@
 #include "game/game.h"
 #include "game/hud.h"
 
+static bool player_is_alive(Game *self) {
+    return entity_is_alive(self->world.player);
+}
+
 static void game_set_state(Game *self, game_state_t state) {
     switch (state) {
         case G_PAUSED:
-            time_set_paused(true);
-            break;
         case G_IDLE:
             time_set_paused(true);
             break;
@@ -24,8 +26,33 @@ static void game_set_state(Game *self, game_state_t state) {
     game_hud_reset(self);
 }
 
-static bool player_is_alive(Game *self) {
-    return entity_is_alive(self->world.player);
+static void game_toggle_ui(Game *self) {
+    switch (self->state) {
+        case G_PLAYING:
+            game_pause(self);
+            break;
+        case G_PAUSED:
+            game_resume(self);
+            break;
+        default:
+            break;
+    }
+}
+
+static void monitor_input(Game *self) {
+    if (button_pressed(SDL_SCANCODE_ESCAPE, true)) {
+        game_toggle_ui(self);
+    }
+}
+
+static void update(Game *self) {
+    if (self->state == G_PLAYING) {
+        stage_update(&self->stage, &self->world);
+    }
+
+    world_update(&self->world);
+    if (!player_is_alive(self)) 
+        self->state = G_QUIT;
 }
 
 void game_init(Game *self) {
@@ -44,34 +71,11 @@ void game_init(Game *self) {
 void game_update(Game *self) {
     time_update();
 
-    if (button_pressed(SDL_SCANCODE_P, true)) {
-        switch (self->state) {
-            case G_PLAYING:
-                game_set_state(self, G_PAUSED);
-                break;
-            case G_IDLE:
-            case G_PAUSED:
-                game_set_state(self, G_PLAYING);
-                break;
-            default: 
-                break;
-        }
-    }
-
-    switch (self->state) {
-        case G_PLAYING:
-            stage_update(&self->stage, &self->world);
-            break;
-        default:
-            break;
-    }
-
-    world_update(&self->world);
-
-    if (!player_is_alive(self)) 
-        self->state = G_QUIT;
+    monitor_input(self);
+    update(self);
 
     game_hud_update(self);
+
     time_limit();
 }
 
