@@ -15,17 +15,19 @@ struct World;
 
 typedef enum {
     E_PLAYER,
-    E_ENEMY,
+    E_INVADER,
+    E_ABDUCTOR,
     E_PROJECTILE,
     E_STAR,
     E_FORMATION,
-    E_MAX,
 } entity_t;
 
 typedef enum {
-    TEAM_ALLY,
-    TEAM_AXIS,
-} team_t;
+    FLAG_ACTIVE         = 1 << 0,
+    FLAG_COLLISION      = 1 << 1,
+    FLAG_PARENT_REF     = 1 << 2,
+    FLAG_AI_CONTROLLED  = 1 << 3,
+} flag_t;
 
 typedef enum {
     STATE_DEAD,
@@ -35,6 +37,9 @@ typedef enum {
     STATE_IDLE,
     STATE_SPAWN,
     STATE_TRAVEL,
+    STATE_SWOOP,
+    STATE_CHARGE,
+    STATE_ABDUCT,
     STATE_ATTACK,
 } state_t;
 
@@ -50,14 +55,13 @@ typedef enum {
     TAG_MIDDLE_RIGHT,
 } tag_t;
 
+typedef enum {
+    TEAM_ALLY,
+    TEAM_AXIS,
+} team_t;
+
 struct Entity;
 typedef void(*entity_f)(struct Entity *, struct World *);
-
-typedef enum {
-    FLAG_ACTIVE         = 1 << 0,
-    FLAG_COLLISION      = 1 << 1,
-    FLAG_PARENT_REF     = 1 << 2,
-} flag_t;
 
 typedef struct Entity {
     // arbitrary id used to determine enemy location on formation
@@ -71,7 +75,7 @@ typedef struct Entity {
     team_t team;
     vec2 dim, pos, vel;
     float health, angle;
-    const struct Entity *parent;
+    struct Entity *parent;
     uint32_t color;
     SDL_Texture *texture;
     Queue path;
@@ -99,7 +103,7 @@ void entity_clear_flag(Entity *, flag_t);
 bool entity_has_flag(Entity *, flag_t);
 
 void entity_damage(Entity *);
-void entity_fire(Entity *, struct World *, uint32_t delay);
+void entity_fire(Entity *, struct World *);
 
 void entity_set_position(Entity *, vec2);
 void entity_set_velocity(Entity *, vec2);

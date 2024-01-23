@@ -190,7 +190,7 @@ void entity_damage(Entity *self) {
     }
 }
 
-void entity_fire(Entity *self, World *world, uint32_t delay) {
+void entity_fire(Entity *self, World *world) {
     if (time_since(self->tick) < PROJECTILE_COOLDOWN)
         return;
 
@@ -199,10 +199,7 @@ void entity_fire(Entity *self, World *world, uint32_t delay) {
     Entity *e = entity_init(E_PROJECTILE, projectile_init, NULL, NULL, world);
     e->team = self->team;
     e->pos = entity_tag(self, self->type == E_PLAYER ? TAG_TOP_MIDDLE : TAG_BOTTOM_MIDDLE);
-    e->vel = (vec2) {
-        .x = 0.f,
-        .y = self->team == TEAM_ALLY ? PROJECTILE_VELOCITY : -PROJECTILE_VELOCITY,
-    };
+    e->vel = (vec2) { .y = self->team == TEAM_ALLY ? PROJECTILE_VELOCITY : -PROJECTILE_VELOCITY, };
 
     world_add_entity(world, e);
 }
