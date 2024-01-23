@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 typedef struct Node_s {
     void *item;
@@ -26,5 +27,6 @@ void list_remove(LinkedList *, void *item);
 void list_join(LinkedList *dst, LinkedList *src);
 
 bool list_is_empty(const LinkedList *);
+void *list_get_index(const LinkedList *, uint32_t index);
 
 #endif

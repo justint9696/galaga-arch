@@ -85,3 +85,13 @@ void list_join(LinkedList *dst, LinkedList *src) {
 bool list_is_empty(const LinkedList *self) {
     return !self->size;
 }
+
+void *list_get_index(const LinkedList *self, uint32_t index) {
+    assert(index < (self->size));
+    
+    Node *tmp = self->head;
+    while (tmp != NULL && index-- > 0)
+        tmp = tmp->next; 
+
+    return tmp->item;
+}
