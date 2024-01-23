@@ -2,11 +2,11 @@
 #define _FORMATION_H_
 
 #include "entity/entity.h"
-#include "entity/enemy.h"
+#include "entity/logic/enemy.h"
 
 #include "gfx/window.h"
 
-#define FORMATION_VELOCITY  ENEMY_IDLE_VELOCITY
+#define FORMATION_VELOCITY  0.1f
 #define FORMATION_DISTANCE  15.f
 
 #define FORMATION_WIDTH     (SCREEN_WIDTH - (SCREEN_WIDTH / 4.f))
