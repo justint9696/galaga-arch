@@ -4,7 +4,7 @@
 #include "entity/logic/route.h"
 #include "entity/logic/path.h"
 
-#include "entity/enemy.h"
+#include "entity/logic/enemy.h"
 
 #include <string.h>
 
