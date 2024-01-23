@@ -1,7 +1,6 @@
 #include "common/util.h"
 
 #include "entity/player.h"
-#include "entity/projectile.h"
 
 #include "game/buttons.h"
 #include "game/world.h"
@@ -18,10 +17,10 @@ void player_init(Entity *self, World *world) {
         .height = PLAYER_HEIGHT,
     };
     self->team = TEAM_ALLY;
-    self->texture = load_texture(PLAYER_TEXTURE);
+    self->texture = renderer_texture(TEX_PLAYER);
     self->health = 1.f;
     self->state = STATE_ALIVE;
-    entity_set_flag(self, FLAG_COLLISION);
+    // entity_set_flag(self, FLAG_COLLISION);
 
     LOG("Player initialized.\n");
 }
@@ -33,7 +32,7 @@ void player_update(Entity *self, World *world) {
     else if (button_pressed(SDL_SCANCODE_RIGHT, false))
         vel.x = PLAYER_VELOCITY;
     if (button_pressed(SDL_SCANCODE_SPACE, true))
-        entity_fire(self, world, PROJECTILE_COOLDOWN);
+        entity_fire(self, world);
 
     if (!memcmp(&self->vel, &vel, sizeof(vec2)))
         return;

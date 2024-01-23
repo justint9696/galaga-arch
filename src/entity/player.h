@@ -4,7 +4,6 @@
 #include "entity/entity.h"
 #include "gfx/window.h"
 
-#define PLAYER_TEXTURE      "assets/images/player.png"
 #define PLAYER_WIDTH        66.7f * SCREEN_SCALAR
 #define PLAYER_HEIGHT       48.f * SCREEN_SCALAR
 #define PLAYER_VELOCITY     0.35f
