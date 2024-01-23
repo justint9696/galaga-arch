@@ -1,18 +1,17 @@
+#include "common/util.h"
 #include "game/buttons.h"
 #include "game/game.h"
 #include "gfx/window.h"
 
 #include <SDL2/SDL_events.h>
-#include <stdio.h>
 
 void poll_events(Game *game) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_QUIT:
-                game_destroy(game);
+                game_quit(game);
                 window_destroy();
-                printf("%s terminated.\n", GAME_TITLE);
                 exit(0);
                 break;
             case SDL_KEYDOWN:
@@ -30,7 +29,6 @@ int main(int argc, char *argv[]) {
 
     Game game;
     game_init(&game);
-    printf("%s initialized.\n", GAME_TITLE);
 
     while (game.state != G_QUIT) {
         renderer_prepare();
@@ -43,6 +41,6 @@ int main(int argc, char *argv[]) {
     game_destroy(&game);
     window_destroy();
 
-    printf("Game Over.\n");
+    LOG("Game Over.\n");
     return 0;
 }

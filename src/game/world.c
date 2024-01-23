@@ -1,5 +1,6 @@
 #include "game/world.h"
 
+#include "entity/logic/ai.h"
 #include "entity/entity.h"
 #include "entity/formation.h"
 #include "entity/player.h"
@@ -27,12 +28,15 @@ static void *get_item(World *world, int x, int y) {
     return (void *)world->data[get_offset(x, y)]; 
 }
 
-static void world_clear_previous(World *self, Entity *entity, vec2 prev_pos) {
-    vec2 size = {
-        .x = prev_pos.x + entity->dim.width,
-        .y = prev_pos.y + entity->dim.height,
+static vec2 get_size(vec2 pos, vec2 dim) {
+    return (vec2) {
+        .x = pos.x + dim.w,
+        .y = pos.y + dim.y,
     };
+}
 
+static void world_clear_previous(World *self, Entity *entity, vec2 prev_pos) {
+    vec2 size = get_size(prev_pos, entity->dim);
     data_loop(prev_pos, size)
         clear(self, x, y);
 }
@@ -42,32 +46,20 @@ static void world_update_data(World *self, Entity *entity, vec2 prev_pos) {
     world_clear_previous(self, entity, prev_pos);
 
     // update the current position
-    vec2 size = (vec2) {
-        .x = entity->pos.x + entity->dim.width,
-        .y = entity->pos.y + entity->dim.height,
-    };
-
+    vec2 size = get_size(entity->pos, entity->dim);
     data_loop(entity->pos, size)
         update(self, x, y, entity);
 }
 
 static void world_clear(World *self, Entity *entity) {
-    vec2 size = {
-        .x = entity->pos.x + entity->dim.width,
-        .y = entity->pos.y + entity->dim.height,
-    };
-
+    vec2 size = get_size(entity->pos, entity->dim);
     data_loop(entity->pos, size)
         clear(self, x, y);
 }
 
 static void world_check_collision(World *self, Entity *entity) {
     Entity *e;
-    vec2 size = {
-        .x = entity->pos.x + entity->dim.width,
-        .y = entity->pos.y + entity->dim.height,
-    };
-
+    vec2 size = get_size(entity->pos, entity->dim);
     data_loop(entity->pos, size) {
         e = (Entity *)get_item(self, x, y);
         if (!e || e == entity ||
@@ -92,6 +84,7 @@ static void world_check_collision(World *self, Entity *entity) {
 void world_init(World *self) {
     memset(self, 0, sizeof(World));
     self->data = calloc(DATA_SIZE, sizeof(data_t));
+    assert(self->data);
 
     // prepare entity pool
     entity_prepare_all();
@@ -135,7 +128,7 @@ void world_update(World *self) {
         pos = e->pos;
         entity_update(e, self);
 
-        // does entity have collision flag
+        // should entity respond to collision
         if (entity_has_flag(e, FLAG_COLLISION)) {
             world_check_collision(self, e);
             if (entity_is_alive(e))
@@ -143,13 +136,19 @@ void world_update(World *self) {
             else
                 world_clear_previous(self, e, pos);
         }
+
+        // is entity controlled by an ai
+        if (entity_has_flag(e, FLAG_AI_CONTROLLED)) {
+            entity_do_ai(e, self);
+        }
     }
 }
 
 void world_add_entity(World *self, Entity *e) {
     list_add(&self->entities, e);
     switch (e->type) {
-        case E_ENEMY:
+        case E_ABDUCTOR:
+        case E_INVADER:
             list_add(&self->enemies, e);
             break;
         default:
@@ -160,7 +159,8 @@ void world_add_entity(World *self, Entity *e) {
 void world_remove_entity(World *self, Entity *e) {
     list_remove(&self->entities, e);
     switch (e->type) {
-        case E_ENEMY:
+        case E_ABDUCTOR:
+        case E_INVADER:
             list_remove(&self->enemies, e);
             break;
         default:

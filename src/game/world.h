@@ -6,6 +6,8 @@
 #include "entity/entity.h"
 #include "gfx/window.h"
 
+#include <stdbool.h>
+
 #define DATA_SIZE SCREEN_WIDTH * SCREEN_HEIGHT
 
 typedef struct World {
@@ -14,6 +16,11 @@ typedef struct World {
 
     Entity *player;
     Entity *formation;
+
+    // used to manage enemy ai
+    uint32_t tick, idle_tick;
+    uint32_t swoop_count;
+    bool spawn_complete;
 
     // contains all the entities in the world
     LinkedList entities;

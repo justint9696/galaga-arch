@@ -3,6 +3,7 @@
 
 #include "game/stage.h"
 #include "game/world.h"
+#include "gfx/ui.h"
 
 #include <stdbool.h>
 
@@ -15,16 +16,22 @@ typedef enum {
     G_PLAYING,
 } game_state_t;
 
-typedef struct {
+typedef struct Game {
     game_state_t state;
-
-    World world;
     Stage stage;
+    World world;
+    UI ui;
 } Game;
 
 void game_init(Game *);
 void game_update(Game *);
 void game_destroy(Game *);
+
 void game_main(Game *);
+
+void game_pause(Game *);
+void game_resume(Game *);
+void game_reset(Game *);
+void game_quit(Game *);
 
 #endif
