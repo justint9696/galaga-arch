@@ -45,8 +45,4 @@ typedef struct {
     int x, y;
 } ivec2, iv2;
 
-typedef struct {
-    uint8_t r, g, b, a;
-} color_s;
-
 #endif

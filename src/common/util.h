@@ -3,6 +3,8 @@
 
 #include "common/type.h"
 
+#include <SDL2/SDL_pixels.h>
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,7 +21,7 @@
 #define min(a, b) ((a > b) ? b : a)
 #define max(a, b) ((a > b) ? a : b)
 
-#define RGBA(c) ((color_s) {\
+#define RGBA(c) ((SDL_Color) {\
         (c >> 24) & 0xff,\
         (c >> 16) & 0xff,\
         (c >>  8) & 0xff,\
