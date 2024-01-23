@@ -130,7 +130,7 @@ static void path_linear(Path *self, Entity *entity) {
     float angle = atan2(dy, dx);
     vec2 vel = (vec2) {
         .x = self->speed * cos(angle),
-            .y = self->speed * sin(angle),
+        .y = self->speed * sin(angle),
     };
 
     vec2 pos = { 
@@ -179,7 +179,7 @@ static void path_circular(Path *self, Entity *entity) {
     float speed = DEG(circumference / period);
 
     uint32_t delta = time_delta();
-    self->angle += speed * (delta ? delta : 1.f);
+    self->angle += speed * delta;
 
     vec2 pos = {
         .x = (mid.x + (rad * cos(RAD(self->angle)))),
@@ -202,10 +202,9 @@ static void path_circular(Path *self, Entity *entity) {
 static void path_bezier(Path *self, Entity *entity) {
     vec2 org = self->org, dst = self->dst;
 
-    const uint32_t now = NOW();
     switch (self->state) {
         case STATE_INACTIVE: 
-            self->tick = now;
+            self->tick = NOW();
             self->state = STATE_ONGOING;
             break;
         default:
@@ -213,7 +212,6 @@ static void path_bezier(Path *self, Entity *entity) {
     }
 
     // TODO: get actual distance and time estimate (if possible) but approximation works
-
     float distance = bezier_length(org, dst, self->speed);
     float time = (distance / fabs(self->speed)) / 2.f;
     float t = (time_since(self->tick) / time);
@@ -252,6 +250,3 @@ void path_update(Path *self, Entity *entity) {
             break;
     }
 }
-
-float path_distance(const Path *);
-float path_time(const Path *);

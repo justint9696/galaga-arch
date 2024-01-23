@@ -46,7 +46,5 @@ typedef struct {
 
 Path *path_init();
 void path_update(Path *, Entity *);
-float path_distance(const Path *);
-float path_time(const Path *);
 
 #endif
