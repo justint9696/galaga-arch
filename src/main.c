@@ -29,8 +29,9 @@ int main(int argc, char *argv[]) {
 
     Game game;
     game_init(&game);
+    LOG("%s initialized.\n", GAME_TITLE);
 
-    while (game.state != G_QUIT) {
+    while (game_is_running(&game)) {
         renderer_prepare();
         game_update(&game);
         renderer_present();
@@ -41,6 +42,5 @@ int main(int argc, char *argv[]) {
     game_destroy(&game);
     window_destroy();
 
-    LOG("Game Over.\n");
     return 0;
 }

@@ -11,6 +11,7 @@
 
 typedef enum {
     G_QUIT = 0,
+    G_DEAD,
     G_IDLE,
     G_PAUSED,
     G_PLAYING,
@@ -27,11 +28,11 @@ void game_init(Game *);
 void game_update(Game *);
 void game_destroy(Game *);
 
-void game_main(Game *);
+bool game_is_running(Game *);
 
 void game_pause(Game *);
 void game_resume(Game *);
-void game_reset(Game *);
+void game_restart(Game *);
 void game_quit(Game *);
 
 #endif

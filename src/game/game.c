@@ -51,8 +51,8 @@ static void update(Game *self) {
     }
 
     world_update(&self->world);
-    if (!player_is_alive(self)) 
-        self->state = G_QUIT;
+    if (!player_is_alive(self) && self->state == G_PLAYING) 
+        game_set_state(self, G_DEAD);
 }
 
 void game_init(Game *self) {
@@ -64,8 +64,6 @@ void game_init(Game *self) {
 
     game_hud_init(self);
     game_set_state(self, G_IDLE);
-
-    LOG("%s initialized.\n", GAME_TITLE);
 }
 
 void game_update(Game *self) {
@@ -77,6 +75,10 @@ void game_update(Game *self) {
     game_hud_update(self);
 
     time_limit();
+}
+
+bool game_is_running(Game *self) {
+    return self->state != G_QUIT;
 }
 
 void game_destroy(Game *self) {
@@ -94,10 +96,10 @@ void game_resume(Game *self) {
     LOG("%s resumed.\n", GAME_TITLE);
 }
 
-void game_reset(Game *self) {
+void game_restart(Game *self) {
     game_init(self);
     game_set_state(self, G_PLAYING);
-    LOG("%s reset.\n", GAME_TITLE);
+    LOG("%s restarted.\n", GAME_TITLE);
 }
 
 void game_quit(Game *self) {

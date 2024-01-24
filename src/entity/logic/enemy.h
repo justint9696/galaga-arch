@@ -9,7 +9,7 @@
 #define ENEMY_HEIGHT            101.3f * SCREEN_SCALAR
 #define ENEMY_SPAWN_X           ((SCREEN_WIDTH - ENEMY_WIDTH) / 2)
 #define ENEMY_SPAWN_Y           (SCREEN_HEIGHT - ENEMY_HEIGHT - 50.f)
-#define ENEMY_COOLDOWN          600
+#define ENEMY_COOLDOWN          800
 #define ENEMY_IDLE_TIME         1500
 
 void enemy_ai(Entity *, struct World *);
