@@ -11,6 +11,8 @@ INCLUDES = -Iinclude/ -Isrc/
 
 CFLAGS = -g -O3 -Wall -Wextra
 CFLAGS += -Wno-unused-parameter
+CFLAGS += -Wno-unused-function
+CFLAGS += -Wno-sequence-point
 CFLAGS += $(INCLUDES)
 
 LDFLAGS = -lm
@@ -23,7 +25,7 @@ TARGET = $(BIN)galaga
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	@mkdir -p $(BIN)
+	@mkdir -p $(dir $@)
 	$(CC) -o $@ $^ $(LDFLAGS) 
 
 release: all

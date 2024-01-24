@@ -12,6 +12,8 @@ INCLUDES = -Iinclude/ -Isrc/
 
 CFLAGS = -g -O3 -Wall -Wextra
 CFLAGS += -Wno-unused-parameter
+CFLAGS += -Wno-unused-function
+CFLAGS += -Wno-sequence-point
 CFLAGS += $(INCLUDES)
 CFLAGS += $(shell $(BIN)sdl2-config --cflags --libs)
 
