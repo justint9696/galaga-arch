@@ -23,13 +23,13 @@ static TTF_Font *load_font(const char *path, uint32_t size) {
     return font;
 }
 
-static void load_fonts() {
+static void prepare_fonts() {
     renderer.fonts[0] = load_font(FONT_ONE, 14);
     renderer.fonts[1] = load_font(FONT_ONE, 12);
     renderer.fonts[2] = load_font(FONT_ONE, 16);
 }
 
-static void load_textures() {
+static void prepare_textures() {
     renderer.textures[0] = load_texture(TEX_ONE);
     renderer.textures[1] = load_texture(TEX_TWO);
     renderer.textures[2] = load_texture(TEX_THREE);
@@ -42,10 +42,10 @@ Renderer *renderer_init(SDL_Window *window) {
     SDL_SetRenderDrawBlendMode(renderer.handle, SDL_BLENDMODE_BLEND);
 
     TTF_Init();
-    load_fonts();
+    prepare_fonts();
 
     IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
-    load_textures();
+    prepare_textures();
 
     return &renderer;
 }
@@ -63,11 +63,11 @@ void renderer_present() {
     SDL_RenderPresent(renderer.handle);
 }
 
-TTF_Font *renderer_font(font_t font) {
+TTF_Font *renderer_font_handle(font_t font) {
     return renderer.fonts[font];
 }
 
-SDL_Texture *renderer_texture(texture_t texture) {
+SDL_Texture *renderer_texture_handle(texture_t texture) {
     return renderer.textures[texture];
 }
 
@@ -112,14 +112,14 @@ void draw_texture(SDL_Texture *texture, int x, int y, int w, int h, float angle)
 
 uint32_t font_width(const char *text, font_t font) {
     int width, height;
-    TTF_Font *handle = renderer_font(font);
+    TTF_Font *handle = renderer_font_handle(font);
     TTF_SizeText(handle, text, &width, &height);
     return width;
 }
 
 uint32_t font_height(font_t font) {
     int width, height;
-    TTF_Font *handle = renderer_font(font);
+    TTF_Font *handle = renderer_font_handle(font);
     TTF_SizeText(handle, "", &width, &height);
     return height;
 }

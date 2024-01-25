@@ -17,7 +17,7 @@ void player_init(Entity *self, World *world) {
         .height = PLAYER_HEIGHT,
     };
     self->team = TEAM_ALLY;
-    self->texture = renderer_texture(TEX_PLAYER);
+    self->texture = renderer_texture_handle(TEX_PLAYER);
     self->health = 1.f;
     self->state = STATE_ALIVE;
     entity_set_flag(self, FLAG_COLLISION);

@@ -12,7 +12,7 @@ void abductor_init(Entity *self, World *world) {
         .height = ABDUCTOR_HEIGHT,
     };
     self->team = TEAM_AXIS;
-    self->texture = renderer_texture(TEX_ABDUCTOR);
+    self->texture = renderer_texture_handle(TEX_ABDUCTOR);
     self->health = 1.f;
     self->state = STATE_SPAWN;
     entity_set_flag(self, (FLAG_COLLISION | FLAG_AI_CONTROLLED));

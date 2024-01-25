@@ -11,8 +11,10 @@ void ui_add(UI *self, const char *title, game_f function) {
     assert(self->size < UI_MAX);
     uint32_t index = self->size++;
     UI_Item *item = &self->items[index];
+
     size_t size = strnlen(title, STR_LEN_MAX);
     strncpy(item->title, title, size);
+
     item->function = function;
     item->index = index;
 }

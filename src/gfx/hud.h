@@ -8,7 +8,7 @@
 #define STR_LEN_MAX 32
 
 typedef enum {
-    HUD_TEXT,
+    HUD_FONT,
     HUD_TEXTURE,
 } hud_t;
 

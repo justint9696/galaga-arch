@@ -17,24 +17,22 @@ typedef enum {
     FONT_NORMAL,
     FONT_SMALL,
     FONT_BIG,
-    FONT_MAX,
 } font_t;
 
-#define FONT_LEN FONT_MAX
+#define FONT_MAX FONT_BIG + 1
 
 typedef enum {
     TEX_PLAYER,
     TEX_INVADER,
     TEX_ABDUCTOR,
-    TEX_MAX,
 } texture_t;
 
-#define TEX_LEN TEX_MAX
+#define TEX_MAX TEX_ABDUCTOR + 1
 
 typedef struct {
     SDL_Renderer *handle;
-    TTF_Font *fonts[FONT_LEN];
-    SDL_Texture *textures[TEX_LEN];
+    TTF_Font *fonts[FONT_MAX];
+    SDL_Texture *textures[TEX_MAX];
 } Renderer;
 
 Renderer *renderer_init(SDL_Window *);
@@ -43,8 +41,8 @@ void renderer_destroy();
 void renderer_prepare();
 void renderer_present();
 
-TTF_Font *renderer_font(font_t);
-SDL_Texture *renderer_texture(texture_t);
+TTF_Font *renderer_font_handle(font_t);
+SDL_Texture *renderer_texture_handle(texture_t);
 
 void draw_text(const char *text, int x, int y, uint32_t color, TTF_Font *font);
 void draw_rect(int x, int y, int w, int h, uint32_t color);
