@@ -21,10 +21,12 @@ typedef struct {
     size_t size;
     int32_t pos;
     UI_Item items[UI_MAX]; 
+    char title[STR_LEN_MAX];
 } UI;
 
 void ui_init(UI *);
 void ui_add(UI *, const char *title, game_f);
+void ui_set_title(UI *, const char *title);
 int32_t ui_scroll(UI *, int32_t);
 game_f ui_select(UI *);
 bool ui_item_selected(const UI *, const UI_Item *);

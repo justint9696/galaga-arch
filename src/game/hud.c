@@ -9,12 +9,14 @@
 
 static void prepare_idle_ui(Game *self) {
     ui_init(&self->ui);
+    ui_set_title(&self->ui, GAME_TITLE);
     ui_add(&self->ui, "Start Game", game_resume);
     ui_add(&self->ui, "Quit Game", game_quit);
 }
 
 static void prepare_paused_ui(Game *self) {
     ui_init(&self->ui);
+    ui_set_title(&self->ui, GAME_TITLE);
     ui_add(&self->ui, "Resume Game", game_resume);
     ui_add(&self->ui, "Restart Game", game_restart);
     ui_add(&self->ui, "Quit Game", game_quit);
@@ -22,24 +24,16 @@ static void prepare_paused_ui(Game *self) {
 
 static void prepare_game_over_ui(Game *self) {
     ui_init(&self->ui);
+    ui_set_title(&self->ui, "Game Over");
     ui_add(&self->ui, "Play Again", game_restart);
     ui_add(&self->ui, "Quit Game", game_quit);
 }
 
 static void update_text(Game *self) {
-    uint32_t width;
+    uint32_t width = font_width(self->ui.title, FONT_NORMAL);
     uint32_t height = font_height(FONT_NORMAL);
 
-    switch (self->state) {
-        case G_DEAD:
-            width = font_width("Game Over", FONT_NORMAL);
-            hud_add_text("Game Over", CENTER_X(width), HUD_Y + height + 5, COLOR_WHITE, FONT_NORMAL);
-            break;
-        default: 
-            width = font_width(GAME_TITLE, FONT_NORMAL);
-            hud_add_text(GAME_TITLE, CENTER_X(width), HUD_Y + height + 5, COLOR_WHITE, FONT_NORMAL);
-            break;
-    }
+    hud_add_text(self->ui.title, CENTER_X(width), HUD_Y + height + 5, COLOR_WHITE, FONT_NORMAL);
 
     UI_Item *item;
     size_t size = self->ui.size;

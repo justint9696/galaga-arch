@@ -19,6 +19,11 @@ void ui_add(UI *self, const char *title, game_f function) {
     item->index = index;
 }
 
+void ui_set_title(UI *self, const char *title) {
+    size_t size = strnlen(title, STR_LEN_MAX);
+    strncpy(self->title, title, size);
+}
+
 int32_t ui_scroll(UI *self, int32_t pos) {
     self->pos += pos;
     if (self->pos < 0) self->pos = self->size - 1;
