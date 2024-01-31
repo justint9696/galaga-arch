@@ -5,11 +5,11 @@
 
 #include <SDL2/SDL.h>
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 640
+#define SCREEN_WIDTH 576
+#define SCREEN_HEIGHT 720
 
-// amount entities are scaled
-#define SCREEN_SCALAR .85
+// amount entity sprites are scaled by
+#define SCREEN_SCALAR .75
 
 // buffer region outside of window borders
 #define SCREEN_BUFFER 250
