@@ -17,10 +17,8 @@ typedef struct World {
     Entity *player;
     Entity *formation;
 
-    // used to manage enemy ai
-    uint32_t tick, idle_tick;
-    uint32_t swoop_count;
-    bool spawn_complete;
+    // used to limit the attack rate of enemies
+    uint32_t tick;
 
     // contains all the entities in the world
     LinkedList entities;
