@@ -6,8 +6,8 @@
 
 #include "gfx/window.h"
 
-#define FORMATION_VELOCITY  0.1f
-#define FORMATION_DISTANCE  15.f
+#define FORMATION_VELOCITY  0.05f
+#define FORMATION_DISTANCE  (ENEMY_WIDTH / 4.f)
 
 #define FORMATION_WIDTH     (SCREEN_WIDTH - (SCREEN_WIDTH / 4.f))
 #define FORMATION_HEIGHT    (SCREEN_HEIGHT / 4.f)
@@ -23,5 +23,7 @@
 
 void formation_init(Entity *, struct World *);
 void formation_update(Entity *, struct World *);
+
+vec2 formation_entity_position(const Entity *, uint32_t id);
 
 #endif

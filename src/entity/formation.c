@@ -1,6 +1,7 @@
 #include "entity/logic/path.h"
 #include "entity/logic/route.h"
 #include "entity/formation.h"
+
 #include "game/world.h"
 
 #include <assert.h>
@@ -31,4 +32,11 @@ void formation_update(Entity *self, World *world) {
         dequeue(&self->path);
         free(path);
     }
+}
+
+vec2 formation_entity_position(const Entity *self, uint32_t id) {
+    vec2 pos = entity_tag(self, TAG_TOP_LEFT);
+    pos.x += ((int)fmod(id, FORMATION_ROW_MAX) * (ENEMY_WIDTH + FORMATION_DISTANCE)) + (ENEMY_WIDTH / 2.f);
+    pos.y -= ((int)(id / FORMATION_ROW_MAX) * (ENEMY_HEIGHT + FORMATION_DISTANCE)) + (ENEMY_HEIGHT / 2.f);
+    return pos;
 }
