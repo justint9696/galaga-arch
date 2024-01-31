@@ -4,6 +4,7 @@
 #include "entity/logic/enemy.h"
 
 #include "entity/abductor.h"
+#include "entity/formation.h"
 #include "entity/invader.h"
 
 #include "game/stage.h"
@@ -28,6 +29,7 @@ static vec2 get_spawnpoint(wave_t wave) {
 
 void stage_init(Stage *self) {
     memset(self, 0, sizeof(Stage));
+    self->state = S_SPAWN;
 }
 
 static void destroy_queue(Queue *q) {
@@ -66,7 +68,7 @@ static bool stage_complete(Stage *self, World *world) {
     return self->wave >= WAVE_MAX && list_is_empty(&world->enemies);
 }
 
-static void monitor_queue(Stage *self, World *world) {
+static void monitor_spawn_queue(Stage *self, World *world) {
     if (queue_is_empty(&self->queue))
         return;
 
@@ -87,11 +89,31 @@ static void monitor_queue(Stage *self, World *world) {
     }
 }
 
+static void monitor_attack_queue(Stage *self, World *world) {
+    if (queue_is_empty(&self->queue)) {
+        self->tick = NOW();
+        self->state = S_IDLE; 
+        return;
+    }
+
+    Entity *e = (Entity *)queue_front(&self->queue);
+    assert(e);
+
+    e->state = STATE_SWOOP;
+
+    // ensure front entity is alive and has traveled far enough from spawn
+    vec2 pos = formation_entity_position(world->formation, e->id);
+    if (entity_is_alive(e) && distance(e->pos, pos) < 250.f)
+        return;
+
+    dequeue(&self->queue);
+}
+
 static void stage_next(Stage *self, World *world) {
     self->current++;
     self->id = 0;
     self->wave = 0;
-    world->spawn_complete = false;
+    self->state = S_SPAWN;
 }
 
 static bool spawn_complete(Stage *self, World *world) {
@@ -99,23 +121,36 @@ static bool spawn_complete(Stage *self, World *world) {
         return false;
 
     Entity *e = (Entity *)world->enemies.tail->item;
-    return (e && queue_is_empty(&self->queue) && queue_is_empty(&e->path));
+    return (e && queue_is_empty(&self->queue) && e->state == STATE_IDLE);
 }
 
-void stage_update(Stage *self, World *world) {
-    // check if stage is complete
-    if (stage_complete(self, world))
-        stage_next(self, world);
+static bool enemy_waves_spawned(World *world) {
+    return (world->enemies.size >= (WAVE_COUNT * WAVE_MAX));
+}
 
+static Entity *random_enemy(World *world) {
+    uint32_t index = RAND(world->enemies.size);
+    Entity *e = (Entity *)list_get_index(&world->enemies, index);
+    switch (e->state) {
+        case STATE_IDLE:
+            return e;
+        default:
+            return random_enemy(world);
+    }
+}
+
+static void spawn_enemies(Stage *self, World *world) {
     // check if all enemies are spawned and in formation
-    if (!world->spawn_complete && spawn_complete(self, world)) {
-        world->idle_tick = NOW();
-        world->spawn_complete = true; 
+    if (spawn_complete(self, world)) {
+        self->state = S_IDLE;
         return;
-    } else if (!wave_complete(self, world)) {
-        monitor_queue(self, world);
+    }
+
+    // check if current wave of enemies are in formation
+    if (!wave_complete(self, world)) {
+        monitor_spawn_queue(self, world);
         return;
-    } 
+    }
 
     // otherwise, clear queue, spawn next wave of enemies, & increment wave number
     queue_clear(&self->queue);
@@ -124,7 +159,7 @@ void stage_update(Stage *self, World *world) {
     vec2 spawn = get_spawnpoint(self->wave);
     for (size_t i = 0; i < WAVE_COUNT; i++) {
         // e = entity_init(E_ABDUCTOR, abductor_init, abductor_destroy, NULL, world); 
-        e = entity_init(E_INVADER, invader_init, invader_destroy, NULL, world); 
+        e = entity_init(E_INVADER, invader_init, invader_destroy, invader_update, world); 
         e->pos = spawn;
         e->id = self->id++;
         enqueue(&self->queue, e);
@@ -136,4 +171,41 @@ void stage_update(Stage *self, World *world) {
 
     self->wave++;
     LOG("Stage wave updated: %i\n", self->wave);
+}
+
+static void attack_enemies(Stage *self, World *world) {
+    if (time_since(self->tick) < SWOOP_COOLDOWN)
+        return;
+
+    Entity *e;
+    for (size_t i = 0; i < 2; i++) {
+        e = random_enemy(world);
+        enqueue(&self->queue, e);
+    }
+
+    e = queue_front(&self->queue);
+    e->state = STATE_SWOOP;
+
+    self->state = S_ATTACK;
+}
+
+static void monitor_stage(Stage *self, World *world) {
+    if (stage_complete(self, world))
+        stage_next(self, world);
+}
+
+void stage_update(Stage *self, World *world) {
+    switch (self->state) {
+        case S_SPAWN:
+            spawn_enemies(self, world);
+            break;
+        case S_IDLE:
+            monitor_stage(self, world);
+            attack_enemies(self, world);
+            break;
+        case S_ATTACK:
+            monitor_stage(self, world);
+            monitor_attack_queue(self, world);
+            break;
+    }
 }
