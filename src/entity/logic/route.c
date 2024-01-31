@@ -89,5 +89,5 @@ void route_swoop(Entity *entity, float speed) {
     route_append(q, (vec2) { .x = org.x + (2.f * radius), .y = org.y - (3.0 * radius) }, -speed, PATH_BEZIER);
 
     // keep here
-    route_append(q, org, speed, PATH_CIRCULAR);
+    // route_append(q, org, speed, PATH_CIRCULAR);
 }
