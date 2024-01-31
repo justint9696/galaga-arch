@@ -20,7 +20,7 @@ void player_init(Entity *self, World *world) {
     self->texture = renderer_texture_handle(TEX_PLAYER);
     self->health = 1.f;
     self->state = STATE_ALIVE;
-    entity_set_flag(self, FLAG_COLLISION);
+    entity_set_flag(self, PLAYER_FLAGS);
 
     LOG("Player initialized.\n");
 }
