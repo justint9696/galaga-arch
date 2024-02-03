@@ -35,15 +35,15 @@ static vec2 get_size(vec2 pos, vec2 dim) {
     };
 }
 
-static void world_clear_previous(World *self, Entity *entity, vec2 prev_pos) {
-    vec2 size = get_size(prev_pos, entity->dim);
-    data_loop(prev_pos, size)
+static void world_clear_previous(World *self, Entity *entity) {
+    vec2 size = get_size(entity->prev_pos, entity->dim);
+    data_loop(entity->prev_pos, size)
         clear(self, x, y);
 }
 
-static void world_update_data(World *self, Entity *entity, vec2 prev_pos) {
+static void world_update_data(World *self, Entity *entity) {
     // clear the entity's previous position
-    world_clear_previous(self, entity, prev_pos);
+    world_clear_previous(self, entity);
 
     // update the current position
     vec2 size = get_size(entity->pos, entity->dim);
@@ -68,9 +68,9 @@ static void world_check_collision(World *self, Entity *entity) {
             continue;
 
         if (entity_collision(entity, e)) {
-            // do not clear primary entity position here
-            // only the previous position needs to be cleared
             entity_damage(entity);
+            if (!entity_is_alive(e)) 
+                world_clear_previous(self, e);
 
             entity_damage(e);
             if (!entity_is_alive(e)) 
@@ -110,7 +110,6 @@ void world_destroy(World *self) {
 }
 
 void world_update(World *self) {
-    vec2 pos;
     Entity *e;
     Node *tmp = self->entities.head;
     while (tmp != NULL) {
@@ -124,17 +123,12 @@ void world_update(World *self) {
             continue;
         }
 
-        // store entity position before update
-        pos = e->pos;
         entity_update(e, self);
 
         // should entity respond to collision
         if (entity_has_flag(e, FLAG_COLLISION)) {
             world_check_collision(self, e);
-            if (entity_is_alive(e))
-                world_update_data(self, e, pos);
-            else
-                world_clear_previous(self, e, pos);
+            world_update_data(self, e);
         }
 
         // is entity controlled by an ai
