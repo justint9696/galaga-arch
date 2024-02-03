@@ -61,6 +61,9 @@ void entity_update(Entity *self, World *world) {
     if (self->update != NULL)
         self->update(self, world);
 
+    // store entity position before update
+    self->prev_pos = self->pos;
+
     // update entity position
     // if entity parent defined && parent reference flag not set
     if (self->parent && !entity_has_flag(self, FLAG_PARENT_REF)) {

@@ -36,6 +36,7 @@ typedef enum {
     STATE_FADE_OUT,
     STATE_IDLE,
     STATE_SPAWN,
+    STATE_MERGE,
     STATE_TRAVEL,
     STATE_SWOOP,
     STATE_CHARGE,
@@ -73,6 +74,7 @@ typedef struct Entity {
     entity_t type;
     state_t state;
     team_t team;
+    vec2 prev_pos;
     vec2 dim, pos, vel;
     float health, angle;
     struct Entity *parent;
