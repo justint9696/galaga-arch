@@ -10,7 +10,6 @@
 #include "entity/player.h"
 #include "entity/projectile.h"
 
-#include "game/stage.h"
 #include "game/world.h"
 
 #include <assert.h>
@@ -22,7 +21,7 @@ static void enemy_determine_path(Entity *self, World *world) {
             route_spawn(self, ENEMY_VELOCITY);
             break;
         case STATE_SWOOP:
-            entity_unlink(self);
+            entity_set_flag(self, FLAG_PARENT_REF);
             route_swoop(self, ENEMY_VELOCITY);
             break;
         case STATE_CHARGE:
@@ -71,14 +70,13 @@ static void enemy_attack(Entity *self, World *world) {
     }
 }
 
-static void enemy_travel(Entity *self, World *world) {
+static void enemy_travel_path(Entity *self, World *world) {
     Path *path = (Path *)queue_front(&self->path);
     assert(path);
 
     if (self->path.size == 1 && self->state == STATE_SPAWN) {
-        if (!self->parent) {
+        if (!entity_has_flag(self, FLAG_PARENT_REF)) {
             // link entity to formation as reference
-            entity_link(self, world->formation);
             entity_set_flag(self, FLAG_PARENT_REF);
         } else {
             // return to proper place in formation
@@ -90,7 +88,7 @@ static void enemy_travel(Entity *self, World *world) {
 
     if (path->complete) {
         // LOG("path dequeued. items remaining: %li\n", self->path.size);
-        entity_set_position(self, path->destintation);
+        entity_set_position(self, path->dst);
         entity_set_velocity(self, (vec2) { .x = 0.f, .y = 0.f });
 
         dequeue(&self->path);
@@ -113,6 +111,22 @@ static void enemy_travel(Entity *self, World *world) {
     }
 }
 
+static void enemy_merge(Entity *self, World *world) {
+    Path *path = (Path *)queue_front(&self->path);
+    assert(path);
+
+    if (self->path.size == 1) {
+        if (!entity_has_flag(self, FLAG_PARENT_REF)) {
+            // link entity to formation as reference
+            entity_set_flag(self, FLAG_PARENT_REF);
+        } else {
+            // return to proper place in formation
+            path->dst = formation_entity_position(world->formation, self->id);
+        }
+    }
+
+    enemy_travel_path(self, world);
+}
 
 void enemy_ai(Entity *self, World *world) {
     state_t prev_state = self->state;
@@ -124,9 +138,12 @@ void enemy_ai(Entity *self, World *world) {
         case STATE_ATTACK:
             self->state = prev_state;
             break;
+        case STATE_MERGE:
+            enemy_merge(self, world);
+            break;
         default:
             if (!queue_is_empty(&self->path))
-                enemy_travel(self, world);
+                enemy_travel_path(self, world);
             else
                 enemy_determine_path(self, world);
             break;

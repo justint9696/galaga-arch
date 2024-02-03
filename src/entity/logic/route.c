@@ -1,18 +1,18 @@
+#include "common/util.h"
 #include "data/queue.h"
 #include "gfx/window.h"
 
 #include "entity/logic/route.h"
-#include "entity/logic/path.h"
-
 #include "entity/logic/enemy.h"
 
+#include <assert.h>
 #include <string.h>
 
 static inline vec2 rear(Queue *q) {
     return (*(Path *)(queue_rear(q))).dst;
 }
 
-static inline void route_start(Queue *q, vec2 org, vec2 dst, float speed, ptype_t type) {
+void route_start(Queue *q, vec2 org, vec2 dst, float speed, ptype_t type) {
     Path *path = path_init();
     path->org = org;
     path->dst = dst;
@@ -21,25 +21,25 @@ static inline void route_start(Queue *q, vec2 org, vec2 dst, float speed, ptype_
     enqueue(q, path);
 }
 
-static inline void route_append(Queue *q, vec2 dst, float speed, ptype_t type) {
+void route_append(Queue *q, vec2 dst, float speed, ptype_t type) {
     route_start(q, rear(q), dst, speed, type); 
 }
 
-static inline void route_spawn_left(Queue *q, vec2 org, float speed) {
+static void route_spawn_left(Queue *q, vec2 org, float speed) {
     float radius = 50.f;
     route_start(q, org, (vec2) { .x = radius, .y = ENEMY_SPAWN_Y - 100.f }, speed, PATH_CIRCULAR);
     route_append(q, (vec2) { .x = rear(q).x, .y = rear(q).y - radius }, speed, PATH_CIRCULAR);
     route_append(q, (vec2) { .x = ENEMY_SPAWN_X, .y = ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
 }
 
-static inline void route_spawn_right(Queue *q, vec2 org, float speed) {
+static void route_spawn_right(Queue *q, vec2 org, float speed) {
     float radius = 50.f;
     route_start(q, org, (vec2) { .x = org.x - radius - ENEMY_WIDTH, .y = ENEMY_SPAWN_Y - 100.f }, -speed, PATH_CIRCULAR);
     route_append(q, (vec2) { .x = rear(q).x, .y = rear(q).y - radius }, -speed, PATH_CIRCULAR);
     route_append(q, (vec2) { .x = ENEMY_SPAWN_X, .y = ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
 }
 
-static inline void route_spawn_center(Queue *q, vec2 org, float speed) {
+static void route_spawn_center(Queue *q, vec2 org, float speed) {
     float radius = 50.f;
     float half = (SCREEN_WIDTH / 2.f);
     route_start(q, org, (vec2) { .x = org.x - half + (radius * 2), .y = org.y - (radius * 6.f) }, -speed, PATH_BEZIER);
@@ -78,16 +78,33 @@ void route_idle(Entity *entity, float speed) {
     enqueue(q, path);
 }
 
+static void route_swoop_left(Queue *q, vec2 org, float speed) {
+    float radius = 100.f;
+    route_start(q, org, (vec2) { .x = org.x, .y = org.y + (radius) }, -speed, PATH_CIRCULAR);
+    route_append(q, org, -speed, PATH_CIRCULAR);
+    route_append(q, (vec2) { .x = 25.f, .y = SCREEN_HEIGHT - (4.f * radius) }, speed, PATH_BEZIER);
+    route_append(q, (vec2) { .x = (SCREEN_WIDTH - ENEMY_WIDTH) / 2.f, .y = SCREEN_HEIGHT - (5.f * radius) }, -speed, PATH_BEZIER);
+}
+
+static void route_swoop_right(Queue *q, vec2 org, float speed) {
+    float radius = 100.f;
+    route_start(q, org, (vec2) { .x = org.x, .y = org.y + (radius) }, speed, PATH_CIRCULAR);
+    route_append(q, org, speed, PATH_CIRCULAR);
+    route_append(q, (vec2) { .x = SCREEN_WIDTH - ENEMY_WIDTH - 25.f, .y = SCREEN_HEIGHT - (4.f * radius) }, speed, PATH_BEZIER);
+    route_append(q, (vec2) { .x = (SCREEN_WIDTH - ENEMY_WIDTH) / 2.f, .y = SCREEN_HEIGHT - (5.f * radius) }, -speed, PATH_BEZIER);
+}
+
 void route_swoop(Entity *entity, float speed) {
     vec2 org = entity->pos;
     Queue *q = &entity->path;
-    float radius = 100.f;
 
-    route_start(q, org, (vec2) { .x = org.x, .y = org.y + (radius) }, -speed, PATH_CIRCULAR);
-    route_append(q, org, -speed, PATH_CIRCULAR);
-    route_append(q, (vec2) { .x = org.x - (2.f * radius), .y = org.y - (1.5 * radius) }, speed, PATH_BEZIER);
-    route_append(q, (vec2) { .x = org.x + (2.f * radius), .y = org.y - (3.0 * radius) }, -speed, PATH_BEZIER);
+    assert(entity->parent);
 
-    // keep here
+    if (entity->parent->vel.x < 0) 
+        route_swoop_left(q, org, speed);
+    else
+        route_swoop_right(q, org, speed);
+
+    // keep here to return entity to spawn
     // route_append(q, org, speed, PATH_CIRCULAR);
 }
