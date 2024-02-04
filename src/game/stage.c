@@ -114,6 +114,7 @@ static void stage_next(Stage *self, World *world) {
     self->id = 0;
     self->wave = 0;
     self->state = S_SPAWN;
+    LOG("Stage updated: %i\n", self->id);
 }
 
 static bool spawn_complete(Stage *self, World *world) {
@@ -129,14 +130,16 @@ static bool enemy_waves_spawned(World *world) {
 }
 
 static Entity *random_enemy(World *world) {
-    uint32_t index = RAND(world->enemies.size);
-    Entity *e = (Entity *)list_get_index(&world->enemies, index);
-    switch (e->state) {
-        case STATE_IDLE:
-            return e;
-        default:
-            return random_enemy(world);
+    Entity *e;
+    uint32_t index;
+    while (true) {
+        index = RAND(world->enemies.size);
+        e = (Entity *)list_get_index(&world->enemies, index);
+        if (e->state == STATE_IDLE && enemy_in_formation(e, world))
+            break;
     }
+
+    return e;
 }
 
 static void spawn_enemies(Stage *self, World *world) {
@@ -178,13 +181,12 @@ static void attack_enemies(Stage *self, World *world) {
         return;
 
     Entity *e;
-    for (size_t i = 0; i < 2; i++) {
+    while (self->queue.size < 2 && self->queue.size < world->enemies.size) {
         e = random_enemy(world);
-        enqueue(&self->queue, e);
+        if (!queue_contains(&self->queue, e)) {
+            enqueue(&self->queue, e);
+        }
     }
-
-    e = queue_front(&self->queue);
-    e->state = STATE_SWOOP;
 
     self->state = S_ATTACK;
 }
