@@ -47,3 +47,14 @@ void dequeue(Queue *q) {
 bool queue_is_empty(const Queue *q) {
     return !q->size;
 }
+
+bool queue_contains(const Queue *q, void *item) {
+    size_t index, size = q->size;
+    for (size_t i = 0; i < size; i++) {
+        index = (q->index + i) % QUEUE_MAX;
+        if (q->queue[index] == item)
+            return true;
+    }
+
+    return false;
+}

@@ -24,5 +24,6 @@ void enqueue(Queue *, void *);
 void dequeue(Queue *);
 
 bool queue_is_empty(const Queue *);
+bool queue_contains(const Queue *, void *);
 
 #endif
