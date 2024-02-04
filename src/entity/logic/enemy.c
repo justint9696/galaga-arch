@@ -149,3 +149,8 @@ void enemy_ai(Entity *self, World *world) {
             break;
     }
 }
+
+bool enemy_in_formation(Entity *self, World *world) {
+    vec2 pos = formation_entity_position(world->formation, self->id);
+    return distance(pos, self->pos) < 15.f;
+}
