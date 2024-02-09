@@ -8,8 +8,12 @@
 #define ABDUCTOR_IDLE_TIME          1500    
 #define ABDUCTOR_WIDTH              66.f * SCREEN_SCALAR 
 #define ABDUCTOR_HEIGHT             62.67f * SCREEN_SCALAR
+// #define ABDUCTOR_HEIGHT             101.3f * SCREEN_SCALAR
+#define ABDUCTOR_FLAGS              (FLAG_COLLISION | FLAG_AI_CONTROLLED)
+#define ABDUCTOR_VELOCITY           0.3f
 
 void abductor_init(Entity *, struct World *);
 void abductor_destroy(Entity *, struct World *);
+void abductor_update(Entity *, struct World *);
 
 #endif
