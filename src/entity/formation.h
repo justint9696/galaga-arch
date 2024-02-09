@@ -24,6 +24,6 @@
 void formation_init(Entity *, struct World *);
 void formation_update(Entity *, struct World *);
 
-vec2 formation_entity_position(const Entity *, uint32_t id);
+vec2 formation_entity_position(const Entity *self, const Entity *entity);
 
 #endif
