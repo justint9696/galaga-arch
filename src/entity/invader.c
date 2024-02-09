@@ -1,10 +1,11 @@
 #include "data/queue.h"
 
-#include "entity/formation.h"
 #include "entity/logic/path.h"
+#include "entity/logic/route.h"
+
+#include "entity/formation.h"
 #include "entity/invader.h"
 
-#include "entity/logic/route.h"
 #include "game/world.h"
 
 void invader_init(Entity *self, World *world) {
@@ -15,7 +16,7 @@ void invader_init(Entity *self, World *world) {
     self->team = TEAM_AXIS;
     self->texture = renderer_texture_handle(TEX_INVADER);
     self->health = 1.f;
-    self->state = STATE_SPAWN;
+    entity_set_state(self, STATE_SPAWN);
     entity_link(self, world->formation);
     entity_set_flag(self, INVADER_FLAGS);
 }
@@ -35,8 +36,8 @@ void invader_destroy(Entity *self, World *world) {
 
 static void teleport(Entity *self, World *world) {
     entity_set_position(self, (vec2) { .x = self->pos.x, .y = SCREEN_HEIGHT + 100.f });
-    route_start(&self->path, self->pos, (vec2) { .x = FORMATION_SPAWN_X, .y = FORMATION_SPAWN_Y }, INVADER_VELOCITY, PATH_BEZIER);
-    self->state = STATE_SPAWN;
+    route_merge(self, INVADER_VELOCITY);
+    entity_set_state(self, STATE_MERGE);
 }
 
 static vec2 get_displacement(Entity *self) {
@@ -51,7 +52,7 @@ static void charge(Entity *self, World *world) {
     vec2 vel = get_displacement(self);
     route_start(&self->path, self->pos, (vec2) { .x = self->pos.x, .y = self->pos.y + 100.f }, vel.x < 0.f ? -INVADER_VELOCITY : INVADER_VELOCITY, PATH_CIRCULAR);
     route_append(&self->path, (vec2) { .x = player->pos.x, .y = -50.f }, -INVADER_VELOCITY, PATH_BEZIER);
-    self->state = STATE_CHARGE;
+    entity_set_state(self, STATE_CHARGE);
 }
 
 static void update(Entity *self, World *world) {
@@ -65,7 +66,7 @@ void invader_update(Entity *self, World *world) {
     if (!queue_is_empty(&self->path))
         return;
 
-    vec2 pos = formation_entity_position(world->formation, self->id);
+    vec2 pos = formation_entity_position(world->formation, self);
     if (self->pos.y >= pos.y)
         return;
 
