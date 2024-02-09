@@ -31,12 +31,14 @@ Entity *entity_init(entity_t type, entity_f init, entity_f destroy, entity_f upd
     self->destroy = destroy;
     self->update = update;
 
-    if (self->texture != NULL)
-        self->render = entity_render_texture;
-    else if (self->color)
-        self->render = entity_render_rect;
-    else 
-        self->render = NULL;
+    if (!self->render) {
+        if (self->texture)
+            self->render = entity_render_texture;
+        else if (self->color)
+            self->render = entity_render_rect;
+        else 
+            self->render = NULL;
+    }
 
     self->type = type;
 
@@ -86,7 +88,7 @@ void entity_update(Entity *self, World *world) {
 
     // if entity is outside of the scene
     if (entity_oob(self)) {
-        self->state = STATE_DEAD;
+        entity_set_state(self, STATE_DEAD);
     }
 
     if (self->render != NULL)
@@ -105,8 +107,8 @@ bool entity_is_moving(const Entity *self) {
 bool entity_collision(const Entity *e0, const Entity *e1) {
     return ((e0->pos.x + e0->dim.width) >= e1->pos.x 
             && (e0->pos.y + e0->dim.height) >= e1->pos.y)
-            && e0->pos.x <= (e1->pos.x + e1->dim.width)
-            && e0->pos.y <= (e1->pos.y + e1->dim.height);
+        && e0->pos.x <= (e1->pos.x + e1->dim.width)
+        && e0->pos.y <= (e1->pos.y + e1->dim.height);
 }
 
 vec2 entity_tag(const Entity *self, tag_t tag) {
@@ -184,11 +186,11 @@ bool entity_has_flag(Entity *self, flag_t flag) {
 void entity_damage(Entity *self) {
     switch (self->type) {
         case E_PROJECTILE:
-            self->state = STATE_DEAD;
+            entity_set_state(self, STATE_DEAD);
             break;
         default:
             if (--self->health <= 0.f)
-                self->state = STATE_DEAD;
+                entity_set_state(self, STATE_DEAD);
             break;
     }
 }
@@ -207,6 +209,17 @@ void entity_fire(Entity *self, World *world) {
     world_add_entity(world, e);
 }
 
+void entity_transform(Entity *self, vec2 dim) {
+    vec2 diff = {
+        .x = dim.x - self->dim.x,
+        .y = dim.y - self->dim.y
+    };
+    self->dim = dim;
+
+    self->pos.x -= (diff.x / 2.f);
+    self->pos.y -= (diff.y / 2.f);
+}
+
 void entity_set_position(Entity *self, vec2 pos) {
     memcpy(&self->pos, &pos, sizeof(vec2));
 }
@@ -217,4 +230,11 @@ void entity_set_velocity(Entity *self, vec2 vel) {
 
 void entity_set_rotation(Entity *self, float angle) {
     memcpy(&self->angle, &angle, sizeof(float));
+}
+
+void entity_set_state(Entity *self, state_t state) {
+    if (self->prev_state != self->state)
+        self->prev_state = self->state;
+
+    self->state = state;
 }

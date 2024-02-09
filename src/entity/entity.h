@@ -20,6 +20,7 @@ typedef enum {
     E_PROJECTILE,
     E_STAR,
     E_FORMATION,
+    E_TRACTOR_BEAM,
 } entity_t;
 
 typedef enum {
@@ -30,7 +31,7 @@ typedef enum {
 } flag_t;
 
 typedef enum {
-    STATE_DEAD,
+    STATE_DEAD = 0,
     STATE_ALIVE,
     STATE_FADE_IN,
     STATE_FADE_OUT,
@@ -42,6 +43,8 @@ typedef enum {
     STATE_CHARGE,
     STATE_ABDUCT,
     STATE_ATTACK,
+    STATE_EXPAND,
+    STATE_RETRACT,
 } state_t;
 
 typedef enum {
@@ -72,12 +75,12 @@ typedef struct Entity {
     uint32_t index;
 
     entity_t type;
-    state_t state;
+    state_t state, prev_state;
     team_t team;
     vec2 prev_pos;
     vec2 dim, pos, vel;
     float health, angle;
-    struct Entity *parent;
+    struct Entity *parent, *child;
     uint32_t color;
     SDL_Texture *texture;
     Queue path;
@@ -107,8 +110,11 @@ bool entity_has_flag(Entity *, flag_t);
 void entity_damage(Entity *);
 void entity_fire(Entity *, struct World *);
 
+void entity_transform(Entity *, vec2);
+
 void entity_set_position(Entity *, vec2);
 void entity_set_velocity(Entity *, vec2);
 void entity_set_rotation(Entity *, float);
+void entity_set_state(Entity *, state_t);
 
 #endif
