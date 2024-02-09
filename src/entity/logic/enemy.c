@@ -2,11 +2,12 @@
 #include "common/util.h"
 
 #include "entity/logic/enemy.h"
-#include "entity/entity.h"
 #include "entity/logic/path.h"
 #include "entity/logic/route.h"
 
+#include "entity/abductor.h"
 #include "entity/formation.h"
+#include "entity/invader.h"
 #include "entity/player.h"
 #include "entity/projectile.h"
 
@@ -24,14 +25,10 @@ static void enemy_determine_path(Entity *self, World *world) {
             entity_set_flag(self, FLAG_PARENT_REF);
             route_swoop(self, ENEMY_VELOCITY);
             break;
-        case STATE_CHARGE:
-        case STATE_ABDUCT:
-            break;
-        default:
-            break;
+        default: break;
     }
 
-    // self->state = STATE_TRAVEL;
+    // entity_set_state(self, STATE_TRAVEL);
     // LOG("path queued. items remaining: %li\n", self->path.size);
 }
 
@@ -74,16 +71,6 @@ static void enemy_travel_path(Entity *self, World *world) {
     Path *path = (Path *)queue_front(&self->path);
     assert(path);
 
-    if (self->path.size == 1 && self->state == STATE_SPAWN) {
-        if (!entity_has_flag(self, FLAG_PARENT_REF)) {
-            // link entity to formation as reference
-            entity_set_flag(self, FLAG_PARENT_REF);
-        } else {
-            // return to proper place in formation
-            path->dst = formation_entity_position(world->formation, self->id);
-        }
-    }
-
     path_update(path, self);
 
     if (path->complete) {
@@ -97,7 +84,7 @@ static void enemy_travel_path(Entity *self, World *world) {
         if (queue_is_empty(&self->path)) {
             queue_clear(&self->path);
 
-            if (self->state == STATE_SPAWN) {
+            if (enemy_in_formation(self, world)) {
                 assert(self->parent);
 
                 entity_set_rotation(self, self->parent->angle);
@@ -106,7 +93,15 @@ static void enemy_travel_path(Entity *self, World *world) {
                 entity_clear_flag(self, FLAG_PARENT_REF);
             }
 
-            self->state = STATE_IDLE;
+            switch (self->state) {
+                case STATE_SPAWN:
+                    route_merge(self, ENEMY_VELOCITY);
+                    entity_set_state(self, STATE_MERGE);
+                    break;
+                default:
+                    entity_set_state(self, STATE_IDLE);
+                    break;
+            }
         }
     }
 }
@@ -121,7 +116,7 @@ static void enemy_merge(Entity *self, World *world) {
             entity_set_flag(self, FLAG_PARENT_REF);
         } else {
             // return to proper place in formation
-            path->dst = formation_entity_position(world->formation, self->id);
+            path->dst = formation_entity_position(world->formation, self);
         }
     }
 
@@ -129,14 +124,13 @@ static void enemy_merge(Entity *self, World *world) {
 }
 
 void enemy_ai(Entity *self, World *world) {
-    state_t prev_state = self->state;
     enemy_attack(self, world);
 
     switch (self->state) {
         case STATE_IDLE:
             break;
         case STATE_ATTACK:
-            self->state = prev_state;
+            entity_set_state(self, self->prev_state);
             break;
         case STATE_MERGE:
             enemy_merge(self, world);
@@ -151,6 +145,28 @@ void enemy_ai(Entity *self, World *world) {
 }
 
 bool enemy_in_formation(Entity *self, World *world) {
-    vec2 pos = formation_entity_position(world->formation, self->id);
+    vec2 pos = formation_entity_position(world->formation, self);
     return distance(pos, self->pos) < 15.f;
+}
+
+float enemy_width(const Entity *self) {
+    switch (self->type) {
+        case E_ABDUCTOR:
+            return ABDUCTOR_WIDTH;
+        case E_INVADER:
+            return INVADER_WIDTH;
+        default:
+            return ENEMY_WIDTH;
+    }
+}
+
+float enemy_height(const Entity *self) {
+    switch (self->type) {
+        case E_ABDUCTOR:
+            return ABDUCTOR_HEIGHT;
+        case E_INVADER:
+            return INVADER_HEIGHT;
+        default:
+            return ENEMY_HEIGHT;
+    }
 }

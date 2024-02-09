@@ -17,4 +17,7 @@
 void enemy_ai(Entity *, struct World *);
 bool enemy_in_formation(Entity *, struct World *);
 
+float enemy_width(const Entity *);
+float enemy_height(const Entity *);
+
 #endif
