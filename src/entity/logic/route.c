@@ -1,9 +1,9 @@
-#include "common/util.h"
 #include "data/queue.h"
-#include "gfx/window.h"
 
 #include "entity/logic/route.h"
 #include "entity/logic/enemy.h"
+
+#include "gfx/window.h"
 
 #include <assert.h>
 #include <string.h>
@@ -29,14 +29,14 @@ static void route_spawn_left(Queue *q, vec2 org, float speed) {
     float radius = 50.f;
     route_start(q, org, (vec2) { .x = radius, .y = ENEMY_SPAWN_Y - 100.f }, speed, PATH_CIRCULAR);
     route_append(q, (vec2) { .x = rear(q).x, .y = rear(q).y - radius }, speed, PATH_CIRCULAR);
-    route_append(q, (vec2) { .x = ENEMY_SPAWN_X, .y = ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
+    // route_append(q, (vec2) { .x = ENEMY_SPAWN_X, .y = ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
 }
 
 static void route_spawn_right(Queue *q, vec2 org, float speed) {
     float radius = 50.f;
     route_start(q, org, (vec2) { .x = org.x - radius - ENEMY_WIDTH, .y = ENEMY_SPAWN_Y - 100.f }, -speed, PATH_CIRCULAR);
     route_append(q, (vec2) { .x = rear(q).x, .y = rear(q).y - radius }, -speed, PATH_CIRCULAR);
-    route_append(q, (vec2) { .x = ENEMY_SPAWN_X, .y = ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
+    // route_append(q, (vec2) { .x = ENEMY_SPAWN_X, .y = ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
 }
 
 static void route_spawn_center(Queue *q, vec2 org, float speed) {
@@ -44,7 +44,7 @@ static void route_spawn_center(Queue *q, vec2 org, float speed) {
     float half = (SCREEN_WIDTH / 2.f);
     route_start(q, org, (vec2) { .x = org.x - half + (radius * 2), .y = org.y - (radius * 6.f) }, -speed, PATH_BEZIER);
     route_append(q, (vec2) { .x = rear(q).x, .y = rear(q).y - 3 * radius }, speed, PATH_CIRCULAR);
-    route_append(q, (vec2) { .x = ENEMY_SPAWN_X, .y = ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
+    // route_append(q, (vec2) { .x = ENEMY_SPAWN_X, .y = ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
 }
 
 void route_spawn(Entity *entity, float speed) {
@@ -107,4 +107,11 @@ void route_swoop(Entity *entity, float speed) {
 
     // keep here to return entity to spawn
     // route_append(q, org, speed, PATH_CIRCULAR);
+}
+
+void route_merge(Entity *entity, float speed) {
+    vec2 org = entity->pos;
+    Queue *q = &entity->path;
+
+    route_start(q, org, (vec2) { .x = ENEMY_SPAWN_X, .y = ENEMY_SPAWN_Y }, speed, PATH_BEZIER);
 }
