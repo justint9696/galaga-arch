@@ -99,13 +99,14 @@ static void monitor_attack_queue(Stage *self, World *world) {
     Entity *e = (Entity *)queue_front(&self->queue);
     assert(e);
 
-    e->state = STATE_SWOOP;
+    entity_set_state(e, STATE_SWOOP);
 
-    // ensure front entity is alive and has traveled far enough from spawn
-    vec2 pos = formation_entity_position(world->formation, e->id);
+    // ensure front entity is alive and has traveled far enough from formation
+    vec2 pos = formation_entity_position(world->formation, e);
     if (entity_is_alive(e) && distance(e->pos, pos) < 250.f)
         return;
 
+    LOG("enemy dequeued: %i!\n", e->type);
     dequeue(&self->queue);
 }
 
@@ -130,11 +131,11 @@ static bool enemy_waves_spawned(World *world) {
 }
 
 static Entity *random_enemy(World *world) {
-    Entity *e;
-    uint32_t index;
-    while (true) {
-        index = RAND(world->enemies.size);
-        e = (Entity *)list_get_index(&world->enemies, index);
+    Entity *e = NULL;
+    size_t size = world->enemies.size;
+    uint32_t index = RAND(size);
+    for (size_t i = 0; i < size; i++) {
+        e = (Entity *)list_get_index(&world->enemies, (index + i) % size);
         if (e->state == STATE_IDLE && enemy_in_formation(e, world))
             break;
     }
@@ -161,11 +162,15 @@ static void spawn_enemies(Stage *self, World *world) {
     Entity *e;
     vec2 spawn = get_spawnpoint(self->wave);
     for (size_t i = 0; i < WAVE_COUNT; i++) {
-        // e = entity_init(E_ABDUCTOR, abductor_init, abductor_destroy, NULL, world); 
-        e = entity_init(E_INVADER, invader_init, invader_destroy, invader_update, world); 
+        e = entity_init(E_ABDUCTOR, abductor_init, abductor_destroy, abductor_update, world); 
         e->pos = spawn;
         e->id = self->id++;
         enqueue(&self->queue, e);
+
+        // e = entity_init(E_INVADER, invader_init, invader_destroy, invader_update, world); 
+        // e->pos = spawn;
+        // e->id = self->id++;
+        // enqueue(&self->queue, e);
     }
 
     // add front entity to world entities
@@ -181,13 +186,18 @@ static void attack_enemies(Stage *self, World *world) {
         return;
 
     Entity *e;
-    while (self->queue.size < 2 && self->queue.size < world->enemies.size) {
+    size_t max_iter = 16;
+    for (size_t i = 0; i < max_iter; i++) {
+        if (self->queue.size >= 2 || self->queue.size >= world->enemies.size) 
+            break;
+
         e = random_enemy(world);
-        if (!queue_contains(&self->queue, e)) {
+        if (e && !queue_contains(&self->queue, e)) {
             enqueue(&self->queue, e);
         }
     }
 
+    LOG("queue->size: %li\n", self->queue.size);
     self->state = S_ATTACK;
 }
 

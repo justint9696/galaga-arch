@@ -8,10 +8,10 @@
 struct World; 
 
 // number of enemies per wave
-#define WAVE_COUNT 6
+#define WAVE_COUNT 1
 
 // delay between enemy swoops
-#define SWOOP_COOLDOWN 3500
+#define SWOOP_COOLDOWN 4000
 
 typedef enum {
     WAVE_ONE = 0,
@@ -27,7 +27,7 @@ typedef enum {
     S_ATTACK,
 } stage_t;
 
-#define WAVE_MAX WAVE_COMPLETE
+#define WAVE_MAX 1
 
 typedef struct {
     // id for current entity to determine place in formation
