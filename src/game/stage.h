@@ -8,26 +8,31 @@
 struct World; 
 
 // number of enemies per wave
-#define WAVE_COUNT 1
+#define WAVE_COUNT      1
 
-// delay between enemy swoops
-#define SWOOP_COOLDOWN 4000
+// cooldown after each wave of enemy swoops
+#define SWOOP_COOLDOWN  1500
+
+// delay between each enemy swoop
+#define SWOOP_DELAY     1000
 
 typedef enum {
     WAVE_ONE = 0,
     WAVE_TWO,
     WAVE_THREE,
     // WAVE_FOUR,
-    WAVE_COMPLETE,
 } wave_t;
+
+#define WAVE_MAX WAVE_THREE + 1
 
 typedef enum {
     S_IDLE = 0,
+    S_WAIT,
     S_SPAWN,
     S_ATTACK,
 } stage_t;
 
-#define WAVE_MAX 1
+#define S_MAX S_ATTACK + 1
 
 typedef struct {
     // id for current entity to determine place in formation
@@ -39,17 +44,26 @@ typedef struct {
     // current stage state
     stage_t state;
 
+    // state to transition to after delay
+    stage_t next_state;
+
     // current wave of the stage
     wave_t wave;
 
+    // tick used to track delays
     uint32_t tick;
+
+    // duration to delay after tick
+    uint32_t delay;
 
     // entity spawn queue
     Queue queue;
 } Stage;
 
-void stage_init(Stage *);
-void stage_destroy(Stage *);
+typedef void(*stage_f)(Stage *, struct World *);
+
+void stage_init(Stage *, struct World *);
+void stage_destroy(Stage *, struct World *);
 void stage_update(Stage *, struct World *);
 
 #endif

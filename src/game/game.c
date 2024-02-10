@@ -59,8 +59,8 @@ void game_init(Game *self) {
     buttons_init();
     time_init();
 
-    stage_init(&self->stage);
     world_init(&self->world);
+    stage_init(&self->stage, &self->world);
 
     game_hud_init(self);
     game_set_state(self, G_IDLE);
@@ -82,8 +82,8 @@ bool game_is_running(Game *self) {
 }
 
 void game_destroy(Game *self) {
+    // stage_destroy(&self->stage, &self->world);
     world_destroy(&self->world);
-    stage_destroy(&self->stage);
 }
 
 void game_pause(Game *self) {
