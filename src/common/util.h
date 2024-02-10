@@ -18,7 +18,7 @@
 
 #define clamp(mn, x, mx) ((mn > x) ? mn : (mx < x) ? mx : x)
 
-#define min(a, b) ((a > b) ? b : a)
+#define min(a, b) ((a < b) ? a : b)
 #define max(a, b) ((a > b) ? a : b)
 
 #define RGBA(c) ((SDL_Color) {\
