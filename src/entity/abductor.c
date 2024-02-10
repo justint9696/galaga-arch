@@ -19,9 +19,9 @@ void abductor_init(Entity *self, World *world) {
     self->team = TEAM_AXIS;
     self->texture = renderer_texture_handle(TEX_ABDUCTOR);
     self->health = 1.f;
-    entity_set_state(self, STATE_SPAWN);
     entity_link(self, world->formation);
     entity_set_flag(self, ABDUCTOR_FLAGS);
+    entity_set_state(self, STATE_SPAWN);
 }
 
 static void destroy_queue(Queue *q) {
@@ -89,8 +89,6 @@ static void tractor_beam_monitor(Entity *self, World *world) {
     Entity *e = self->child;
     if (e && entity_is_alive(e))
         return;
-
-    LOG("et phone home\n");
 
     // if so, remove child and return to formation
     self->child = NULL;

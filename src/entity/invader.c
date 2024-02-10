@@ -16,9 +16,9 @@ void invader_init(Entity *self, World *world) {
     self->team = TEAM_AXIS;
     self->texture = renderer_texture_handle(TEX_INVADER);
     self->health = 1.f;
-    entity_set_state(self, STATE_SPAWN);
     entity_link(self, world->formation);
     entity_set_flag(self, INVADER_FLAGS);
+    entity_set_state(self, STATE_SPAWN);
 }
 
 static void destroy_queue(Queue *q) {
