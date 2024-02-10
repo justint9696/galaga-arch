@@ -86,7 +86,7 @@ bool list_is_empty(const LinkedList *self) {
     return !self->size;
 }
 
-void *list_get_index(const LinkedList *self, uint32_t index) {
+void *list_get(const LinkedList *self, uint32_t index) {
     assert(index < (self->size));
     
     Node *tmp = self->head;
