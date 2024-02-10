@@ -1,5 +1,5 @@
-#ifndef _TYPE_H_
-#define _TYPE_H_
+#ifndef _COMMON_TYPE_H_
+#define _COMMON_TYPE_H_
 
 #include <stdint.h>
 
@@ -8,6 +8,7 @@
 #define COLOR_RED       0xff0000ff
 #define COLOR_GREEN     0x00ff00ff
 #define COLOR_YELLOW    0xffff00ff
+#define COLOR_CYAN      0x00ffffff
 
 #if _WIN32 || _WIN64
 #if _WIN64
@@ -31,7 +32,6 @@ typedef uint64_t data_t;
 typedef uint32_t data_t;
 #endif
 
-
 typedef struct {
     union {
         float x, w, width;
@@ -44,5 +44,7 @@ typedef struct {
 typedef struct {
     int x, y;
 } ivec2, iv2;
+
+#define VEC2(_x, _y) ((vec2) { .x = _x, .y = _y })
 
 #endif
