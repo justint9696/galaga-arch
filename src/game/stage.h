@@ -8,13 +8,16 @@
 struct World; 
 
 // number of enemies per wave
-#define WAVE_COUNT      1
+#define WAVE_COUNT 6
 
 // cooldown after each wave of enemy swoops
-#define SWOOP_COOLDOWN  1500
+#define SWOOP_COOLDOWN 1500
 
 // delay between each enemy swoop
-#define SWOOP_DELAY     1000
+#define SWOOP_DELAY 1000
+
+// maximum number of enemies to swoop
+#define SWOOP_COUNT 2
 
 typedef enum {
     WAVE_ONE = 0,
@@ -59,8 +62,6 @@ typedef struct {
     // entity spawn queue
     Queue queue;
 } Stage;
-
-typedef void(*stage_f)(Stage *, struct World *);
 
 void stage_init(Stage *, struct World *);
 void stage_destroy(Stage *, struct World *);

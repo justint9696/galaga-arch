@@ -1,5 +1,3 @@
-#include "common/util.h"
-
 #include "data/queue.h"
 
 #include "entity/logic/enemy.h"
@@ -12,10 +10,7 @@
 #include "game/world.h"
 
 void abductor_init(Entity *self, World *world) {
-    self->dim = (vec2) {
-        .width = ABDUCTOR_WIDTH,
-        .height = ABDUCTOR_HEIGHT,
-    };
+    self->dim = VEC2(ABDUCTOR_WIDTH, ABDUCTOR_HEIGHT);
     self->team = TEAM_AXIS;
     self->texture = renderer_texture_handle(TEX_ABDUCTOR);
     self->health = 1.f;
@@ -37,13 +32,6 @@ void abductor_destroy(Entity *self, World *world) {
     destroy_queue(&self->path);
 }
 
-static vec2 get_displacement(Entity *self) {
-    return (vec2) { 
-        .x = self->pos.x - self->prev_pos.x,
-        .y = self->pos.y - self->prev_pos.y,
-    };
-}
-
 static void move_to_player(Entity *self, World *world) {
     // move x tiles above player.y
     const Entity *player = world->player;
@@ -53,9 +41,9 @@ static void move_to_player(Entity *self, World *world) {
         return;
     }
 
-    vec2 vel = get_displacement(self);
-    route_start(&self->path, self->pos, (vec2) { .x = self->pos.x, .y = self->pos.y + 100.f }, vel.x < 0.f ? -ABDUCTOR_VELOCITY : ABDUCTOR_VELOCITY, PATH_CIRCULAR);
-    route_append(&self->path, (vec2) { .x = player->pos.x, .y = player->pos.y + 150.f }, vel.x < 0.f ? -ABDUCTOR_VELOCITY : ABDUCTOR_VELOCITY, PATH_BEZIER);
+    vec2 vel = entity_displacement(self);
+    route_start(&self->path, self->pos, VEC2(self->pos.x, self->pos.y + 100.f ), vel.x < 0.f ? -ABDUCTOR_VELOCITY : ABDUCTOR_VELOCITY, PATH_CIRCULAR);
+    route_append(&self->path, VEC2(player->pos.x, player->pos.y + 150.f ), vel.x < 0.f ? -ABDUCTOR_VELOCITY : ABDUCTOR_VELOCITY, PATH_BEZIER);
     entity_set_state(self, STATE_CHARGE);
 }
 
@@ -67,21 +55,18 @@ static void tractor_beam_present(Entity *self, World *world) {
 
     Entity *e = entity_init(E_TRACTOR_BEAM, tractor_beam_init, tractor_beam_destroy, tractor_beam_update, world);
     e->pos = entity_tag(self, TAG_BOTTOM_MIDDLE);
-    e->pos = (vec2) {
-        .x = e->pos.x - (TRACTOR_BEAM_WIDTH / 2.f),
-        .y = e->pos.y - TRACTOR_BEAM_HEIGHT - 5.f,
-    };
+    e->pos = VEC2(e->pos.x - (TRACTOR_BEAM_WIDTH / 2.f), e->pos.y - TRACTOR_BEAM_HEIGHT - 5.f);
 
     self->child = e;
     world_add_entity(world, e);
     entity_set_rotation(self, 0.f);
 }
 
-static void teleport(Entity *self, World *world) {
-    entity_set_position(self, (vec2) { .x = self->pos.x, .y = SCREEN_HEIGHT + 100.f });
-    route_merge(self, ABDUCTOR_VELOCITY);
-    entity_set_state(self, STATE_MERGE);
+static void return_to_formation(Entity *self, World *world) {
+    // entity_set_position(self, VEC2(self->pos.x, SCREEN_HEIGHT + 100.f));
+    // entity_set_state(self, STATE_MERGE);
     entity_set_flag(self, FLAG_AI_CONTROLLED);
+    entity_set_state(self, STATE_CHARGE);
 }
 
 static void tractor_beam_monitor(Entity *self, World *world) {
@@ -92,7 +77,7 @@ static void tractor_beam_monitor(Entity *self, World *world) {
 
     // if so, remove child and return to formation
     self->child = NULL;
-    teleport(self, world);
+    return_to_formation(self, world);
 }
 
 static void abduct_player(Entity *self, World *world) {

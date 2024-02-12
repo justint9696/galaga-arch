@@ -2,7 +2,7 @@
 #include "common/util.h"
 
 #include "entity/logic/enemy.h"
-#include "entity/logic/path.h"
+#include "entity/entity.h"
 #include "entity/logic/route.h"
 
 #include "entity/abductor.h"
@@ -14,23 +14,6 @@
 #include "game/world.h"
 
 #include <assert.h>
-#include <math.h>
-
-static void enemy_determine_path(Entity *self, World *world) {
-    switch (self->state) {
-        case STATE_SPAWN:
-            route_spawn(self, ENEMY_VELOCITY);
-            break;
-        case STATE_SWOOP:
-            entity_set_flag(self, FLAG_PARENT_REF);
-            route_swoop(self, ENEMY_VELOCITY);
-            break;
-        default: break;
-    }
-
-    // entity_set_state(self, STATE_TRAVEL);
-    // LOG("path queued. items remaining: %li\n", self->path.size);
-}
 
 static void enemy_attack(Entity *self, World *world) {
     if (time_since(world->tick) < ENEMY_COOLDOWN)
@@ -38,17 +21,13 @@ static void enemy_attack(Entity *self, World *world) {
 
     const Entity *player = world->player;
 
-    vec2 diff = {
-        .x = (player->pos.x - self->pos.x),
-        .y = fabs(player->pos.y - self->pos.y)
-    };
+    vec2 diff = VEC2((player->pos.x - self->pos.x), fabs(player->pos.y - self->pos.y));
 
     if (!entity_is_moving(player)) {
         if (fabs(diff.x) < 5.f) {
             world->tick = NOW();
             entity_fire(self, world);
         }
-
         return;
     }
 
@@ -56,10 +35,7 @@ static void enemy_attack(Entity *self, World *world) {
     if ((diff.x < 0.f && player->vel.x < 0.f) || (diff.x > 0.f && player->vel.x > 0.f)) 
         return;
 
-    vec2 time = {
-        .x = fabs(diff.x / PLAYER_VELOCITY),
-        .y = fabs(diff.y / PROJECTILE_VELOCITY)
-    };
+    vec2 time = VEC2(fabs(diff.x / PLAYER_VELOCITY), fabs(diff.y / PROJECTILE_VELOCITY));
 
     if (fabs(diff.x) < 30.f || (fabs(time.x - time.y) < 1.f)) {
         world->tick = NOW();
@@ -67,11 +43,66 @@ static void enemy_attack(Entity *self, World *world) {
     }
 }
 
+static void enemy_teleport(Entity *self, World *world) {
+    if (self->pos.y > 0.f) {
+        entity_set_state(self, STATE_IDLE);
+        return;
+    }
+
+    entity_set_position(self, VEC2(self->pos.x, SCREEN_HEIGHT + 100.f));
+    entity_set_state(self, STATE_MERGE);
+}
+
+static void enemy_determine_path(Entity *self, World *world) {
+    switch (self->state) {
+        case STATE_SPAWN:
+            entity_clear_flag(self, FLAG_PARENT_REF);
+            route_create(self, world, ROUTE_SPAWN, ENEMY_VELOCITY);
+            break;
+        case STATE_SWOOP:
+            entity_set_flag(self, FLAG_PARENT_REF);
+            route_create(self, world, ROUTE_SWOOP, ENEMY_VELOCITY);
+            break;
+        case STATE_MERGE:
+            entity_set_flag(self, FLAG_PARENT_REF);
+            route_create(self, world, ROUTE_MERGE, ENEMY_VELOCITY);
+            break;
+        case STATE_RETURN:
+            entity_set_flag(self, FLAG_PARENT_REF);
+            route_create(self, world, ROUTE_RETURN, ENEMY_VELOCITY);
+            break;
+        case STATE_CHARGE:
+            entity_set_flag(self, FLAG_PARENT_REF);
+            route_create(self, world, ROUTE_CHARGE, ENEMY_VELOCITY);
+            break;
+        default: break;
+    }
+
+    // LOG("path queued. items remaining: %li\n", self->path.size);
+}
+
+static void enemy_merge(Entity *self, World *world) {
+    if (self->state != STATE_MERGE)
+        return;
+
+    Path *path = (Path *)queue_front(&self->path);
+    assert(path);
+
+    path->dst = formation_entity_position(world->formation, self);
+}
+
 static void enemy_travel_path(Entity *self, World *world) {
     Path *path = (Path *)queue_front(&self->path);
     assert(path);
 
     path_update(path, self);
+
+    switch (self->state) {
+        case STATE_MERGE:
+            enemy_merge(self, world);
+            break;
+        default: break;
+    }
 
     if (path->complete) {
         // LOG("path dequeued. items remaining: %li\n", self->path.size);
@@ -88,15 +119,16 @@ static void enemy_travel_path(Entity *self, World *world) {
                 assert(self->parent);
 
                 entity_set_rotation(self, self->parent->angle);
-
-                // clear parent reference flag
                 entity_clear_flag(self, FLAG_PARENT_REF);
             }
 
             switch (self->state) {
                 case STATE_SPAWN:
-                    route_merge(self, ENEMY_VELOCITY);
+                case STATE_RETURN:
                     entity_set_state(self, STATE_MERGE);
+                    break;
+                case STATE_CHARGE:
+                    enemy_teleport(self, world);
                     break;
                 default:
                     entity_set_state(self, STATE_IDLE);
@@ -106,40 +138,21 @@ static void enemy_travel_path(Entity *self, World *world) {
     }
 }
 
-static void enemy_merge(Entity *self, World *world) {
-    Path *path = (Path *)queue_front(&self->path);
-    assert(path);
-
-    if (self->path.size == 1) {
-        if (!entity_has_flag(self, FLAG_PARENT_REF)) {
-            // link entity to formation as reference
-            entity_set_flag(self, FLAG_PARENT_REF);
-        } else {
-            // return to proper place in formation
-            path->dst = formation_entity_position(world->formation, self);
-        }
+static void enemy_path(Entity *self, World *world) {
+    if (queue_is_empty(&self->path)) {
+        enemy_determine_path(self, world);
+    } else {
+        enemy_travel_path(self, world);
     }
-
-    enemy_travel_path(self, world);
 }
 
 void enemy_ai(Entity *self, World *world) {
     enemy_attack(self, world);
 
+    // TODO: cleanup code
     switch (self->state) {
-        case STATE_IDLE:
-            break;
-        case STATE_ATTACK:
-            entity_set_state(self, self->prev_state);
-            break;
-        case STATE_MERGE:
-            enemy_merge(self, world);
-            break;
         default:
-            if (!queue_is_empty(&self->path))
-                enemy_travel_path(self, world);
-            else
-                enemy_determine_path(self, world);
+            enemy_path(self, world);
             break;
     }
 }

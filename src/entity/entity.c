@@ -114,53 +114,30 @@ bool entity_collision(const Entity *e0, const Entity *e1) {
 vec2 entity_tag(const Entity *self, tag_t tag) {
     switch (tag) {
         case TAG_CENTER:
-            return (vec2) {
-                .x = self->pos.x + (self->dim.width / 2.f),
-                .y = self->pos.y + (self->dim.height / 2.f),
-            };
+            return VEC2(self->pos.x + (self->dim.width / 2.f), self->pos.y + (self->dim.height / 2.f));
         case TAG_TOP_LEFT:
-            return (vec2) {
-                .x = self->pos.x,
-                .y = self->pos.y + self->dim.height,
-            };
+            return VEC2(self->pos.x, self->pos.y + self->dim.height);
         case TAG_TOP_RIGHT:
-            return (vec2) {
-                .x = self->pos.x + self->dim.width,
-                .y = self->pos.y + self->dim.height,
-            };
+            return VEC2(self->pos.x + self->dim.width, self->pos.y + self->dim.height);
         case TAG_TOP_MIDDLE:
-            return (vec2) {
-                .x = self->pos.x + (self->dim.width / 2.f),
-                .y = self->pos.y + self->dim.height,
-            };
+            return VEC2(self->pos.x + (self->dim.width / 2.f), self->pos.y + self->dim.height);
         case TAG_BOTTOM_LEFT:
-            return (vec2) {
-                .x = self->pos.x,
-                .y = self->pos.y,
-            };
+            return VEC2(self->pos.x, self->pos.y);
         case TAG_BOTTOM_RIGHT:
-            return (vec2) {
-                .x = self->pos.x + self->dim.width,
-                .y = self->pos.y,
-            };
+            return VEC2(self->pos.x + self->dim.width, self->pos.y);
         case TAG_BOTTOM_MIDDLE:
-            return (vec2) {
-                .x = self->pos.x + (self->dim.width / 2.f),
-                .y = self->pos.y,
-            };
+            return VEC2(self->pos.x + (self->dim.width / 2.f), self->pos.y);
         case TAG_MIDDLE_LEFT:
-            return (vec2) {
-                .x = self->pos.x,
-                .y = self->pos.y + (self->dim.height / 2.f),
-            };
+            return VEC2(self->pos.x, self->pos.y + (self->dim.height / 2.f));
         case TAG_MIDDLE_RIGHT:
-            return (vec2) {
-                .x = self->pos.x + self->dim.width,
-                .y = self->pos.y + (self->dim.height / 2.f),
-            };
+            return VEC2(self->pos.x + self->dim.width, self->pos.y + (self->dim.height / 2.f));
         default:
             return self->pos;
     }
+}
+
+vec2 entity_displacement(const Entity *self) {
+    return VEC2(self->pos.x - self->prev_pos.x, self->pos.y - self->prev_pos.y);
 }
 
 void entity_link(Entity *self, Entity *parent) {
@@ -204,7 +181,7 @@ void entity_fire(Entity *self, World *world) {
     Entity *e = entity_init(E_PROJECTILE, projectile_init, NULL, NULL, world);
     e->team = self->team;
     e->pos = entity_tag(self, self->type == E_PLAYER ? TAG_TOP_MIDDLE : TAG_BOTTOM_MIDDLE);
-    e->vel = (vec2) { .y = self->team == TEAM_ALLY ? PROJECTILE_VELOCITY : -PROJECTILE_VELOCITY, };
+    e->vel = VEC2(0.f, self->team == TEAM_ALLY ? PROJECTILE_VELOCITY : -PROJECTILE_VELOCITY);
 
     world_add_entity(world, e);
 }

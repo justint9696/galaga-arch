@@ -8,14 +8,8 @@
 #include <assert.h>
 
 void formation_init(Entity *self, World *world) {
-    self->pos = (vec2) {
-        .x = FORMATION_SPAWN_X,
-        .y = FORMATION_SPAWN_Y,
-    };
-    self->dim = (vec2) {
-        .width = FORMATION_WIDTH,
-        .height = FORMATION_HEIGHT,
-    };
+    self->pos = VEC2(FORMATION_SPAWN_X, FORMATION_SPAWN_Y);
+    self->dim = VEC2(FORMATION_WIDTH, FORMATION_HEIGHT);
     self->team = TEAM_ALLY;
     self->health = 1.f;
     self->state = STATE_ALIVE;
@@ -23,7 +17,7 @@ void formation_init(Entity *self, World *world) {
 
 void formation_update(Entity *self, World *world) {
     if (queue_is_empty(&self->path))
-        route_idle(self, FORMATION_VELOCITY);
+        route_create(self, world, ROUTE_IDLE, FORMATION_VELOCITY);
 
     Path *path = (Path *)queue_front(&self->path);
     assert(path);

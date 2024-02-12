@@ -38,11 +38,11 @@ typedef enum {
     STATE_IDLE,
     STATE_SPAWN,
     STATE_MERGE,
+    STATE_RETURN,
     STATE_TRAVEL,
     STATE_SWOOP,
     STATE_CHARGE,
     STATE_ABDUCT,
-    STATE_ATTACK,
     STATE_EXPAND,
     STATE_RETRACT,
 } state_t;
@@ -99,6 +99,7 @@ bool entity_is_moving(const Entity *);
 bool entity_collision(const Entity *, const Entity *);
 
 vec2 entity_tag(const Entity *, tag_t);
+vec2 entity_displacement(const Entity *);
 
 void entity_link(Entity *, Entity *);
 void entity_unlink(Entity *);

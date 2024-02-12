@@ -19,20 +19,19 @@
 
 static void render(Entity *self, World *world) {
     // TODO: render a pyramid shaped figure with a rounded bottom
+    // added pixels per y = w/(h-1)
+    const uint32_t p = floor(self->dim.w / (self->dim.h - 1));
 }
 
 void tractor_beam_init(Entity *self, World *world) {
-    self->dim = (vec2) {
-        .width = TRACTOR_BEAM_WIDTH,
-        .height = TRACTOR_BEAM_HEIGHT,
-    };
-    self->color = COLOR_BLUE;
+    self->dim = VEC2(TRACTOR_BEAM_WIDTH, TRACTOR_BEAM_HEIGHT);
+    self->color = COLOR_CYAN;
     self->team = TEAM_AXIS;
     self->health = 1.f;
-    entity_set_state(self, STATE_IDLE);
     // self->render = render;
     self->tick = NOW();
     entity_set_flag(self, TRACTOR_BEAM_FLAGS);
+    entity_set_state(self, STATE_IDLE);
 }
 
 void tractor_beam_destroy(Entity *self, World *world) {

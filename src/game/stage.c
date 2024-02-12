@@ -48,18 +48,18 @@ static bool wave_complete(Stage *self, World *world) {
 
     // the last entity's path is done or the entity is undefined
     Entity *e = (Entity *)world->enemies.tail->item;
-    return (!e || (e && queue_is_empty(&self->queue) && queue_is_empty(&e->path)));
+    return (!e || (e && queue_is_empty(&self->queue) && enemy_in_formation(e, world)));
 }
 
 static bool stage_complete(Stage *self, World *world) {
     return self->wave >= WAVE_MAX && list_is_empty(&world->enemies);
 }
 
-static void delay_start(Stage *self, uint32_t delay, stage_t next_state) {
+static void change_state_delayed(Stage *self, stage_t state, uint32_t delay) {
     self->tick = NOW();
     self->delay = delay;
     self->state = S_WAIT;
-    self->next_state = next_state;
+    self->next_state = state;
 }
 
 static void spawn_wave(Stage *self, World *world) {
@@ -108,16 +108,17 @@ static void monitor_queue(Stage *self, World *world) {
 
 static void spawn_update(Stage *self, World *world) {
     // check if spawned enemies are in formation
-    // if not, check if current wave of enemies are in formation
     if (spawn_complete(self, world)) {
-        delay_start(self, SWOOP_DELAY, S_ATTACK);
+        change_state_delayed(self, S_ATTACK, SWOOP_DELAY);
         return;
-    } else if (!wave_complete(self, world)) {
+    } 
+    // if not, check if current wave of enemies are in formation
+    else if (!wave_complete(self, world)) {
         monitor_queue(self, world);
         return;
     }
 
-    // otherwise, clear queue, spawn next wave of enemies, and increment wave
+    // otherwise, clear queue and spawn next wave of enemies
     queue_clear(&self->queue);
     spawn_wave(self, world);
 }
@@ -148,13 +149,14 @@ static void queue_random_enemy(Stage *self, World *world) {
     }
 
     assert(e);
+
     e->state = STATE_SWOOP;
     enqueue(&self->queue, e);
 }
 
 static void idle_update(Stage *self, World *world) {
     if (queue_is_empty(&self->queue)) {
-        delay_start(self, SWOOP_COOLDOWN, S_ATTACK);
+        change_state_delayed(self, S_ATTACK, SWOOP_COOLDOWN);
         return;
     }
 
@@ -166,10 +168,15 @@ static void idle_update(Stage *self, World *world) {
 }
 
 static void attack_update(Stage *self, World *world) {
+    if (self->queue.size >= world->enemies.size) {
+        self->state = S_IDLE;
+        return;
+    }
+
     queue_random_enemy(self, world);
 
-    if (self->queue.size < 2)
-        delay_start(self, SWOOP_DELAY, S_ATTACK);
+    if (self->queue.size < SWOOP_COUNT)
+        change_state_delayed(self, S_ATTACK, SWOOP_DELAY);
     else
         self->state = S_IDLE;
 }
@@ -178,7 +185,7 @@ static void monitor_stage(Stage *self, World *world) {
     if (!stage_complete(self, world))
         return;
 
-    // TODO: delay_start for stage transition
+    // TODO: change_state_delayed for stage transition
     self->state = S_SPAWN;
     stage_next(self, world);
 }
