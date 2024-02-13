@@ -18,6 +18,18 @@ void queue_clear(Queue *q) {
     memset(q, 0, sizeof(Queue));
 }
 
+void queue_free(Queue *q) {
+    void *item;
+    size_t size = q->size;
+    for (size_t i = 0; i < size; i++) {
+        item = queue_pop(q);
+        assert(item);
+        free(item);
+    }
+
+    memset(q, 0, sizeof(Queue));
+}
+
 void *queue_front(const Queue *q) {
     return q->queue[q->index];
 }

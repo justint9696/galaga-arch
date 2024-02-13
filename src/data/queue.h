@@ -15,6 +15,7 @@ typedef struct {
 
 Queue *queue_init();
 void queue_clear(Queue *);
+void queue_free(Queue *);
 
 void *queue_front(const Queue *);
 void *queue_rear(const Queue *);

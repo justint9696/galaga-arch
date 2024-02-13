@@ -19,17 +19,8 @@ void abductor_init(Entity *self, World *world) {
     entity_set_state(self, STATE_SPAWN);
 }
 
-static void destroy_queue(Queue *q) {
-    Path *p;
-    size_t size = q->size;
-    for (size_t i = 0; i < size; i++) {
-        p = (Path *)queue_pop(q);
-        free(p);
-    }
-}
-
 void abductor_destroy(Entity *self, World *world) {
-    destroy_queue(&self->path);
+    queue_free(&self->path);
 }
 
 static void move_to_player(Entity *self, World *world) {
