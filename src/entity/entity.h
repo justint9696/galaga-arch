@@ -11,7 +11,7 @@
 
 #define ENTITY_MAX 640
 
-struct World;
+typedef struct World World;
 
 typedef enum {
     E_PLAYER,
@@ -24,10 +24,11 @@ typedef enum {
 } entity_t;
 
 typedef enum {
-    FLAG_ACTIVE         = 1 << 0,
-    FLAG_COLLISION      = 1 << 1,
-    FLAG_PARENT_REF     = 1 << 2,
-    FLAG_AI_CONTROLLED  = 1 << 3,
+    FLAG_ACTIVE             = 1 << 0,
+    FLAG_COLLISION          = 1 << 1,
+    FLAG_PARENT_REF         = 1 << 2,
+    FLAG_AI_CONTROLLED      = 1 << 3,
+    FLAG_PLAYER_CONTROLLED  = 1 << 4
 } flag_t;
 
 typedef enum {
@@ -64,15 +65,21 @@ typedef enum {
     TEAM_AXIS,
 } team_t;
 
-struct Entity;
-typedef void(*entity_f)(struct Entity *, struct World *);
+typedef struct Entity Entity;
 
-typedef struct Entity {
+typedef void(*entity_f)(Entity *, World *);
+typedef void(*entity_collide_f)(Entity *, Entity *, World *);
+typedef void(*entity_render_f)(Entity *);
+
+struct Entity {
     // arbitrary id used to determine enemy location on formation
     uint32_t id;
 
     // index of entity within the entity pool
     uint32_t index;
+
+    // depth of sprite within the renderer
+    uint32_t depth;
 
     entity_t type;
     state_t state, prev_state;
@@ -80,19 +87,25 @@ typedef struct Entity {
     vec2 prev_pos;
     vec2 dim, pos, vel;
     float health, angle;
-    struct Entity *parent, *child;
+    Entity *parent, *child;
     uint32_t color;
     SDL_Texture *texture;
     Queue path;
     uint32_t flags;
     uint32_t tick;
 
-    entity_f init, destroy, render, update;
-} Entity;
+    entity_f init, destroy, update;
+    entity_collide_f collide;
+    entity_render_f render;
+};
 
-Entity *entity_init(entity_t, entity_f init, entity_f destroy, entity_f update, struct World *);
-void entity_destroy(Entity *, struct World *);
-void entity_update(Entity *, struct World *);
+Entity *entity_create(entity_t, World *);
+void entity_init(Entity *, entity_f init, entity_f destroy, entity_f update, entity_collide_f collide, World *);
+
+// Entity *entity_init(entity_t, entity_f init, entity_f destroy, entity_f update, World *);
+void entity_destroy(Entity *, World *);
+void entity_update(Entity *, World *);
+bool entity_collide(Entity *, Entity *, World *);
 
 bool entity_is_alive(const Entity *);
 bool entity_is_moving(const Entity *);
@@ -109,7 +122,7 @@ void entity_clear_flag(Entity *, flag_t);
 bool entity_has_flag(Entity *, flag_t);
 
 void entity_damage(Entity *);
-void entity_fire(Entity *, struct World *);
+void entity_fire(Entity *, World *);
 
 void entity_transform(Entity *, vec2);
 

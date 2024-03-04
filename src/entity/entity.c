@@ -5,29 +5,64 @@
 #include "gfx/window.h"
 
 #include "entity/entity.h"
+#include "entity/abductor.h"
+#include "entity/formation.h"
+#include "entity/invader.h"
+#include "entity/player.h"
+#include "entity/star.h"
 #include "entity/pool.h"
 #include "entity/projectile.h"
+#include "entity/tractor_beam.h"
 
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
-static void entity_render_rect(Entity *self, World *world) {
-    draw_rect(round(self->pos.x), round(self->pos.y), self->dim.width, self->dim.height, self->color);
+static void entity_render_rect(Entity *self) {
+    draw_rect(VEC2(round(self->pos.x), round(self->pos.y)), self->dim, self->color, 0);
 }
 
-static void entity_render_texture(Entity *self, World *world) {
-    draw_texture(self->texture, round(self->pos.x), round(self->pos.y), self->dim.width, self->dim.height, self->angle);
+static void entity_render_texture(Entity *self) {
+    draw_texture(self->texture, VEC2(round(self->pos.x), round(self->pos.y)), self->dim, self->angle, 0);
 }
 
-Entity *entity_init(entity_t type, entity_f init, entity_f destroy, entity_f update, World *world) {
+Entity *entity_create(entity_t type, World *world) {
     Entity *self = entity_request();
     assert(self);
 
-    self->init = init;
-    self->init(self, world);
+    switch ((self->type = type)) {
+        case E_PLAYER:
+            entity_init(self, player_init, NULL, NULL, NULL, world);
+            break;
+        case E_INVADER:
+            entity_init(self, invader_init, invader_destroy, invader_update, NULL, world);
+            break;
+        case E_ABDUCTOR:
+            entity_init(self, abductor_init, abductor_destroy, abductor_update, NULL, world);
+            break;
+        case E_PROJECTILE:
+            entity_init(self, projectile_init, NULL, NULL, projectile_collide, world);
+            break;
+        case E_STAR:
+            entity_init(self, star_init, NULL, star_update, NULL, world);
+            break;
+        case E_FORMATION:
+            entity_init(self, formation_init, NULL, formation_update, NULL, world);
+            break;
+        case E_TRACTOR_BEAM:
+            entity_init(self, tractor_beam_init, tractor_beam_destroy, tractor_beam_update, tractor_beam_collide, world);
+            break;
+    }
 
+    return self;
+}
+
+void entity_init(Entity *self, entity_f init, entity_f destroy, entity_f update, entity_collide_f collide, World *world) {
+    if ((self->init = init) != NULL)
+        self->init(self, world);
+
+    self->collide = collide;
     self->destroy = destroy;
     self->update = update;
 
@@ -36,13 +71,8 @@ Entity *entity_init(entity_t type, entity_f init, entity_f destroy, entity_f upd
             self->render = entity_render_texture;
         else if (self->color)
             self->render = entity_render_rect;
-        else 
-            self->render = NULL;
     }
 
-    self->type = type;
-
-    return self;
 }
 
 void entity_destroy(Entity *self, World *world) {
@@ -87,12 +117,19 @@ void entity_update(Entity *self, World *world) {
     } 
 
     // if entity is outside of the scene
-    if (entity_oob(self)) {
+    if (entity_oob(self))
         entity_set_state(self, STATE_DEAD);
-    }
 
     if (self->render != NULL)
-        self->render(self, world);
+        self->render(self);
+}
+
+bool entity_collide(Entity *self, Entity *entity, World *world) {
+    entity_collide_f f;
+    if ((f = self->collide) != NULL)
+        f(self, entity, world);
+
+    return f != NULL;
 }
 
 bool entity_is_alive(const Entity *self) {
@@ -140,23 +177,25 @@ vec2 entity_displacement(const Entity *self) {
     return VEC2(self->pos.x - self->prev_pos.x, self->pos.y - self->prev_pos.y);
 }
 
-void entity_link(Entity *self, Entity *parent) {
+inline void entity_link(Entity *self, Entity *parent) {
     self->parent = parent;
+    parent->child = self;
 }
 
-void entity_unlink(Entity *self) {
+inline void entity_unlink(Entity *self) {
+    self->parent->child = NULL;
     self->parent = NULL;
 }
 
-void entity_set_flag(Entity *self, flag_t flag) {
+inline void entity_set_flag(Entity *self, flag_t flag) {
     self->flags |= flag;
 }
 
-void entity_clear_flag(Entity *self, flag_t flag) {
+inline void entity_clear_flag(Entity *self, flag_t flag) {
     self->flags &= ~flag;
 }
 
-bool entity_has_flag(Entity *self, flag_t flag) {
+inline bool entity_has_flag(Entity *self, flag_t flag) {
     return self->flags & flag;
 }
 
@@ -178,7 +217,7 @@ void entity_fire(Entity *self, World *world) {
 
     self->tick = NOW();
 
-    Entity *e = entity_init(E_PROJECTILE, projectile_init, NULL, NULL, world);
+    Entity *e = entity_create(E_PROJECTILE, world);
     e->team = self->team;
     e->pos = entity_tag(self, self->type == E_PLAYER ? TAG_TOP_MIDDLE : TAG_BOTTOM_MIDDLE);
     e->vel = VEC2(0.f, self->team == TEAM_ALLY ? PROJECTILE_VELOCITY : -PROJECTILE_VELOCITY);
@@ -206,7 +245,7 @@ void entity_set_velocity(Entity *self, vec2 vel) {
 }
 
 void entity_set_rotation(Entity *self, float angle) {
-    memcpy(&self->angle, &angle, sizeof(float));
+    self->angle = angle;
 }
 
 void entity_set_state(Entity *self, state_t state) {
