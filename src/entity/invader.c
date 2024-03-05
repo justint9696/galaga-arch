@@ -1,7 +1,5 @@
 #include "data/queue.h"
 
-#include "entity/logic/path.h"
-
 #include "entity/formation.h"
 #include "entity/invader.h"
 

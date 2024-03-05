@@ -33,24 +33,22 @@ static void move_to_player(Entity *self, World *world) {
     }
 
     vec2 vel = entity_displacement(self);
-    route_start(&self->path, self->pos, VEC2(self->pos.x, self->pos.y + 100.f ), vel.x < 0.f ? -ABDUCTOR_VELOCITY : ABDUCTOR_VELOCITY, PATH_CIRCULAR);
-    route_append(&self->path, VEC2(player->pos.x, player->pos.y + 150.f ), vel.x < 0.f ? -ABDUCTOR_VELOCITY : ABDUCTOR_VELOCITY, PATH_BEZIER);
+    route_start(&self->path, self->pos, VEC2(self->pos.x, self->pos.y + 100.f), vel.x < 0.f ? -ENEMY_VELOCITY : ENEMY_VELOCITY, PATH_CIRCULAR);
+    route_append(&self->path, VEC2(player->pos.x, player->pos.y + 150.f), vel.x < 0.f ? -ENEMY_VELOCITY : ENEMY_VELOCITY, PATH_BEZIER);
     entity_set_state(self, STATE_CHARGE);
 }
 
 static void tractor_beam_present(Entity *self, World *world) {
-    if (self->child) {
-        entity_set_state(self, STATE_RETRACT);
-        return;
-    }
-
-    Entity *e = entity_init(E_TRACTOR_BEAM, tractor_beam_init, tractor_beam_destroy, tractor_beam_update, world);
+    Entity *e = entity_create(E_TRACTOR_BEAM, world);
     e->pos = entity_tag(self, TAG_BOTTOM_MIDDLE);
     e->pos = VEC2(e->pos.x - (TRACTOR_BEAM_WIDTH / 2.f), e->pos.y - TRACTOR_BEAM_HEIGHT - 5.f);
+    e->parent = self;
 
     self->child = e;
     world_add_entity(world, e);
     entity_set_rotation(self, 0.f);
+
+    entity_set_state(self, STATE_RETRACT);
 }
 
 static void return_to_formation(Entity *self, World *world) {
