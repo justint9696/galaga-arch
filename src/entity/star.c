@@ -40,27 +40,18 @@ static void fade(Entity *self) {
             else
                 self->state = STATE_FADE_OUT;
             break;
-        default:
-            break;
+        default: break;
     }
 }
 
 void star_init(Entity *self, World *world) {
-    self->pos = (vec2) {
-        .x = random_x(),
-        .y = random_y(),
-    };
-    self->vel = (vec2) {
-        .x = 0.f,
-        .y = -STAR_VELOCITY,
-    };
-    self->dim = (vec2) {
-        .width = STAR_WIDTH,
-        .height = STAR_HEIGHT,
-    };
+    self->pos = VEC2(random_x(), random_y());
+    self->vel = VEC2(0.f, -STAR_VELOCITY);
+    self->dim = VEC2(STAR_WIDTH, STAR_HEIGHT);
     self->color = random_color();
     self->state = random_state();
     self->health = 1.f;
+    self->depth = DEPTH_BASE;
 }
 
 void star_update(Entity *self, World *world) {

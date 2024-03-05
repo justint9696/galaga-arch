@@ -101,8 +101,6 @@ struct Entity {
 
 Entity *entity_create(entity_t, World *);
 void entity_init(Entity *, entity_f init, entity_f destroy, entity_f update, entity_collide_f collide, World *);
-
-// Entity *entity_init(entity_t, entity_f init, entity_f destroy, entity_f update, World *);
 void entity_destroy(Entity *, World *);
 void entity_update(Entity *, World *);
 bool entity_collide(Entity *, Entity *, World *);

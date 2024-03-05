@@ -5,6 +5,7 @@ void projectile_init(Entity *self, World *world) {
     self->dim = VEC2( PROJECTILE_WIDTH, PROJECTILE_HEIGHT);
     self->color = COLOR_GREEN;
     self->health = 1.f;
+    self->depth = DEPTH_PROJECTILE;
     entity_set_flag(self, FLAG_COLLISION);
     entity_set_state(self, STATE_ALIVE);
 }

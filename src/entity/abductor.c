@@ -12,8 +12,9 @@
 void abductor_init(Entity *self, World *world) {
     self->dim = VEC2(ABDUCTOR_WIDTH, ABDUCTOR_HEIGHT);
     self->team = TEAM_AXIS;
-    self->texture = renderer_texture_handle(TEX_ABDUCTOR);
+    self->texture = texture_handle(TEX_ABDUCTOR);
     self->health = 1.f;
+    self->depth = DEPTH_CHARACTER;
     entity_link(self, world->formation);
     entity_set_flag(self, ABDUCTOR_FLAGS);
     entity_set_state(self, STATE_SPAWN);

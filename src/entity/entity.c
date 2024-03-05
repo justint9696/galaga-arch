@@ -5,13 +5,14 @@
 #include "gfx/window.h"
 
 #include "entity/entity.h"
+#include "entity/pool.h"
+
 #include "entity/abductor.h"
 #include "entity/formation.h"
 #include "entity/invader.h"
 #include "entity/player.h"
-#include "entity/star.h"
-#include "entity/pool.h"
 #include "entity/projectile.h"
+#include "entity/star.h"
 #include "entity/tractor_beam.h"
 
 #include <assert.h>
@@ -20,11 +21,11 @@
 #include <string.h>
 
 static void entity_render_rect(Entity *self) {
-    draw_rect(VEC2(round(self->pos.x), round(self->pos.y)), self->dim, self->color, 0);
+    draw_rect(VEC2(round(self->pos.x), round(self->pos.y)), self->dim, self->color, self->depth);
 }
 
 static void entity_render_texture(Entity *self) {
-    draw_texture(self->texture, VEC2(round(self->pos.x), round(self->pos.y)), self->dim, self->angle, 0);
+    draw_texture(self->texture, VEC2(round(self->pos.x), round(self->pos.y)), self->dim, self->angle, self->depth);
 }
 
 Entity *entity_create(entity_t type, World *world) {
@@ -72,7 +73,6 @@ void entity_init(Entity *self, entity_f init, entity_f destroy, entity_f update,
         else if (self->color)
             self->render = entity_render_rect;
     }
-
 }
 
 void entity_destroy(Entity *self, World *world) {
@@ -144,8 +144,8 @@ bool entity_is_moving(const Entity *self) {
 bool entity_collision(const Entity *e0, const Entity *e1) {
     return ((e0->pos.x + e0->dim.width) >= e1->pos.x 
             && (e0->pos.y + e0->dim.height) >= e1->pos.y)
-        && e0->pos.x <= (e1->pos.x + e1->dim.width)
-        && e0->pos.y <= (e1->pos.y + e1->dim.height);
+            && e0->pos.x <= (e1->pos.x + e1->dim.width)
+            && e0->pos.y <= (e1->pos.y + e1->dim.height);
 }
 
 vec2 entity_tag(const Entity *self, tag_t tag) {

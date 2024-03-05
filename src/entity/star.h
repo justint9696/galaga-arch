@@ -9,7 +9,7 @@
 #define STAR_HEIGHT     STAR_WIDTH
 #define STAR_COLOR      0xffffff00
 
-void star_init(Entity *, struct World *);
-void star_update(Entity *, struct World *);
+void star_init(Entity *, World *);
+void star_update(Entity *, World *);
 
 #endif

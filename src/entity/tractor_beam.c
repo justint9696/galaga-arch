@@ -31,6 +31,7 @@ void tractor_beam_init(Entity *self, World *world) {
     self->health = 1.f;
     // self->render = render;
     self->tick = NOW();
+    self->depth = DEPTH_PROJECTILE;
     entity_set_flag(self, TRACTOR_BEAM_FLAGS);
     entity_set_state(self, STATE_IDLE);
 }
