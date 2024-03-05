@@ -1,8 +1,6 @@
 #include "game/world.h"
 
 #include "entity/logic/ai.h"
-#include "entity/entity.h"
-#include "entity/formation.h"
 #include "entity/player.h"
 #include "entity/pool.h"
 #include "entity/star.h"
@@ -68,11 +66,11 @@ static void world_check_collision(World *self, Entity *entity) {
             continue;
 
         if (entity_collision(entity, e)) {
-            entity_damage(entity);
+            entity_collide(entity, e, self);
             if (!entity_is_alive(e)) 
                 world_clear_previous(self, e);
 
-            entity_damage(e);
+            entity_collide(e, entity, self);
             if (!entity_is_alive(e)) 
                 world_clear(self, e);
 
@@ -91,14 +89,14 @@ void world_init(World *self) {
 
     Entity *e;
     for (size_t i = 0; i < STAR_MAX; i++) {
-        e = entity_init(E_STAR, star_init, NULL, star_update, self); 
+        e = entity_create(E_STAR, self);
         world_add_entity(self, e);
     }
 
-    self->player = entity_init(E_PLAYER, player_init, NULL, player_update, self);
+    self->player = entity_create(E_PLAYER, self);
     world_add_entity(self, self->player);
 
-    self->formation = entity_init(E_FORMATION, formation_init, NULL, formation_update, self);
+    self->formation = entity_create(E_FORMATION, self);
     world_add_entity(self, self->formation);
 }
 
@@ -134,6 +132,11 @@ void world_update(World *self) {
         // is entity controlled by an ai
         if (entity_has_flag(e, FLAG_AI_CONTROLLED)) {
             entity_do_ai(e, self);
+        }
+
+        // should entity respond to player input
+        if (entity_has_flag(e, FLAG_PLAYER_CONTROLLED)) {
+            player_handle_input(e, self);
         }
     }
 }
