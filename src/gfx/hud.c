@@ -1,4 +1,5 @@
 #include "gfx/hud.h"
+#include "gfx/renderer.h"
 
 #include <assert.h>
 #include <string.h>
@@ -37,10 +38,10 @@ void hud_update() {
         e = &hud.items[i];
         switch (e->type) {
             case HUD_FONT:
-                draw_text(e->text, e->pos.x, e->pos.y, e->color, e->font); 
+                draw_text(e->text, e->pos, e->color, e->font, LAYER_UI);
                 break;
             case HUD_TEXTURE:
-                draw_texture(e->texture, e->pos.x, e->pos.y, e->dim.w, e->dim.h, 0);
+                draw_texture(e->texture, e->pos, e->dim, 0, LAYER_UI);
                 break;
         }
     }

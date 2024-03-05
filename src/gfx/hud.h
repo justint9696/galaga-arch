@@ -14,6 +14,7 @@ typedef enum {
 
 typedef struct {
     hud_t type;
+    uint32_t depth;
     vec2 pos;
     vec2 dim;
     uint32_t color;

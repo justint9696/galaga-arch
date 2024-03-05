@@ -54,7 +54,7 @@ void renderer_destroy() {
     SDL_DestroyRenderer(renderer.handle);
 }
 
-void renderer_prepare() {
+void renderer_clear() {
     SDL_SetRenderDrawColor(renderer.handle, 0, 0, 0, 255);
     SDL_RenderClear(renderer.handle);
 }
@@ -71,43 +71,41 @@ SDL_Texture *renderer_texture_handle(texture_t texture) {
     return renderer.textures[texture];
 }
 
-void draw_text(const char *text, int x, int y, uint32_t color, TTF_Font *font) {
+void draw_text(const char *text, vec2 pos, uint32_t color, TTF_Font *font, uint32_t depth) {
     SDL_Surface *surface = TTF_RenderText_Solid(font, text, RGBA(color));
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer.handle, surface);
 
-    const int width = surface->w, height = surface->h;
+    const vec2 dim = VEC2(surface->w, surface->h);
     SDL_FreeSurface(surface);
 
-    draw_texture(texture, x, y, width, height, 0.f); 
+    draw_texture(texture, pos, dim, 0.f, depth); 
 }
 
-void draw_rect(int x, int y, int w, int h, uint32_t color) {
+void draw_rect(vec2 pos, vec2 dim, uint32_t color, uint32_t depth) {
     SDL_Color c = RGBA(color);
 
     // make origin at bottom of the screen
-    y = SCREEN_HEIGHT - y - h;
+    pos.y = (SCREEN_HEIGHT - pos.y - dim.h);
 
-    SDL_Rect rect;
-    rect.x = x;
-    rect.y = y;
-    rect.w = w;
-    rect.h = h;
+    SDL_Rect rect = (SDL_Rect) {
+        .x = pos.x, .y = pos.y,
+        .w = dim.w, .h = dim.h,
+    };
 
-    SDL_SetRenderDrawColor(renderer.handle, c.r, c.g, c.b, c.a);
-    SDL_RenderFillRect(renderer.handle, &rect);
+    // SDL_SetRenderDrawColor(renderer.handle, c.r, c.g, c.b, c.a);
+    // SDL_RenderFillRect(renderer.handle, &rect);
 }
 
-void draw_texture(SDL_Texture *texture, int x, int y, int w, int h, float angle) {
+void draw_texture(SDL_Texture *texture, vec2 pos, vec2 dim, float angle, uint32_t depth) {
     // make origin at bottom of screen
-    y = SCREEN_HEIGHT - y - h;
+    pos.y = (SCREEN_HEIGHT - pos.y - dim.h);
 
-    SDL_Rect dst;
-    dst.x = x;
-    dst.y = y;
-    dst.w = w;
-    dst.h = h;
+    SDL_Rect rect = (SDL_Rect) {
+        .x = pos.x, .y = pos.y,
+        .w = dim.w, .h = dim.h,
+    };
 
-    SDL_RenderCopyEx(renderer.handle, texture, NULL, &dst, angle, NULL, false);
+    // SDL_RenderCopyEx(renderer.handle, texture, NULL, &rect, angle, NULL, false);
 }
 
 uint32_t font_width(const char *text, font_t font) {
