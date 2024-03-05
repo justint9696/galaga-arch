@@ -8,6 +8,7 @@
 #define PROJECTILE_VELOCITY 1.f
 #define PROJECTILE_COOLDOWN 250
 
-void projectile_init(Entity *, struct World *);
+void projectile_init(Entity *, World *);
+void projectile_collide(Entity *, Entity *, World *);
 
 #endif

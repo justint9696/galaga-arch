@@ -1,6 +1,7 @@
 #include "common/time.h"
 #include "common/util.h"
 
+#include "entity/entity.h"
 #include "entity/player.h"
 #include "entity/tractor_beam.h"
 
@@ -34,7 +35,31 @@ void tractor_beam_init(Entity *self, World *world) {
     entity_set_state(self, STATE_IDLE);
 }
 
+void tractor_beam_collide(Entity *self, Entity *entity, World *world) {
+    switch (entity->type) {
+        case E_PROJECTILE:
+            entity_set_state(entity, STATE_DEAD);
+            break;
+        case E_PLAYER:
+            // remove player control and collision
+            entity_clear_flag(entity, PLAYER_FLAGS);
+
+            // link the player to tractor beam
+            entity_link(entity, self);
+            entity_set_flag(entity, FLAG_PARENT_REF);
+
+            // start player abduction
+            entity_set_state(self, STATE_ABDUCT);
+            entity_set_velocity(entity, VEC2(0.f, 0.1f));
+            break;
+        default:
+            break;
+    }
+}
+
 void tractor_beam_destroy(Entity *self, World *world) {
+    // check if player was abducted
+    // if so, pass player to parent
     LOG("tractor beam destroyed\n");
 }
 
@@ -56,6 +81,7 @@ static void expand_beam(Entity *self) {
     if (self->dim.width >= TARGET_WIDTH) {
         self->tick = NOW();
         entity_set_state(self, STATE_IDLE);
+        entity_set_flag(self, FLAG_COLLISION);
         return;
     }
 
@@ -85,6 +111,11 @@ static void retract_beam(Entity *self) {
     entity_transform(self, (vec2) { .w = self->dim.w - vel, .h = self->dim.h });
 }
 
+static void abduct_player(Entity *self, Entity *player) {
+    // move player to center of beam
+    // spin player model
+}
+
 void tractor_beam_update(Entity *self, World *world) {
     switch (self->state) {
         case STATE_IDLE:
@@ -96,6 +127,7 @@ void tractor_beam_update(Entity *self, World *world) {
             break;
         case STATE_ABDUCT:
             // player is colliding with tractor beam
+            abduct_player(self, world->player);
             break;
         case STATE_RETRACT:
             // time has passsed and player is not under beam
