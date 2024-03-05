@@ -3,9 +3,6 @@
 
 #include "entity/logic/enemy.h"
 
-#include "entity/abductor.h"
-#include "entity/invader.h"
-
 #include "game/stage.h"
 #include "game/world.h"
 
@@ -66,12 +63,12 @@ static void spawn_wave(Stage *self, World *world) {
     Entity *e;
     vec2 spawn = wave_get_spawnpoint(self->wave);
     for (size_t i = 0; i < WAVE_COUNT; i++) {
-        e = entity_init(E_ABDUCTOR, abductor_init, abductor_destroy, abductor_update, world); 
+        e = entity_create(E_ABDUCTOR, world);
         e->pos = spawn;
         e->id = self->id++;
         enqueue(&self->queue, e);
 
-        // e = entity_init(E_INVADER, invader_init, invader_destroy, invader_update, world); 
+        // e = entity_create(E_INVADER, world);
         // e->pos = spawn;
         // e->id = self->id++;
         // enqueue(&self->queue, e);
