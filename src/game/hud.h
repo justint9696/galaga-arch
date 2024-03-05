@@ -6,10 +6,9 @@
 #define HUD_Y       SCREEN_HEIGHT - 80
 #define HUD_DIST    18
 
-struct Game;
+typedef struct Game Game;
 
-void game_hud_init(struct Game *);
-void game_hud_update(struct Game *);
-void game_hud_reset(struct Game *);
+void game_hud_update(Game *);
+void game_hud_reset(Game *);
 
 #endif

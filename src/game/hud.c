@@ -33,7 +33,7 @@ static void update_text(Game *self) {
     uint32_t width = font_width(self->ui.title, FONT_NORMAL);
     uint32_t height = font_height(FONT_NORMAL);
 
-    hud_add_text(self->ui.title, CENTER_X(width), HUD_Y + height + 5, COLOR_WHITE, FONT_NORMAL);
+    draw_text(self->ui.title, VEC2(CENTER_X(width), HUD_Y + height + 5), COLOR_WHITE, FONT_NORMAL, DEPTH_UI);
 
     UI_Item *item;
     size_t size = self->ui.size;
@@ -41,9 +41,9 @@ static void update_text(Game *self) {
         item = &self->ui.items[i]; 
         width = font_width(item->title, FONT_SMALL);
         if (ui_item_selected(&self->ui, item))
-            hud_add_text(item->title, CENTER_X(width), HUD_Y - (HUD_DIST * i), COLOR_RED, FONT_SMALL);
+            draw_text(item->title, VEC2(CENTER_X(width), HUD_Y - (HUD_DIST * i)), COLOR_RED, FONT_SMALL, DEPTH_UI);
         else
-            hud_add_text(item->title, CENTER_X(width), HUD_Y - (HUD_DIST * i), COLOR_WHITE, FONT_SMALL);
+            draw_text(item->title, VEC2(CENTER_X(width), HUD_Y - (HUD_DIST * i)), COLOR_WHITE, FONT_SMALL, DEPTH_UI);
     }
 }
 
@@ -61,10 +61,6 @@ static void monitor_input(Game *self) {
     }
 }
 
-void game_hud_init(Game *self) {
-    hud_init();
-}
-
 void game_hud_update(Game *self) {
     switch (self->state) {
         case G_IDLE:
@@ -73,11 +69,8 @@ void game_hud_update(Game *self) {
             update_text(self);
             monitor_input(self);
             break;
-        default:
-            break;
+        default: break;
     }
-
-    hud_update();
 }
 
 void game_hud_reset(Game *self) {
@@ -91,7 +84,6 @@ void game_hud_reset(Game *self) {
         case G_DEAD:
             prepare_game_over_ui(self);
             break;
-        default:
-            break;
+        default: break;
     }
 }

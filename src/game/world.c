@@ -8,8 +8,8 @@
 #include <assert.h>
 #include <string.h>
 
-#define data_loop(_a, _b) \
-    for (size_t y = _a.y; y < _b.y && y < SCREEN_HEIGHT; y++) \
+#define data_loop(_a, _b)\
+    for (size_t y = _a.y; y < _b.y && y < SCREEN_HEIGHT; y++)\
         for (size_t x = _a.x; x < _b.x && x < SCREEN_WIDTH; x++)
 
 #define get_offset(x, y) (x + (y * SCREEN_WIDTH))
@@ -27,10 +27,7 @@ static void *get_item(World *world, int x, int y) {
 }
 
 static vec2 get_size(vec2 pos, vec2 dim) {
-    return (vec2) {
-        .x = pos.x + dim.w,
-        .y = pos.y + dim.y,
-    };
+    return VEC2(pos.x + dim.w, pos.y + dim.h);
 }
 
 static void world_clear_previous(World *self, Entity *entity) {

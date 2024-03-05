@@ -18,8 +18,7 @@ static void game_set_state(Game *self, game_state_t state) {
         case G_PLAYING:
             time_set_paused(false);
             break;
-        default:
-            break;
+        default: break;
     }
 
     self->state = state;
@@ -34,8 +33,7 @@ static void game_toggle_ui(Game *self) {
         case G_PAUSED:
             game_resume(self);
             break;
-        default:
-            break;
+        default: break;
     }
 }
 
@@ -62,7 +60,6 @@ void game_init(Game *self) {
     world_init(&self->world);
     stage_init(&self->stage, &self->world);
 
-    game_hud_init(self);
     game_set_state(self, G_IDLE);
 }
 
