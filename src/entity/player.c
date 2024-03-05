@@ -8,24 +8,18 @@
 #include <string.h>
 
 void player_init(Entity *self, World *world) {
-    self->pos = (vec2) {
-        .x = PLAYER_SPAWN_X,
-        .y = PLAYER_SPAWN_Y,
-    };
-    self->dim = (vec2) {
-        .width = PLAYER_WIDTH,
-        .height = PLAYER_HEIGHT,
-    };
+    self->pos = VEC2(PLAYER_SPAWN_X, PLAYER_SPAWN_Y);
+    self->dim = VEC2(PLAYER_WIDTH, PLAYER_HEIGHT);
     self->team = TEAM_ALLY;
     self->texture = renderer_texture_handle(TEX_PLAYER);
     self->health = 1.f;
-    self->state = STATE_ALIVE;
     entity_set_flag(self, PLAYER_FLAGS);
+    entity_set_state(self, STATE_ALIVE);
 
     LOG("Player initialized.\n");
 }
 
-void player_update(Entity *self, World *world) {
+void player_handle_input(Entity *self, World *world) {
     vec2 vel = { 0 };
     if (button_pressed(SDL_SCANCODE_LEFT, false))
         vel.x = -PLAYER_VELOCITY;

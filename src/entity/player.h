@@ -9,9 +9,9 @@
 #define PLAYER_VELOCITY     0.35f
 #define PLAYER_SPAWN_X      ((SCREEN_WIDTH - PLAYER_WIDTH) / 2)
 #define PLAYER_SPAWN_Y      50.f
-#define PLAYER_FLAGS        FLAG_COLLISION
+#define PLAYER_FLAGS        (FLAG_COLLISION | FLAG_PLAYER_CONTROLLED)
 
-void player_init(Entity *, struct World *);
-void player_update(Entity *, struct World *);
+void player_init(Entity *, World *);
+void player_handle_input(Entity *, World *);
 
 #endif
