@@ -1,7 +1,7 @@
 #ifndef _GFX_UI_H_
 #define _GFX_UI_H_
 
-#include "gfx/hud.h"
+#include "gfx/renderer.h"
 
 #include <stdbool.h>
 #include <stdint.h>
