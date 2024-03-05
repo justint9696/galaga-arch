@@ -5,7 +5,7 @@
 
 #include <SDL2/SDL_events.h>
 
-void poll_events(Game *game) {
+static void poll_events(Game *game) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
@@ -18,8 +18,7 @@ void poll_events(Game *game) {
             case SDL_KEYUP:
                 buttons_update(event);
                 break;
-            default:
-                break;
+            default: break;
         }
     }
 }
@@ -32,7 +31,7 @@ int main(int argc, char *argv[]) {
     LOG("%s initialized.\n", GAME_TITLE);
 
     while (game_is_running(&game)) {
-        renderer_prepare();
+        renderer_clear();
         game_update(&game);
         renderer_present();
 
