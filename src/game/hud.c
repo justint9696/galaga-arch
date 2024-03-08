@@ -4,7 +4,7 @@
 
 #include <assert.h>
 
-#define CENTER_X(_width) ((SCREEN_WIDTH - _width) / 2.f)
+#define CENTER_X(_width)  ((SCREEN_WIDTH - _width) / 2.f)
 #define CENTER_Y(_height) ((SCREEN_HEIGHT - _height) / 2.f)
 
 static void prepare_idle_ui(Game *self) {
@@ -35,10 +35,10 @@ static void update_text(Game *self) {
 
     draw_text(self->ui.title, VEC2(CENTER_X(width), HUD_Y + height + 5), COLOR_WHITE, FONT_NORMAL, DEPTH_UI);
 
-    UI_Item *item;
+    UIComponent *item;
     size_t size = self->ui.size;
     for (size_t i = 0; i < size; i++) {
-        item = &self->ui.items[i]; 
+        item = &self->ui.items[i];
         width = font_width(item->title, FONT_SMALL);
         if (ui_item_selected(&self->ui, item))
             draw_text(item->title, VEC2(CENTER_X(width), HUD_Y - (HUD_DIST * i)), COLOR_RED, FONT_SMALL, DEPTH_UI);
@@ -69,7 +69,8 @@ void game_hud_update(Game *self) {
             update_text(self);
             monitor_input(self);
             break;
-        default: break;
+        default:
+            break;
     }
 }
 
@@ -84,6 +85,7 @@ void game_hud_reset(Game *self) {
         case G_DEAD:
             prepare_game_over_ui(self);
             break;
-        default: break;
+        default:
+            break;
     }
 }
