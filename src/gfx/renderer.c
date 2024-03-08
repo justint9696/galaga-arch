@@ -1,11 +1,11 @@
-#include "common/util.h"
 #include "gfx/renderer.h"
 #include "gfx/window.h"
 
-#include <stdbool.h>
+#include "common/util.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <stdbool.h>
 
 static Renderer renderer;
 
@@ -58,11 +58,13 @@ Renderer *renderer_init(SDL_Window *window) {
 
 void renderer_destroy() {
     // free allocated memory for each renderer layer
-    for (size_t i = 0; i < DEPTH_MAX + 1; i++)
+    for (size_t i = 0; i < DEPTH_MAX + 1; i++) {
         array_list_destroy(&renderer.depth[i]);
+    }
 
     SDL_DestroyRenderer(renderer.handle);
 }
+
 static void render_rect(RenderComponent *comp) {
     SDL_Color c = comp->color;
     SDL_SetRenderDrawColor(renderer.handle, c.r, c.g, c.b, c.a);
@@ -79,7 +81,7 @@ static void renderer_prepare() {
     for (size_t i = 0; i < DEPTH_MAX + 1; i++) {
         list = &renderer.depth[i];
         for (size_t j = 0; j < list->size; j++) {
-            comp = (RenderComponent *)array_list_get(list, j); 
+            comp = (RenderComponent *)array_list_get(list, j);
             switch (comp->type) {
                 case C_FONT:
                 case C_TEXTURE:
@@ -89,12 +91,14 @@ static void renderer_prepare() {
                     render_rect(comp);
                     break;
             }
+
+            array_list_remove(list, j);
         }
     }
 
     // clear components from each layer of renderer
-    for (size_t i = 0; i < DEPTH_MAX + 1; i++)
-        array_list_clear(&renderer.depth[i]);
+    // for (size_t i = 0; i < DEPTH_MAX + 1; i++)
+    // 	array_list_clear(&renderer.depth[i]);
 }
 
 void renderer_clear() {
@@ -127,14 +131,14 @@ void draw_text(const char *text, vec2 pos, uint32_t color, font_t font, depth_t 
 
     // construct the render component
     RenderComponent comp = {
-        .angle = 0.f,
-        .type = C_TEXTURE,
-        .rect = (SDL_Rect) {
-            .x = pos.x, .y = pos.y,
-            .w = dim.w, .h = dim.h,
-        },
-        .texture = texture,
-    };
+		.angle = 0.f,
+		.type = C_TEXTURE,
+		.rect = (SDL_Rect) {
+				.x = pos.x, .y = pos.y,
+				.w = dim.w, .h = dim.h,
+			},
+		.texture = texture,
+	};
 
     size_t size = strnlen(text, STR_LEN_MAX);
     strncpy(comp.text, text, size + 1);
@@ -149,14 +153,14 @@ void draw_rect(vec2 pos, vec2 dim, uint32_t color, depth_t depth) {
 
     // construct the render component
     RenderComponent comp = {
-        .angle = 0.f,
-        .type = C_RECT,
-        .color = RGBA(color),
-        .rect = (SDL_Rect) {
-            .x = pos.x, .y = pos.y,
-            .w = dim.w, .h = dim.h,
-        },
-    };
+		.angle = 0.f,
+		.type = C_RECT,
+		.color = RGBA(color),
+		.rect = (SDL_Rect) {
+				.x = pos.x, .y = pos.y,
+				.w = dim.w, .h = dim.h,
+			},
+	};
 
     // add the component to the corresponding layer
     array_list_append(&renderer.depth[depth], &comp);
@@ -171,14 +175,14 @@ void draw_texture(SDL_Texture *texture, vec2 pos, vec2 dim, float angle, depth_t
 
     // construct the render component
     RenderComponent comp = {
-        .angle = angle,
-        .type = C_TEXTURE,
-        .rect = (SDL_Rect) {
-            .x = pos.x, .y = pos.y,
-            .w = dim.w, .h = dim.h,
-        },
-        .texture = texture,
-    };
+		.angle = angle,
+		.type = C_TEXTURE,
+		.rect = (SDL_Rect) {
+				.x = pos.x, .y = pos.y,
+				.w = dim.w, .h = dim.h,
+			},
+		.texture = texture,
+	};
 
     // add the component to the corresponding layer
     array_list_append(&renderer.depth[depth], &comp);
