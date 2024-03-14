@@ -1,14 +1,17 @@
 CC = gcc
 
 BIN = bin/
+INC = include/
 LIB = lib/
 OBJ = obj/
 SRC = src/
 
-SRCS = $(shell find $(SRC) -name '*.c') 
+EXE_SUFFIX = .exe
+
+SRCS = $(shell find $(SRC) -name "*.c") 
 OBJS = $(patsubst $(SRC)%, $(OBJ)%, $(SRCS:.c=.o))
 
-INCLUDES = -Iinclude/ -Isrc/
+INCLUDES = -I$(INC) -I$(SRC)
 
 CFLAGS = -g -O3 -Wall -Wextra
 CFLAGS += -Wno-unused-parameter
@@ -21,7 +24,7 @@ LDFLAGS = -lmingw32
 LDFLAGS += -L$(LIB)
 LDFLAGS += -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
 
-TARGET = $(BIN)galaga
+TARGET = $(BIN)galaga$(EXE_SUFFIX)
 
 .PHONY: all clean
 

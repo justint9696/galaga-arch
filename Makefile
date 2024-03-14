@@ -4,10 +4,10 @@ BIN = bin/
 OBJ = obj/
 SRC = src/
 
-SRCS = $(shell find $(SRC) -name '*.c') 
+SRCS = $(shell find $(SRC) -name "*.c") 
 OBJS = $(patsubst $(SRC)%, $(OBJ)%, $(SRCS:.c=.o))
 
-INCLUDES = -Iinclude/ -Isrc/
+INCLUDES = -I$(SRC)
 
 CFLAGS = -g -O3 -Wall -Wextra
 CFLAGS += -Wno-unused-parameter
