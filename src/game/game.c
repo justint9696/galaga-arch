@@ -1,8 +1,8 @@
+#include "game/game.h"
 #include "common/time.h"
 #include "common/util.h"
 #include "entity/entity.h"
 #include "game/buttons.h"
-#include "game/game.h"
 #include "game/hud.h"
 
 static bool player_is_alive(Game *self) {
@@ -18,7 +18,8 @@ static void game_set_state(Game *self, game_state_t state) {
         case G_PLAYING:
             time_set_paused(false);
             break;
-        default: break;
+        default:
+            break;
     }
 
     self->state = state;
@@ -33,13 +34,20 @@ static void game_toggle_ui(Game *self) {
         case G_PAUSED:
             game_resume(self);
             break;
-        default: break;
+        default:
+            break;
     }
 }
 
 static void monitor_input(Game *self) {
     if (button_pressed(SDL_SCANCODE_ESCAPE, true)) {
         game_toggle_ui(self);
+    }
+    if (button_pressed(SDL_SCANCODE_R, true)) {
+        game_restart(self);
+    }
+    if (button_pressed(SDL_SCANCODE_Q, true)) {
+        game_quit(self);
     }
 }
 
@@ -49,8 +57,9 @@ static void update(Game *self) {
     }
 
     world_update(&self->world);
-    if (!player_is_alive(self) && self->state == G_PLAYING) 
+    if (!player_is_alive(self) && self->state == G_PLAYING) {
         game_set_state(self, G_DEAD);
+    }
 }
 
 void game_init(Game *self) {

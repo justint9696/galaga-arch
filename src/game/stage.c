@@ -63,15 +63,15 @@ static void spawn_wave(Stage *self, World *world) {
     Entity *e;
     vec2 spawn = wave_get_spawnpoint(self->wave);
     for (size_t i = 0; i < WAVE_COUNT; i++) {
-        e = entity_create(E_ABDUCTOR, world);
-        e->pos = spawn;
-        e->id = self->id++;
-        enqueue(&self->queue, e);
-
-        // e = entity_create(E_INVADER, world);
+        // e = entity_create(E_ABDUCTOR, world);
         // e->pos = spawn;
         // e->id = self->id++;
         // enqueue(&self->queue, e);
+
+        e = entity_create(E_INVADER, world);
+        e->pos = spawn;
+        e->id = self->id++;
+        enqueue(&self->queue, e);
     }
 
     // add front entity to world entities
@@ -108,7 +108,7 @@ static void spawn_update(Stage *self, World *world) {
     if (spawn_complete(self, world)) {
         change_state_delayed(self, S_ATTACK, SWOOP_DELAY);
         return;
-    } 
+    }
     // if not, check if current wave of enemies are in formation
     else if (!wave_complete(self, world)) {
         monitor_queue(self, world);
@@ -160,7 +160,8 @@ static void idle_update(Stage *self, World *world) {
     Entity *e = (Entity *)queue_front(&self->queue);
     assert(e);
 
-    if (!entity_has_flag(e, FLAG_ACTIVE) || (e->state == STATE_IDLE && entity_is_alive(e) && enemy_in_formation(e, world)))
+    if (!entity_has_flag(e, FLAG_ACTIVE)
+        || (e->state == STATE_IDLE && entity_is_alive(e) && enemy_in_formation(e, world)))
         dequeue(&self->queue);
 }
 
@@ -208,6 +209,7 @@ void stage_update(Stage *self, World *world) {
         case S_ATTACK:
             attack_update(self, world);
             break;
-        default: break;
+        default:
+            break;
     }
 }
